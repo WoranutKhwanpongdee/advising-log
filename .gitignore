@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.wrangler
+drizzle/migrations/.drizzle
+
+# Environment & local secrets
+.env
+.env.local
+
+# OS / Editor
+.DS_Store
+*.log
