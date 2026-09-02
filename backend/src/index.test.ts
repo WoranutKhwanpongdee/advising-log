@@ -7,7 +7,7 @@ describe('Backend Hono API', () => {
     expect(res.status).toBe(200)
     const body = await res.json() as { service: string; status: string }
     expect(body.service).toBe('AdvisingLog API')
-    expect(body.status).toBe('online')
+    expect(body.status).toBe('online')asdasd
   })
 
   it('GET /api/health returns healthy status', async () => {
