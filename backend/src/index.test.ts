@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import app from './index'
 
 describe('Backend Hono API', () => {
+  sdf
   it('GET / returns system status JSON', async () => {
     const res = await app.request('/')
     expect(res.status).toBe(200)
