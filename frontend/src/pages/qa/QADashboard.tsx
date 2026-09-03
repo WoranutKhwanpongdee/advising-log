@@ -5,6 +5,7 @@
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { PageHeader, Card, StatCard, Button } from '@/components/ui'
 import { ADVISING_CATEGORIES, EXIT_REASON_CODES } from '@/types'
 import { BarChart3, TrendingUp, AlertTriangle, UserX, CalendarClock, ListChecks, Download } from 'lucide-react'
@@ -19,6 +20,15 @@ export default function QADashboard() {
   const store = useStore()
   const { addToast } = useToast()
   const { t, language } = useLanguage()
+  const { isDark } = useTheme()
+
+  const chartTheme = {
+    grid: isDark ? '#1e293b' : '#f1f5f9',
+    axis: isDark ? '#94a3b8' : '#64748b',
+    tooltipBg: isDark ? '#0f172a' : '#ffffff',
+    tooltipBorder: isDark ? '#334155' : '#e2e8f0',
+    tooltipText: isDark ? '#f8fafc' : '#0f172a',
+  }
 
   const totalRequests = store.requests.length
   const totalSessions = store.sessions.length
@@ -96,17 +106,19 @@ export default function QADashboard() {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryData} layout="vertical" margin={{ left: 0, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#475569' }} width={140} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                <XAxis type="number" tick={{ fontSize: 11, fill: chartTheme.axis }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} width={140} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#ffffff',
-                    borderColor: '#e2e8f0',
+                    backgroundColor: chartTheme.tooltipBg,
+                    borderColor: chartTheme.tooltipBorder,
+                    color: chartTheme.tooltipText,
                     borderRadius: '8px',
                     fontSize: '12px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
+                  itemStyle={{ color: chartTheme.tooltipText }}
                 />
                 <Bar dataKey="count" fill="#0284c7" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -116,7 +128,7 @@ export default function QADashboard() {
 
         {/* Exit Reason Distribution */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
             <UserX className="h-4 w-4 text-rose-600" /> {t('สัดส่วนสาเหตุการขอลาออกและลาพัก', 'Exit & Leave Cases by Category')}
           </h3>
           <div className="h-64">
@@ -130,7 +142,7 @@ export default function QADashboard() {
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    label={{ fontSize: 10, fill: '#475569' }}
+                    label={{ fontSize: 10, fill: chartTheme.axis }}
                   >
                     {exitData.map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -138,14 +150,16 @@ export default function QADashboard() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#ffffff',
-                      borderColor: '#e2e8f0',
+                      backgroundColor: chartTheme.tooltipBg,
+                      borderColor: chartTheme.tooltipBorder,
+                      color: chartTheme.tooltipText,
                       borderRadius: '8px',
                       fontSize: '12px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
+                    itemStyle={{ color: chartTheme.tooltipText }}
                   />
-                  <Legend wrapperStyle={{ fontSize: 11, color: '#475569' }} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: chartTheme.axis }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -157,25 +171,27 @@ export default function QADashboard() {
 
       {/* Advisor Workload */}
       <Card>
-        <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
           <CalendarClock className="h-4 w-4 text-sky-600" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
         </h3>
         <div className="h-60">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={advisorWorkload}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: chartTheme.axis }} />
+              <YAxis tick={{ fontSize: 11, fill: chartTheme.axis }} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#ffffff',
-                  borderColor: '#e2e8f0',
+                  backgroundColor: chartTheme.tooltipBg,
+                  borderColor: chartTheme.tooltipBorder,
+                  color: chartTheme.tooltipText,
                   borderRadius: '8px',
                   fontSize: '12px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                 }}
+                itemStyle={{ color: chartTheme.tooltipText }}
               />
-              <Legend wrapperStyle={{ fontSize: 11, color: '#475569' }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: chartTheme.axis }} />
               <Bar dataKey="students" fill="#0284c7" name={t('นักศึกษาในความดูแล', 'Assigned Advisees')} radius={[4, 4, 0, 0]} />
               <Bar dataKey="requests" fill="#38bdf8" name={t('คำร้องที่ได้รับ', 'Student Requests')} radius={[4, 4, 0, 0]} />
               <Bar dataKey="sessions" fill="#64748b" name={t('ครั้งที่ให้คำปรึกษาสำเร็จ', 'Completed Sessions')} radius={[4, 4, 0, 0]} />
