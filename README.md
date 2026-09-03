@@ -81,6 +81,18 @@ The current advising process relies on **paper forms and scattered email threads
 
 ---
 
+## 👥 Project Members
+
+| # | Student ID | Name | Role |
+| :-: | :---------: | :--- | :--- |
+| 01 | `6631503083` | **Phonepadith Kongsengchanh** | 🎨 UX/UI Designer |
+| 02 | `6631503085` | **Sai Seng Main** | 🧭 Tech Lead |
+| 03 | `6631503036` | **Woranut Khwanpongdee** | 🤖 AI Lead |
+| 04 | `6631503039` | **Wilasinee Mangkorn** | ✅ QA / Test |
+| 05 | `6631503031` | **Pirisa Kitichai** | 📦 Product Owner |
+
+---
+
 ## 🛠 Tech Stack
 
 | Layer | Technology |
