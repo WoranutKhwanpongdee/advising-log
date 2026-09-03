@@ -41,7 +41,7 @@ The current advising process relies on **paper forms and scattered email threads
 ### 📝 Advising Records
 - Structured advising session logs (date, topic, advice, tags)
 - Categories: academic, activities, general, and personal matters
-- Document & photo attachments (synced to Google Drive)
+- Document & photo attachments (stored in Cloudinary)
 
 ### 🔄 Automated Follow-up System
 - Auto-triggered follow-up tasks based on critical tags and time
@@ -89,6 +89,7 @@ The current advising process relies on **paper forms and scattered email threads
 | **UI** | Tailwind CSS + shadcn/ui |
 | **Backend** | Cloudflare Workers + Hono |
 | **Database** | Cloudflare D1 + Drizzle ORM |
+| **Media Storage** | Cloudinary (images, documents, secure URLs) |
 | **Validation** | Zod |
 | **Charts** | Recharts |
 | **Import/Export** | SheetJS |
