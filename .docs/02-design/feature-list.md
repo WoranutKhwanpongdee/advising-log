@@ -40,3 +40,4 @@ This document outlines the core features of the AdvisingLog system, organized by
 - **Secure Media Storage**: All sensitive documents and images are stored securely on Cloudinary using authenticated/private URLs.
 - **Data Privacy**: Automatic de-identification of sensitive student data in logs and reports.
 - **Responsive UI**: A modern, accessible web interface built with React, Tailwind CSS, and shadcn/ui.
+
