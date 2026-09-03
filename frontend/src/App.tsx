@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { StoreProvider } from '@/data/mock-store'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ToastContainer } from '@/components/ui'
 import { AppLayout } from '@/components/layout/AppLayout'
 
@@ -67,49 +68,51 @@ function RootRedirect() {
 export default function App() {
   return (
     <BrowserRouter>
-      <StoreProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              
-              <Route path="/" element={<AppLayout />}>
-                <Route index element={<RootRedirect />} />
+      <LanguageProvider>
+        <StoreProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
                 
-                {/* Student Routes */}
-                <Route path="student" element={<RequireRole allowedRoles={['student']}><StudentDashboard /></RequireRole>} />
-                <Route path="student/request" element={<RequireRole allowedRoles={['student']}><RequestAdvising /></RequireRole>} />
-                <Route path="student/history" element={<RequireRole allowedRoles={['student']}><AdvisingHistory /></RequireRole>} />
-                <Route path="student/history/:id" element={<RequireRole allowedRoles={['student']}><AdvisingDetail /></RequireRole>} />
-                <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
-                <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
-                <Route path="student/exit" element={<RequireRole allowedRoles={['student']}><ExitForm /></RequireRole>} />
+                <Route path="/" element={<AppLayout />}>
+                  <Route index element={<RootRedirect />} />
+                  
+                  {/* Student Routes */}
+                  <Route path="student" element={<RequireRole allowedRoles={['student']}><StudentDashboard /></RequireRole>} />
+                  <Route path="student/request" element={<RequireRole allowedRoles={['student']}><RequestAdvising /></RequireRole>} />
+                  <Route path="student/history" element={<RequireRole allowedRoles={['student']}><AdvisingHistory /></RequireRole>} />
+                  <Route path="student/history/:id" element={<RequireRole allowedRoles={['student']}><AdvisingDetail /></RequireRole>} />
+                  <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
+                  <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
+                  <Route path="student/exit" element={<RequireRole allowedRoles={['student']}><ExitForm /></RequireRole>} />
 
-                {/* Advisor Routes */}
-                <Route path="advisor" element={<RequireRole allowedRoles={['advisor']}><AdvisorDashboard /></RequireRole>} />
-                <Route path="advisor/sessions" element={<RequireRole allowedRoles={['advisor']}><AdvisingSessions /></RequireRole>} />
-                <Route path="advisor/log" element={<RequireRole allowedRoles={['advisor']}><AdvisorLog /></RequireRole>} />
-                <Route path="advisor/warnings" element={<RequireRole allowedRoles={['advisor']}><EarlyWarning /></RequireRole>} />
-                <Route path="advisor/referrals" element={<RequireRole allowedRoles={['advisor']}><Referrals /></RequireRole>} />
-                <Route path="advisor/exit-cases" element={<RequireRole allowedRoles={['advisor']}><ExitCases /></RequireRole>} />
+                  {/* Advisor Routes */}
+                  <Route path="advisor" element={<RequireRole allowedRoles={['advisor']}><AdvisorDashboard /></RequireRole>} />
+                  <Route path="advisor/sessions" element={<RequireRole allowedRoles={['advisor']}><AdvisingSessions /></RequireRole>} />
+                  <Route path="advisor/log" element={<RequireRole allowedRoles={['advisor']}><AdvisorLog /></RequireRole>} />
+                  <Route path="advisor/warnings" element={<RequireRole allowedRoles={['advisor']}><EarlyWarning /></RequireRole>} />
+                  <Route path="advisor/referrals" element={<RequireRole allowedRoles={['advisor']}><Referrals /></RequireRole>} />
+                  <Route path="advisor/exit-cases" element={<RequireRole allowedRoles={['advisor']}><ExitCases /></RequireRole>} />
 
-                {/* QA Routes */}
-                <Route path="qa" element={<RequireRole allowedRoles={['qa_chair']}><QADashboard /></RequireRole>} />
-                <Route path="qa/exit-review" element={<RequireRole allowedRoles={['qa_chair']}><ExitCaseReview /></RequireRole>} />
+                  {/* QA Routes */}
+                  <Route path="qa" element={<RequireRole allowedRoles={['qa_chair']}><QADashboard /></RequireRole>} />
+                  <Route path="qa/exit-review" element={<RequireRole allowedRoles={['qa_chair']}><ExitCaseReview /></RequireRole>} />
 
-                {/* Admin Routes */}
-                <Route path="admin" element={<RequireRole allowedRoles={['admin']}><AdminDashboard /></RequireRole>} />
-                <Route path="admin/users" element={<RequireRole allowedRoles={['admin']}><UserManagement /></RequireRole>} />
-                <Route path="admin/roster" element={<RequireRole allowedRoles={['admin']}><Roster /></RequireRole>} />
-                <Route path="admin/categories" element={<RequireRole allowedRoles={['admin']}><Categories /></RequireRole>} />
-                <Route path="admin/document-types" element={<RequireRole allowedRoles={['admin']}><DocumentTypes /></RequireRole>} />
-                <Route path="admin/audit-logs" element={<RequireRole allowedRoles={['admin']}><AuditLogs /></RequireRole>} />
-              </Route>
-            </Routes>
-            <ToastContainer />
-          </ToastProvider>
-        </AuthProvider>
-      </StoreProvider>
+                  {/* Admin Routes */}
+                  <Route path="admin" element={<RequireRole allowedRoles={['admin']}><AdminDashboard /></RequireRole>} />
+                  <Route path="admin/users" element={<RequireRole allowedRoles={['admin']}><UserManagement /></RequireRole>} />
+                  <Route path="admin/roster" element={<RequireRole allowedRoles={['admin']}><Roster /></RequireRole>} />
+                  <Route path="admin/categories" element={<RequireRole allowedRoles={['admin']}><Categories /></RequireRole>} />
+                  <Route path="admin/document-types" element={<RequireRole allowedRoles={['admin']}><DocumentTypes /></RequireRole>} />
+                  <Route path="admin/audit-logs" element={<RequireRole allowedRoles={['admin']}><AuditLogs /></RequireRole>} />
+                </Route>
+              </Routes>
+              <ToastContainer />
+            </ToastProvider>
+          </AuthProvider>
+        </StoreProvider>
+      </LanguageProvider>
     </BrowserRouter>
   )
 }

@@ -1,71 +1,110 @@
 // ============================================================
-// Student — Advising Detail
+// Student — Advising Detail (Minimal White & Sky Blue)
 // ============================================================
 
 import { useParams, useNavigate } from 'react-router-dom'
 import { useStore } from '@/data/mock-store'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, Card, StatusBadge, Timeline, EmptyState } from '@/components/ui'
-import { ADVISING_CATEGORIES } from '@/types'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Calendar, Paperclip, FileText, CheckCircle } from 'lucide-react'
 
 export default function AdvisingDetail() {
   const { id } = useParams<{ id: string }>()
   const store = useStore()
+  const { t, getCategoryLabel } = useLanguage()
   const navigate = useNavigate()
 
   const request = store.requests.find(r => r.id === id)
-  if (!request) return <EmptyState title="Request not found" />
+  if (!request) return <EmptyState title={t('ไม่พบข้อมูลคำร้อง', 'Request not found')} description={t('ไม่พบข้อมูลคำร้องขอรับคำปรึกษาที่ต้องการ', 'The requested advising record could not be located.')} />
 
   const advisor = store.users.find(u => u.id === request.advisorId)
   const appointment = store.appointments.find(a => a.requestId === request.id)
   const session = store.sessions.find(s => s.requestId === request.id)
   const followUps = store.followUps.filter(f => f.requestId === request.id)
-  const catLabel = ADVISING_CATEGORIES.find(c => c.value === request.category)?.label || request.category
+  const catLabel = getCategoryLabel(request.category)
 
   // Build timeline
   const timelineItems = [
-    { date: request.createdAt, title: 'Request Submitted', description: catLabel, status: 'requested' },
+    { date: request.createdAt, title: t('ยื่นคำร้องขอรับคำปรึกษา', 'Request Submitted'), description: catLabel, status: 'requested' },
   ]
   if (appointment) {
-    timelineItems.push({ date: appointment.createdAt, title: `Appointment ${appointment.status === 'scheduled' ? 'Scheduled' : appointment.status}`, description: `${appointment.scheduledDate} at ${appointment.scheduledTime}, ${appointment.location}`, status: appointment.status })
+    timelineItems.push({
+      date: appointment.createdAt,
+      title: t('นัดหมายเวลาเข้าพบ', `Appointment ${appointment.status === 'scheduled' ? 'Scheduled' : appointment.status}`),
+      description: `${appointment.scheduledDate} · ${appointment.scheduledTime} (${appointment.location})`,
+      status: appointment.status
+    })
   }
   if (session) {
-    timelineItems.push({ date: session.sessionDate, title: 'Session Completed', description: session.summary, status: 'completed' })
+    timelineItems.push({
+      date: session.sessionDate,
+      title: t('บันทึกผลการให้คำปรึกษาเสร็จสิ้น', 'Session Completed'),
+      description: session.summary,
+      status: 'completed'
+    })
   }
   followUps.forEach(fu => {
-    timelineItems.push({ date: fu.createdAt, title: `Follow-up: ${fu.task}`, description: `Due: ${fu.dueDate}`, status: fu.status })
+    timelineItems.push({
+      date: fu.createdAt,
+      title: `${t('งานติดตามผล:', 'Follow-up:')} ${fu.task}`,
+      description: `${t('กำหนดส่ง:', 'Due:')} ${fu.dueDate}`,
+      status: fu.status
+    })
   })
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl mx-auto">
       <div className="mb-4">
-        <button onClick={() => navigate('/student/history')} className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
-          <ArrowLeft className="h-4 w-4" /> Back to History
+        <button
+          onClick={() => navigate('/student/history')}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-sky-700 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="h-4 w-4" /> {t('กลับสู่ประวัติคำร้อง', 'Back to Advising History')}
         </button>
       </div>
 
       <PageHeader title={catLabel} actions={<StatusBadge status={request.status} />} />
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {/* Request details */}
         <Card>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Request Details</h3>
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div><span className="text-slate-400">Request ID</span><p className="font-medium text-slate-900">{request.id}</p></div>
-            <div><span className="text-slate-400">Advisor</span><p className="font-medium text-slate-900">{advisor?.name || '-'}</p></div>
-            <div><span className="text-slate-400">Preferred Date</span><p className="font-medium text-slate-900">{request.preferredDate}</p></div>
-            <div><span className="text-slate-400">Preferred Time</span><p className="font-medium text-slate-900">{request.preferredTime}</p></div>
+          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-sky-600" /> {t('รายละเอียดคำร้อง', 'Request Details')}
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs pb-4 border-b border-slate-100">
+            <div>
+              <span className="text-slate-400 block font-medium">{t('รหัสคำร้อง', 'Request ID')}</span>
+              <p className="font-semibold text-slate-900 mt-0.5">{request.id}</p>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-medium">{t('อาจารย์ที่ปรึกษา', 'Faculty Advisor')}</span>
+              <p className="font-semibold text-slate-900 mt-0.5">{advisor?.name || '-'}</p>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-medium">{t('วันที่สะดวกเข้าพบ', 'Preferred Date')}</span>
+              <p className="font-semibold text-slate-900 mt-0.5">{request.preferredDate}</p>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-medium">{t('เวลาที่สะดวกเข้าพบ', 'Preferred Time')}</span>
+              <p className="font-semibold text-slate-900 mt-0.5">{request.preferredTime}</p>
+            </div>
           </div>
-          <div className="mt-3">
-            <span className="text-xs text-slate-400">Details</span>
-            <p className="text-sm text-slate-700 mt-0.5">{request.details}</p>
+
+          <div className="mt-4">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">{t('ประเด็นที่ขอรับคำปรึกษา', 'Description')}</span>
+            <p className="text-xs sm:text-sm text-slate-700 mt-1 leading-relaxed bg-slate-50/60 p-3 rounded-lg border border-slate-100">
+              {request.details}
+            </p>
           </div>
+
           {request.attachments.length > 0 && (
-            <div className="mt-3">
-              <span className="text-xs text-slate-400">Attachments</span>
-              <div className="flex flex-wrap gap-1 mt-1">
+            <div className="mt-4">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">{t('เอกสารแนบ', 'Attached Files')}</span>
+              <div className="flex flex-wrap gap-2">
                 {request.attachments.map((f, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-slate-100 rounded text-xs text-slate-600">{f}</span>
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-50 border border-sky-100 rounded-lg text-xs font-medium text-sky-800">
+                    <Paperclip className="h-3 w-3" /> {f}
+                  </span>
                 ))}
               </div>
             </div>
@@ -75,31 +114,48 @@ export default function AdvisingDetail() {
         {/* Session log */}
         {session && (
           <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Advising Session Log</h3>
-            <div className="space-y-2 text-xs">
-              <div><span className="text-slate-400">Summary</span><p className="text-slate-700">{session.summary}</p></div>
-              <div><span className="text-slate-400">Advice Provided</span><p className="text-slate-700">{session.advice}</p></div>
-              <div><span className="text-slate-400">Outcome</span><p className="text-slate-700">{session.outcome}</p></div>
+            <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-emerald-600" /> {t('บันทึกผลการเข้าพบอาจารย์ที่ปรึกษา', 'Advising Session Log')}
+            </h3>
+            <div className="space-y-3.5 text-xs sm:text-sm">
+              <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-lg">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-0.5">{t('สรุปผลการให้คำปรึกษา', 'Session Summary')}</span>
+                <p className="text-slate-800 leading-relaxed">{session.summary}</p>
+              </div>
+              <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-lg">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-0.5">{t('คำแนะนำและแนวทางปฏิบัติ', 'Advice & Guidance Provided')}</span>
+                <p className="text-slate-800 leading-relaxed">{session.advice}</p>
+              </div>
+              {session.outcome && (
+                <div className="p-3 bg-slate-50/70 border border-slate-100 rounded-lg">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-0.5">{t('ผลลัพธ์ / ข้อตกลงร่วมกัน', 'Outcome / Action Items')}</span>
+                  <p className="text-slate-800 leading-relaxed">{session.outcome}</p>
+                </div>
+              )}
             </div>
           </Card>
         )}
 
         {/* Timeline */}
         <Card>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Timeline</h3>
+          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-sky-600" /> {t('ลำดับสถานะการดำเนินงาน', 'Progress Timeline')}
+          </h3>
           <Timeline items={timelineItems} />
         </Card>
 
         {/* Follow-ups */}
         {followUps.length > 0 && (
           <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Follow-ups</h3>
-            <div className="space-y-2">
+            <h3 className="text-sm font-bold text-slate-900 mb-3.5 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-sky-600" /> {t('รายการงานที่ต้องติดตามผล', 'Assigned Follow-up Tasks')}
+            </h3>
+            <div className="space-y-2.5">
               {followUps.map(fu => (
-                <div key={fu.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-md">
+                <div key={fu.id} className="flex items-center justify-between p-3.5 bg-slate-50/80 border border-slate-100 rounded-xl">
                   <div>
-                    <p className="text-xs font-medium text-slate-900">{fu.task}</p>
-                    <p className="text-[11px] text-slate-400">Due: {fu.dueDate}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">{fu.task}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 font-medium">{t('กำหนดส่ง:', 'Due:')} {fu.dueDate}</p>
                   </div>
                   <StatusBadge status={fu.status} />
                 </div>
@@ -111,3 +167,4 @@ export default function AdvisingDetail() {
     </div>
   )
 }
+

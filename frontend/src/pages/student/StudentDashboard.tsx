@@ -1,16 +1,17 @@
 // ============================================================
-// Student Dashboard
+// Student Dashboard — REG MFU Academic Information Style
 // ============================================================
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
-import { PageHeader, StatCard, Card, StatusBadge, EmptyState } from '@/components/ui'
-import { Calendar, Clock, User, ListChecks, Bell, FileEdit } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { PageHeader, StatCard, Card, StatusBadge, EmptyState, Button, StudentProfileBanner } from '@/components/ui'
+import { Calendar, Clock, ListChecks, Bell, FileEdit, ArrowRight, BookOpen, CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { ADVISING_CATEGORIES } from '@/types'
 
 export default function StudentDashboard() {
   const { currentUser } = useAuth()
+  const { t, language, getCategoryLabel } = useLanguage()
   const store = useStore()
   const navigate = useNavigate()
 
@@ -27,137 +28,201 @@ export default function StudentDashboard() {
   const myNotifications = store.notifications.filter(n => n.userId === currentUser.id && !n.isRead)
 
   const upcomingAppointment = myAppointments[0]
-  const latestRequest = myRequests[0]
 
   return (
     <div>
+      {/* Student Profile Hero Banner (REG MFU SIS Style) */}
+      <StudentProfileBanner
+        student={currentUser}
+        advisor={advisor}
+        school={currentUser.department ? (language === 'th' ? 'สำนักวิชาเทคโนโลยีสารสนเทศ' : 'School of Information Technology') : undefined}
+        major={t('สาขาวิชาวิศวกรรมซอฟต์แวร์', 'Software Engineering')}
+        gpax="3.48"
+        credits="102 / 136"
+        status={t('ปกติ', 'Normal')}
+        semester={t('1/2569', 'Semester 1 / Academic Year 2026')}
+      />
+
       <PageHeader
-        title={`Welcome, ${currentUser.name.split(' ')[0]}`}
-        description="Your advising overview"
+        title={t('บริการให้คำปรึกษาทางวิชาการ', 'Academic Advising Services')}
+        description={t('ระบบติดตามผลการเข้าพบอาจารย์ที่ปรึกษา ตารางการนัดหมาย และรายการงานมอบหมายทางวิชาการ', 'Track advisor sessions, upcoming appointments, and assigned follow-up items.')}
         actions={
-          <button
-            onClick={() => navigate('/student/request')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors"
-          >
-            <FileEdit className="h-4 w-4" />
-            Request Advising
-          </button>
+          <Button onClick={() => navigate('/student/request')}>
+            <FileEdit className="h-4 w-4 mr-1.5" />
+            {t('ยื่นคำร้องขอเข้าพบ', 'Request Advising')}
+          </Button>
         }
       />
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Total Requests" value={myRequests.length} icon={<FileEdit className="h-5 w-5" />} color="indigo" />
-        <StatCard label="Upcoming" value={myAppointments.length} icon={<Calendar className="h-5 w-5" />} color="blue" />
-        <StatCard label="Pending Follow-ups" value={myFollowUps.length} icon={<ListChecks className="h-5 w-5" />} color="amber" />
-        <StatCard label="Unread Notifications" value={myNotifications.length} icon={<Bell className="h-5 w-5" />} color="red" />
+        <StatCard label={t('คำร้องทั้งหมด', 'Total Requests')} value={myRequests.length} icon={<FileEdit className="h-5 w-5" />} color="sky" />
+        <StatCard label={t('นัดหมายที่กำลังมาถึง', 'Upcoming Sessions')} value={myAppointments.length} icon={<Calendar className="h-5 w-5" />} color="sky" />
+        <StatCard label={t('งานติดตามผลคงค้าง', 'Pending Follow-ups')} value={myFollowUps.length} icon={<ListChecks className="h-5 w-5" />} color="amber" />
+        <StatCard label={t('ข้อความแจ้งเตือนใหม่', 'Unread Notices')} value={myNotifications.length} icon={<Bell className="h-5 w-5" />} color="red" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column */}
+        {/* Left column (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
-          {/* My Advisor */}
-          <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">My Advisor</h3>
-            {advisor ? (
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <User className="h-5 w-5 text-indigo-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{advisor.name}</p>
-                  <p className="text-xs text-slate-500">{advisor.department}</p>
-                  <p className="text-xs text-slate-500">{advisor.email} {advisor.phone ? `/ ${advisor.phone}` : ''}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">No advisor assigned yet. Please contact the admin office.</p>
-            )}
-          </Card>
-
           {/* Upcoming Appointment */}
           <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Upcoming Appointment</h3>
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-sky-600" /> {t('ตารางนัดหมายที่ได้รับการยืนยัน', 'Confirmed Upcoming Appointment')}
+              </h3>
+              {upcomingAppointment && (
+                <span className="text-[11px] font-semibold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
+                  {t('ภาคการศึกษา 1/2569', 'Semester 1/2026')}
+                </span>
+              )}
+            </div>
+
             {upcomingAppointment ? (
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{upcomingAppointment.scheduledDate}</p>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-xs text-slate-500 flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> {upcomingAppointment.scheduledTime}
-                    </span>
-                    <span className="text-xs text-slate-500">{upcomingAppointment.location}</span>
+              <div className="p-4 bg-sky-50/40 border border-sky-200/60 rounded-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3.5">
+                    <div className="h-11 w-11 rounded-xl bg-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                      <Calendar className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-slate-900">{upcomingAppointment.scheduledDate}</p>
+                        <StatusBadge status={upcomingAppointment.status} />
+                      </div>
+                      <p className="text-xs text-slate-600 mt-1 flex items-center gap-2 font-medium">
+                        <span className="flex items-center gap-1 text-sky-700 font-semibold">
+                          <Clock className="h-3.5 w-3.5" /> {upcomingAppointment.scheduledTime}
+                        </span>
+                        <span className="text-slate-300">·</span>
+                        <span>{t('สถานที่:', 'Location:')} {upcomingAppointment.location}</span>
+                      </p>
+                    </div>
                   </div>
-                  <StatusBadge status={upcomingAppointment.status} className="mt-1.5" />
+                  <Button size="sm" variant="secondary" onClick={() => navigate('/student/history')}>
+                    {t('ดูรายละเอียด', 'View Details')}
+                  </Button>
                 </div>
               </div>
             ) : (
-              <EmptyState title="No upcoming appointments" description="Submit a new advising request to schedule one." />
+              <EmptyState
+                title={t('ไม่มีนัดหมายที่รอดำเนินการ', 'No upcoming appointments')}
+                description={t('คุณยังไม่มีการนัดหมายที่กำลังจะมาถึง สามารถยื่นคำร้องขอเข้าพบอาจารย์ที่ปรึกษาได้ตลอดเวลา', 'You have no confirmed sessions scheduled. Submit a petition to meet with your advisor.')}
+                action={
+                  <Button size="sm" onClick={() => navigate('/student/request')}>
+                    {t('ยื่นคำร้องขอนัดหมาย', 'Request Advising Session')}
+                  </Button>
+                }
+              />
             )}
           </Card>
 
-          {/* Latest Advising */}
+          {/* Recent Advising Requests Table (REG MFU Academic Table Style) */}
           <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Latest Advising Request</h3>
-            {latestRequest ? (
-              <div
-                className="cursor-pointer hover:bg-slate-50 -m-2 p-2 rounded-md transition-colors"
-                onClick={() => navigate(`/student/history/${latestRequest.id}`)}
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-900">
-                    {ADVISING_CATEGORIES.find(c => c.value === latestRequest.category)?.label}
-                  </p>
-                  <StatusBadge status={latestRequest.status} />
-                </div>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{latestRequest.details}</p>
-                <p className="text-xs text-slate-400 mt-1">{latestRequest.createdAt}</p>
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-sky-600" /> {t('ประวัติคำร้องขอรับคำปรึกษาล่าสุด', 'Recent Advising Petitions')}
+              </h3>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/student/history')} className="text-xs text-sky-600">
+                {t('ดูทั้งหมด', 'View All')} <ArrowRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+
+            {myRequests.length > 0 ? (
+              <div className="divide-y divide-slate-100">
+                {myRequests.slice(0, 4).map(req => {
+                  const catLabel = getCategoryLabel(req.category)
+                  return (
+                    <div
+                      key={req.id}
+                      onClick={() => navigate(`/student/history/${req.id}`)}
+                      className="py-3.5 px-2 hover:bg-sky-50/30 rounded-xl transition-all duration-150 cursor-pointer flex items-center justify-between gap-4 group"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                            {req.id}
+                          </span>
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 truncate group-hover:text-sky-900">
+                            {catLabel}
+                          </p>
+                        </div>
+                        <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{req.details}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">{t('ยื่นคำร้องเมื่อ:', 'Submitted on:')} {req.createdAt}</p>
+                      </div>
+                      <div className="flex-shrink-0 flex items-center gap-2">
+                        <StatusBadge status={req.status} />
+                        <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-sky-600 group-hover:translate-x-0.5 transition-all" />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             ) : (
-              <EmptyState title="No advising records" description="You haven't submitted any advising requests yet." />
+              <EmptyState title={t('ไม่พบประวัติคำร้อง', 'No advising petitions found')} description={t('คุณยังไม่มีประวัติการยื่นคำร้องขอรับคำปรึกษาในภาคการศึกษานี้', 'You have not submitted any advising requests in this academic term.')} />
             )}
           </Card>
         </div>
 
-        {/* Right column */}
+        {/* Right column (1 col) */}
         <div className="space-y-6">
           {/* Pending Follow-ups */}
           <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Pending Follow-ups</h3>
+            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <ListChecks className="h-4 w-4 text-sky-600" /> {t('งานที่ต้องดำเนินการ', 'Assigned Action Items')}
+              </h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                {myFollowUps.length} {t('รายการ', 'Items')}
+              </span>
+            </div>
+
             {myFollowUps.length > 0 ? (
-              <div className="space-y-2">
-                {myFollowUps.slice(0, 5).map(fu => (
-                  <div key={fu.id} className="p-2 bg-slate-50 rounded-md">
-                    <p className="text-xs font-medium text-slate-900">{fu.task}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[11px] text-slate-400">Due: {fu.dueDate}</span>
+              <div className="space-y-2.5">
+                {myFollowUps.slice(0, 4).map(fu => (
+                  <div key={fu.id} className="p-3 bg-slate-50/80 border border-slate-200/70 rounded-xl hover:border-sky-200 transition-all">
+                    <p className="text-xs font-bold text-slate-900">{fu.task}</p>
+                    <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200/50">
+                      <span className="text-[10px] text-slate-500 font-medium">{t('กำหนดส่ง:', 'Due:')} {fu.dueDate}</span>
                       <StatusBadge status={fu.status} />
                     </div>
                   </div>
                 ))}
+                <Button size="sm" variant="secondary" onClick={() => navigate('/student/followups')} className="w-full mt-2 text-xs">
+                  {t('จัดการงานที่ต้องทำทั้งหมด', 'Manage All Action Items')}
+                </Button>
               </div>
             ) : (
-              <p className="text-xs text-slate-500">No pending follow-ups</p>
+              <div className="py-6 text-center">
+                <CheckCircle2 className="h-7 w-7 text-emerald-500 mx-auto mb-2 opacity-80" />
+                <p className="text-xs font-semibold text-slate-700">{t('ไม่มีงานค้างที่ต้องส่ง', 'All tasks completed')}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">{t('คุณได้ปฏิบัติตามคำแนะนำครบถ้วนแล้ว', 'You have no pending advisor action items.')}</p>
+              </div>
             )}
           </Card>
 
-          {/* Recent Notifications */}
+          {/* Academic Notices / Notifications */}
           <Card>
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Notifications</h3>
+            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Bell className="h-4 w-4 text-sky-600" /> {t('ประกาศและการแจ้งเตือน', 'System Notices')}
+              </h3>
+            </div>
+
             {myNotifications.length > 0 ? (
-              <div className="space-y-2">
-                {myNotifications.slice(0, 5).map(n => (
-                  <div key={n.id} className="p-2 bg-slate-50 rounded-md">
-                    <p className="text-xs font-medium text-slate-900">{n.title}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
+              <div className="space-y-2.5">
+                {myNotifications.slice(0, 4).map(n => (
+                  <div key={n.id} className="p-3 bg-sky-50/40 border border-sky-100 rounded-xl">
+                    <div className="flex items-start justify-between gap-1">
+                      <p className="text-xs font-bold text-slate-900">{n.title}</p>
+                      <span className="h-1.5 w-1.5 rounded-full bg-sky-500 flex-shrink-0 mt-1" />
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500">No new notifications</p>
+              <p className="text-xs text-slate-400 py-6 text-center font-medium">{t('ไม่มีข้อความแจ้งเตือนใหม่', 'No new notifications')}</p>
             )}
           </Card>
         </div>
@@ -165,3 +230,6 @@ export default function StudentDashboard() {
     </div>
   )
 }
+
+
+

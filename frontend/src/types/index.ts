@@ -16,15 +16,15 @@ export type AdvisingCategory =
   | 'personal'
   | 'withdrawal_leave'
 
-export const ADVISING_CATEGORIES: { value: AdvisingCategory; label: string }[] = [
-  { value: 'scholarship_document', label: 'Scholarship / Document Signing' },
-  { value: 'financial', label: 'Financial Issues' },
-  { value: 'registration', label: 'Registration' },
-  { value: 'student_status', label: 'Student Status' },
-  { value: 'academic_performance', label: 'Academic Performance / GPA / Probation' },
-  { value: 'internship_career', label: 'Internship / Cooperative Education / Career' },
-  { value: 'personal', label: 'Personal Issues' },
-  { value: 'withdrawal_leave', label: 'Withdrawal / Leave of Absence' },
+export const ADVISING_CATEGORIES: { value: AdvisingCategory; label: string; labelEn: string; labelTh: string }[] = [
+  { value: 'scholarship_document', label: 'Scholarship / Document Signing', labelEn: 'Scholarship / Document Signing', labelTh: 'ทุนการศึกษา / ลงนามเอกสาร' },
+  { value: 'financial', label: 'Financial Issues', labelEn: 'Financial Issues', labelTh: 'ปัญหาทางการเงิน / ค่าธรรมเนียม' },
+  { value: 'registration', label: 'Course Registration', labelEn: 'Course Registration', labelTh: 'การลงทะเบียนเรียน / เพิ่ม-ถอน' },
+  { value: 'student_status', label: 'Student Status', labelEn: 'Student Status', labelTh: 'สถานภาพนักศึกษา' },
+  { value: 'academic_performance', label: 'Academic Performance / GPA / Probation', labelEn: 'Academic Performance / GPA / Probation', labelTh: 'ผลการเรียน / GPA / ภาวะวิทยาทัณฑ์' },
+  { value: 'internship_career', label: 'Internship / Co-op / Career', labelEn: 'Internship / Co-op / Career', labelTh: 'ฝึกงาน / สหกิจศึกษา / อาชีพ' },
+  { value: 'personal', label: 'Personal Issues', labelEn: 'Personal Issues', labelTh: 'ปัญหาส่วนตัว / การปรับตัว' },
+  { value: 'withdrawal_leave', label: 'Withdrawal / Leave of Absence', labelEn: 'Withdrawal / Leave of Absence', labelTh: 'การขอลาพัก / ขอลาออก' },
 ]
 
 export type RequestStatus =
@@ -48,12 +48,12 @@ export type ReferralDestination =
   | 'mental_health'
   | 'academic_support'
 
-export const REFERRAL_DESTINATIONS: { value: ReferralDestination; label: string }[] = [
-  { value: 'guidance_counseling', label: 'Guidance / Counseling' },
-  { value: 'scholarship_office', label: 'Scholarship Office' },
-  { value: 'financial_office', label: 'Financial Office' },
-  { value: 'mental_health', label: 'Mental Health Service' },
-  { value: 'academic_support', label: 'Academic Support' },
+export const REFERRAL_DESTINATIONS: { value: ReferralDestination; label: string; labelEn: string; labelTh: string }[] = [
+  { value: 'guidance_counseling', label: 'Guidance & Counseling Center', labelEn: 'Guidance & Counseling Center', labelTh: 'ศูนย์แนะแนวและให้คำปรึกษา' },
+  { value: 'scholarship_office', label: 'Scholarship Office', labelEn: 'Scholarship Office', labelTh: 'งานทุนการศึกษา' },
+  { value: 'financial_office', label: 'Financial Services Office', labelEn: 'Financial Services Office', labelTh: 'ส่วนการเงินและบัญชี' },
+  { value: 'mental_health', label: 'Mental Health & Wellness Unit', labelEn: 'Mental Health & Wellness Unit', labelTh: 'หน่วยบริการสุขภาพจิต' },
+  { value: 'academic_support', label: 'Academic Support Center', labelEn: 'Academic Support Center', labelTh: 'ศูนย์สนับสนุนการเรียนรู้วิชาการ' },
 ]
 
 export type ExitType = 'withdrawal' | 'leave_of_absence' | 'transfer' | 'dropout'
@@ -68,26 +68,26 @@ export type ExitReasonCode =
   | 'career_work'
   | 'other'
 
-export const EXIT_REASON_CODES: { value: ExitReasonCode; label: string }[] = [
-  { value: 'financial', label: 'Financial' },
-  { value: 'academic', label: 'Academic' },
-  { value: 'health', label: 'Health' },
-  { value: 'personal_family', label: 'Personal / Family' },
-  { value: 'mental_health', label: 'Mental Health' },
-  { value: 'transfer', label: 'Transfer' },
-  { value: 'career_work', label: 'Career / Work' },
-  { value: 'other', label: 'Other' },
+export const EXIT_REASON_CODES: { value: ExitReasonCode; label: string; labelEn: string; labelTh: string }[] = [
+  { value: 'financial', label: 'Financial Difficulty', labelEn: 'Financial Difficulty', labelTh: 'ปัญหาด้านการเงิน / ค่าใช้จ่าย' },
+  { value: 'academic', label: 'Academic Difficulty', labelEn: 'Academic Difficulty', labelTh: 'ผลการเรียน / ไม่ถนัดในสาขา' },
+  { value: 'health', label: 'Physical Health', labelEn: 'Physical Health', labelTh: 'ปัญหาสุขภาพทางกาย' },
+  { value: 'personal_family', label: 'Personal / Family Circumstances', labelEn: 'Personal / Family Circumstances', labelTh: 'ภาระครอบครัว / ส่วนตัว' },
+  { value: 'mental_health', label: 'Mental Health', labelEn: 'Mental Health', labelTh: 'สภาวะสุขภาพจิต / ความเครียด' },
+  { value: 'transfer', label: 'Institution Transfer', labelEn: 'Institution Transfer', labelTh: 'โอนย้ายสถาบันการศึกษา' },
+  { value: 'career_work', label: 'Career / Employment', labelEn: 'Career / Employment', labelTh: 'ประกอบอาชีพ / ศึกษาต่อ' },
+  { value: 'other', label: 'Other Reasons', labelEn: 'Other Reasons', labelTh: 'เหตุผลอื่นๆ' },
 ]
 
 export type ExitCaseStatus = 'open' | 'under_review' | 'resolved' | 'closed'
 
 export type EarlyWarningType = 'academic_risk' | 'financial_risk' | 'attendance' | 'personal'
 
-export const EARLY_WARNING_TYPES: { value: EarlyWarningType; label: string }[] = [
-  { value: 'academic_risk', label: 'Academic Risk' },
-  { value: 'financial_risk', label: 'Financial Risk' },
-  { value: 'attendance', label: 'Attendance Problems' },
-  { value: 'personal', label: 'Personal Issues' },
+export const EARLY_WARNING_TYPES: { value: EarlyWarningType; label: string; labelEn: string; labelTh: string }[] = [
+  { value: 'academic_risk', label: 'Academic Risk (Low GPA)', labelEn: 'Academic Risk (Low GPA)', labelTh: 'เสี่ยงทางวิชาการ (GPA ต่ำ)' },
+  { value: 'financial_risk', label: 'Financial Risk', labelEn: 'Financial Risk', labelTh: 'เสี่ยงค้างชำระค่าธรรมเนียม' },
+  { value: 'attendance', label: 'Attendance Risk', labelEn: 'Attendance Risk', labelTh: 'ปัญหาการเข้าเรียนไม่สม่ำเสมอ' },
+  { value: 'personal', label: 'Personal & Well-being', labelEn: 'Personal & Well-being', labelTh: 'ปัญหาส่วนตัว / ความเป็นอยู่' },
 ]
 
 export type EarlyWarningSeverity = 'low' | 'medium' | 'high' | 'critical'
