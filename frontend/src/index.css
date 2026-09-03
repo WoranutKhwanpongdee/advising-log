@@ -54,3 +54,50 @@ body {
   color: #0f172a;
 }
 
+/* Keep the dashboard rail attached to the viewport and aligned with the light UI. */
+aside {
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  color: #475569;
+  min-height: 100vh;
+}
+
+aside .text-white {
+  color: #0f172a;
+}
+
+aside .text-slate-300,
+aside .text-slate-400,
+aside .text-slate-500 {
+  color: #64748b;
+}
+
+aside .text-indigo-300 {
+  color: #4f46e5;
+}
+
+aside .bg-indigo-500 {
+  background-color: #4f46e5;
+}
+
+aside .bg-white\/5 {
+  background-color: #f8fafc;
+}
+
+aside .border-white\/10 {
+  border-color: #e2e8f0;
+}
+
+aside button:hover {
+  background-color: #eef2ff;
+  color: #3730a3;
+}
+
+@media (min-width: 1024px) {
+  aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+}
+
