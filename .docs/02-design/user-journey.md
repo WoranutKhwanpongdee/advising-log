@@ -6,7 +6,7 @@ This outlines the User Journeys within the AdvisingLog system, separated by four
 
 ## 1. Quality Assurance (QA) User Journey
 
-![alt text](image.png)
+![alt text](Gemini_Generated_Image_8nxqt18nxqt18nxq.jpg)
 
 ### 1.1 Authentication Phase
 1. **Start:** User accesses the login page.
@@ -34,7 +34,8 @@ The user can repeatedly perform actions within this loop as long as they are log
 ---
 
 ## 2. Admin User Journey
-![alt text](Gemini_Generated_Image_a47c71a47c71a47c-1.jpg)
+
+![alt text](Gemini_Generated_Image_a47c71a47c71a47c.jpg)
 
 ### 2.1 Authentication & Initial Dashboard Phase
 1. **Start:** User accesses the login page.
@@ -121,6 +122,7 @@ From the dashboard, the user can separate into multiple parallel task tabs (fork
 ---
 
 ## 4. Student User Journey
+
 ![alt text](Gemini_Generated_Image_whj7pfwhj7pfwhj7.jpg)
 
 ### 4.1 Authentication Phase
