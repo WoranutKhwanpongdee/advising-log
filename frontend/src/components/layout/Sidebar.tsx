@@ -1,10 +1,7 @@
-// ============================================================
-// AdvisingLog — Sidebar Navigation
-// ============================================================
-
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import type { UserRole } from '@/types'
 import {
   LayoutDashboard,
@@ -26,6 +23,7 @@ import {
   ScrollText,
   GraduationCap,
   X,
+  Sparkles,
 } from 'lucide-react'
 
 interface NavItem {
@@ -34,55 +32,56 @@ interface NavItem {
   icon: React.ReactNode
 }
 
-function getNavItems(role: UserRole): NavItem[] {
-  switch (role) {
-    case 'student':
-      return [
-        { to: '/student', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
-        { to: '/student/request', label: 'Request Advising', icon: <FileEdit className="h-4 w-4" /> },
-        { to: '/student/history', label: 'Advising History', icon: <History className="h-4 w-4" /> },
-        { to: '/student/documents', label: 'Documents', icon: <FileText className="h-4 w-4" /> },
-        { to: '/student/followups', label: 'Follow-ups', icon: <ListChecks className="h-4 w-4" /> },
-        { to: '/student/exit', label: 'Exit Form', icon: <LogOutIcon className="h-4 w-4" /> },
-      ]
-    case 'advisor':
-      return [
-        { to: '/advisor', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
-        { to: '/advisor/sessions', label: 'Advising Sessions', icon: <CalendarClock className="h-4 w-4" /> },
-        { to: '/advisor/log', label: 'Advisor Log', icon: <ClipboardList className="h-4 w-4" /> },
-        { to: '/advisor/warnings', label: 'Early Warning', icon: <AlertTriangle className="h-4 w-4" /> },
-        { to: '/advisor/referrals', label: 'Referrals', icon: <Share2 className="h-4 w-4" /> },
-        { to: '/advisor/exit-cases', label: 'Exit Cases', icon: <UserX className="h-4 w-4" /> },
-      ]
-    case 'qa_chair':
-      return [
-        { to: '/qa', label: 'QA Dashboard', icon: <BarChart3 className="h-4 w-4" /> },
-        { to: '/qa/exit-review', label: 'Exit Case Review', icon: <UserX className="h-4 w-4" /> },
-      ]
-    case 'admin':
-      return [
-        { to: '/admin', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
-        { to: '/admin/users', label: 'User Management', icon: <Users className="h-4 w-4" /> },
-        { to: '/admin/roster', label: 'Student-Advisor Roster', icon: <BookOpen className="h-4 w-4" /> },
-        { to: '/admin/categories', label: 'Categories', icon: <FolderCog className="h-4 w-4" /> },
-        { to: '/admin/document-types', label: 'Document Types', icon: <FileCog className="h-4 w-4" /> },
-        { to: '/admin/audit-logs', label: 'Audit Logs', icon: <ScrollText className="h-4 w-4" /> },
-      ]
-    default:
-      return []
-  }
-}
-
-const roleLabels: Record<UserRole, string> = {
-  student: 'Student',
-  advisor: 'Advisor',
-  qa_chair: 'Program Chair / QA',
-  admin: 'Admin',
-}
-
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { currentUser } = useAuth()
+  const { t } = useLanguage()
   if (!currentUser) return null
+
+  function getNavItems(role: UserRole): NavItem[] {
+    switch (role) {
+      case 'student':
+        return [
+          { to: '/student', label: t('หน้าหลัก', 'Dashboard'), icon: <LayoutDashboard className="h-4 w-4" /> },
+          { to: '/student/request', label: t('ยื่นคำร้องขอเข้าพบ', 'Request Advising'), icon: <FileEdit className="h-4 w-4" /> },
+          { to: '/student/history', label: t('ประวัติการขอคำปรึกษา', 'Advising History'), icon: <History className="h-4 w-4" /> },
+          { to: '/student/documents', label: t('เอกสารที่เกี่ยวข้อง', 'Documents'), icon: <FileText className="h-4 w-4" /> },
+          { to: '/student/followups', label: t('งานที่ต้องดำเนินการ', 'Follow-ups'), icon: <ListChecks className="h-4 w-4" /> },
+          { to: '/student/exit', label: t('ยื่นคำร้องลาพัก/ลาออก', 'Exit & Leave'), icon: <LogOutIcon className="h-4 w-4" /> },
+        ]
+      case 'advisor':
+        return [
+          { to: '/advisor', label: t('แดชบอร์ดอาจารย์', 'Dashboard'), icon: <LayoutDashboard className="h-4 w-4" /> },
+          { to: '/advisor/sessions', label: t('การให้คำปรึกษา', 'Advising Sessions'), icon: <CalendarClock className="h-4 w-4" /> },
+          { to: '/advisor/log', label: t('บันทึกผลการเข้าพบ', 'Advisor Log'), icon: <ClipboardList className="h-4 w-4" /> },
+          { to: '/advisor/warnings', label: t('ระบบเตือนภัยวิชาการ', 'Early Warning'), icon: <AlertTriangle className="h-4 w-4" /> },
+          { to: '/advisor/referrals', label: t('การส่งต่อหน่วยงาน', 'Referrals'), icon: <Share2 className="h-4 w-4" /> },
+          { to: '/advisor/exit-cases', label: t('คำร้องขอลาพัก/ลาออก', 'Exit Cases'), icon: <UserX className="h-4 w-4" /> },
+        ]
+      case 'qa_chair':
+        return [
+          { to: '/qa', label: t('แดชบอร์ดประกันคุณภาพ', 'QA Dashboard'), icon: <BarChart3 className="h-4 w-4" /> },
+          { to: '/qa/exit-review', label: t('ทบทวนเคสลาออก', 'Exit Case Review'), icon: <UserX className="h-4 w-4" /> },
+        ]
+      case 'admin':
+        return [
+          { to: '/admin', label: t('แดชบอร์ดผู้ดูแล', 'Admin Dashboard'), icon: <LayoutDashboard className="h-4 w-4" /> },
+          { to: '/admin/users', label: t('จัดการผู้ใช้งาน', 'User Management'), icon: <Users className="h-4 w-4" /> },
+          { to: '/admin/roster', label: t('จัดสรรอาจารย์ที่ปรึกษา', 'Student-Advisor Roster'), icon: <BookOpen className="h-4 w-4" /> },
+          { to: '/admin/categories', label: t('หมวดหมู่คำปรึกษา', 'Categories'), icon: <FolderCog className="h-4 w-4" /> },
+          { to: '/admin/document-types', label: t('ประเภทเอกสาร', 'Document Types'), icon: <FileCog className="h-4 w-4" /> },
+          { to: '/admin/audit-logs', label: t('ประวัติการทำงานระบบ', 'Audit Logs'), icon: <ScrollText className="h-4 w-4" /> },
+        ]
+      default:
+        return []
+    }
+  }
+
+  const roleMeta = {
+    student: { title: t('ระบบนักศึกษา', 'Student Portal'), subtitle: t('นักศึกษาในความดูแล', 'Academic Advisee') },
+    advisor: { title: t('ระบบอาจารย์ที่ปรึกษา', 'Advisor Portal'), subtitle: t('อาจารย์ที่ปรึกษา', 'Faculty Advisor') },
+    qa_chair: { title: t('ระบบประกันคุณภาพ', 'QA & Chair Portal'), subtitle: t('ฝ่ายประกันคุณภาพ', 'Quality Assurance') },
+    admin: { title: t('ระบบผู้ดูแล', 'Admin Console'), subtitle: t('ผู้ดูแลระบบ', 'System Operator') },
+  }[currentUser.role]
 
   const navItems = getNavItems(currentUser.role)
 
@@ -90,35 +89,46 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden" onClick={onClose} />
       )}
 
       <aside className={cn(
-        'fixed top-0 left-0 z-40 h-full w-56 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto',
+        'fixed top-0 left-0 z-40 h-full w-64 bg-white border-r border-slate-200/80 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto shadow-xs',
         isOpen ? 'translate-x-0' : '-translate-x-full',
       )}>
         {/* Logo area */}
-        <div className="h-14 flex items-center justify-between px-4 border-b border-slate-200">
-          <div className="flex items-center gap-2">
-            <div className="bg-indigo-600 text-white p-1.5 rounded-md">
-              <GraduationCap className="h-4 w-4" />
+        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md shadow-sky-600/20 ring-2 ring-sky-100">
+              <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-sm font-bold text-slate-900">AdvisingLog</span>
+            <div>
+              <span className="text-sm font-extrabold tracking-tight text-slate-900 block leading-tight">
+                Advising<span className="text-sky-600">Log</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider leading-tight">
+                Academic Advisory
+              </span>
+            </div>
           </div>
-          <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Role label */}
-        <div className="px-4 py-2.5 border-b border-slate-100">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-            {roleLabels[currentUser.role]}
-          </span>
+        {/* Role label badge */}
+        <div className="px-4 py-3 border-b border-slate-100/80 bg-slate-50/40">
+          <div className="p-2 rounded-xl bg-white border border-slate-200/70 shadow-2xs flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-slate-900 leading-tight">{roleMeta.title}</p>
+              <p className="text-[10px] text-slate-400 font-medium">{roleMeta.subtitle}</p>
+            </div>
+            <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-3.5 space-y-1 overflow-y-auto">
           {navItems.map(item => (
             <NavLink
               key={item.to}
@@ -126,18 +136,37 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               end={item.to === '/student' || item.to === '/advisor' || item.to === '/qa' || item.to === '/admin'}
               onClick={onClose}
               className={({ isActive }) => cn(
-                'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group cursor-pointer',
                 isActive
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                  ? 'bg-sky-50 text-sky-800 font-bold border border-sky-200/70 shadow-2xs'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent',
               )}
             >
-              {item.icon}
-              {item.label}
+              {({ isActive }) => (
+                <>
+                  <span className={cn(
+                    'p-1 rounded-lg transition-colors',
+                    isActive ? 'bg-sky-600 text-white' : 'text-slate-400 group-hover:text-slate-700',
+                  )}>
+                    {item.icon}
+                  </span>
+                  <span className="flex-1">{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
+
+        {/* Footer info */}
+        <div className="p-4 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+          <span className="font-medium">AdvisingLog v2.1</span>
+          <span className="inline-flex items-center gap-1 font-semibold text-sky-600">
+            <Sparkles className="h-3 w-3" /> Online
+          </span>
+        </div>
       </aside>
     </>
   )
 }
+
+

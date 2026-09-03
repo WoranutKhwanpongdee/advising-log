@@ -1,11 +1,13 @@
-// Admin — Document Types
 import { useState } from 'react'
 import { useStore } from '@/data/mock-store'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput } from '@/components/ui'
 import type { DocumentType } from '@/types'
+import { FileText } from 'lucide-react'
 
 export default function DocumentTypes() {
   const store = useStore()
+  const { t } = useLanguage()
   const [search, setSearch] = useState('')
 
   const docTypes = store.documentTypes.filter(d => {
@@ -14,21 +16,50 @@ export default function DocumentTypes() {
   })
 
   const columns = [
-    { key: 'name', header: 'Document Name', render: (d: DocumentType) => <span className="text-sm font-medium">{d.name}</span> },
-    { key: 'signature', header: 'Signature Method', render: (d: DocumentType) => <span className="text-xs">{d.signatureMethod === 'wet_signature' ? 'Wet Signature' : 'E-Signature'}</span> },
-    { key: 'status', header: 'Status', render: (d: DocumentType) => <StatusBadge status={d.isActive ? 'active' : 'inactive'} className={d.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'} /> },
-    { key: 'actions', header: 'Actions', render: (d: DocumentType) => (
-      <Button size="sm" variant="secondary" onClick={() => store.updateDocumentType(d.id, { isActive: !d.isActive })}>
-        {d.isActive ? 'Disable' : 'Enable'}
-      </Button>
-    ) },
+    {
+      key: 'name',
+      header: t('ชื่อเอกสาร / แบบฟอร์ม', 'Document Name'),
+      render: (d: DocumentType) => (
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center flex-shrink-0">
+            <FileText className="h-4 w-4" />
+          </div>
+          <span className="text-xs sm:text-sm font-semibold text-slate-900">{d.name}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'signature',
+      header: t('รูปแบบการลงนาม', 'Validation Method'),
+      render: (d: DocumentType) => (
+        <span className="text-xs font-medium text-slate-700">
+          {d.signatureMethod === 'wet_signature' ? t('ลงนามด้วยตนเอง (ส่งเอกสารฉบับจริง)', 'Wet Signature (Physical Submission)') : t('ลงนามดิจิทัล (ยืนยันผ่านระบบ)', 'E-Signature (Digital Confirmation)')}
+        </span>
+      ),
+    },
+    { key: 'status', header: t('สถานะ', 'Status'), render: (d: DocumentType) => <StatusBadge status={d.isActive ? 'active' : 'inactive'} /> },
+    {
+      key: 'actions',
+      header: t('การจัดการ', 'Action'),
+      render: (d: DocumentType) => (
+        <Button size="sm" variant="secondary" onClick={() => store.updateDocumentType(d.id, { isActive: !d.isActive })}>
+          {d.isActive ? t('ปิดใช้งาน', 'Disable') : t('เปิดใช้งาน', 'Enable')}
+        </Button>
+      ),
+    },
   ]
 
   return (
     <div>
-      <PageHeader title="Document Types" description="Configure required document types and signature methods." actions={<Button>Add Document Type</Button>} />
-      <div className="mb-4 max-w-sm"><SearchInput value={search} onChange={setSearch} placeholder="Search documents..." /></div>
-      <DataTable columns={columns} data={docTypes} emptyMessage="No document types found." />
+      <PageHeader
+        title={t('การกำหนดแบบฟอร์มและเอกสาร', 'Document Types & Templates')}
+        description={t('จัดการแบบฟอร์มการให้คำปรึกษาที่จำเป็น รูปแบบการลงนาม และเอกสารระเบียบข้อบังคับ', 'Configure mandatory advising forms, signoff methods, and compliance documentation.')}
+      />
+      <div className="mb-5 max-w-sm">
+        <SearchInput value={search} onChange={setSearch} placeholder={t('ค้นหาแบบฟอร์มเอกสาร...', 'Search documents...')} />
+      </div>
+      <DataTable columns={columns} data={docTypes} emptyMessage={t('ไม่พบข้อมูลแบบฟอร์มเอกสาร', 'No document types found.')} />
     </div>
   )
 }
+
