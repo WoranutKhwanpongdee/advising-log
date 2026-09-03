@@ -1,106 +1,115 @@
-import { GraduationCap, Users, Calendar, FileText, BarChart3, ShieldCheck } from 'lucide-react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { StoreProvider } from '@/data/mock-store'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { ToastProvider } from '@/contexts/ToastContext'
+import { ToastContainer } from '@/components/ui'
+import { AppLayout } from '@/components/layout/AppLayout'
+
+// Pages
+import LoginPage from '@/pages/LoginPage'
+
+// Student Pages
+import StudentDashboard from '@/pages/student/StudentDashboard'
+import RequestAdvising from '@/pages/student/RequestAdvising'
+import AdvisingHistory from '@/pages/student/AdvisingHistory'
+import AdvisingDetail from '@/pages/student/AdvisingDetail'
+import Documents from '@/pages/student/Documents'
+import FollowUps from '@/pages/student/FollowUps'
+import ExitForm from '@/pages/student/ExitForm'
+
+// Advisor Pages
+import AdvisorDashboard from '@/pages/advisor/AdvisorDashboard'
+import AdvisingSessions from '@/pages/advisor/AdvisingSessions'
+import AdvisorLog from '@/pages/advisor/AdvisorLog'
+import EarlyWarning from '@/pages/advisor/EarlyWarning'
+import Referrals from '@/pages/advisor/Referrals'
+import ExitCases from '@/pages/advisor/ExitCases'
+
+// QA Pages
+import QADashboard from '@/pages/qa/QADashboard'
+import ExitCaseReview from '@/pages/qa/ExitCaseReview'
+
+// Admin Pages
+import AdminDashboard from '@/pages/admin/AdminDashboard'
+import UserManagement from '@/pages/admin/UserManagement'
+import Roster from '@/pages/admin/Roster'
+import Categories from '@/pages/admin/Categories'
+import DocumentTypes from '@/pages/admin/DocumentTypes'
+import AuditLogs from '@/pages/admin/AuditLogs'
+
+import type { UserRole } from '@/types'
+
+// Role Guard Component
+function RequireRole({ children, allowedRoles }: { children: import('react').ReactNode, allowedRoles: UserRole[] }) {
+  const { currentUser, isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (currentUser && !allowedRoles.includes(currentUser.role)) {
+    // Redirect to their default dashboard if unauthorized
+    if (currentUser.role === 'student') return <Navigate to="/student" replace />
+    if (currentUser.role === 'advisor') return <Navigate to="/advisor" replace />
+    if (currentUser.role === 'qa_chair') return <Navigate to="/qa" replace />
+    if (currentUser.role === 'admin') return <Navigate to="/admin" replace />
+  }
+  return children
+}
+
+// Redirect root to appropriate dashboard
+function RootRedirect() {
+  const { currentUser, isAuthenticated } = useAuth()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (currentUser?.role === 'student') return <Navigate to="/student" replace />
+  if (currentUser?.role === 'advisor') return <Navigate to="/advisor" replace />
+  if (currentUser?.role === 'qa_chair') return <Navigate to="/qa" replace />
+  if (currentUser?.role === 'admin') return <Navigate to="/admin" replace />
+  return <Navigate to="/login" replace />
+}
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-      {/* Top Header Navigation */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 text-white p-2 rounded-lg">
-              <GraduationCap className="h-6 w-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">AdvisingLog</h1>
-              <p className="text-xs text-slate-500 font-medium">Student Advising System</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-              System Online
-            </span>
-          </div>
-        </div>
-      </header>
+    <BrowserRouter>
+      <StoreProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              
+              <Route path="/" element={<AppLayout />}>
+                <Route index element={<RootRedirect />} />
+                
+                {/* Student Routes */}
+                <Route path="student" element={<RequireRole allowedRoles={['student']}><StudentDashboard /></RequireRole>} />
+                <Route path="student/request" element={<RequireRole allowedRoles={['student']}><RequestAdvising /></RequireRole>} />
+                <Route path="student/history" element={<RequireRole allowedRoles={['student']}><AdvisingHistory /></RequireRole>} />
+                <Route path="student/history/:id" element={<RequireRole allowedRoles={['student']}><AdvisingDetail /></RequireRole>} />
+                <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
+                <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
+                <Route path="student/exit" element={<RequireRole allowedRoles={['student']}><ExitForm /></RequireRole>} />
 
-      {/* Main Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Banner */}
-        <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-800 text-white rounded-2xl p-8 shadow-lg mb-8">
-          <div className="max-w-3xl">
-            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm text-xs font-semibold rounded-full uppercase tracking-wider mb-3">
-              Role-Based Advising Platform
-            </span>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl mb-2">
-              Empowering Student Success & Advising Workflows
-            </h2>
-            <p className="text-indigo-100 text-base leading-relaxed">
-              AdvisingLog streamlines meeting logs, advising records, QA reporting, follow-ups, and academic case tracking in one unified interface.
-            </p>
-          </div>
-        </div>
+                {/* Advisor Routes */}
+                <Route path="advisor" element={<RequireRole allowedRoles={['advisor']}><AdvisorDashboard /></RequireRole>} />
+                <Route path="advisor/sessions" element={<RequireRole allowedRoles={['advisor']}><AdvisingSessions /></RequireRole>} />
+                <Route path="advisor/log" element={<RequireRole allowedRoles={['advisor']}><AdvisorLog /></RequireRole>} />
+                <Route path="advisor/warnings" element={<RequireRole allowedRoles={['advisor']}><EarlyWarning /></RequireRole>} />
+                <Route path="advisor/referrals" element={<RequireRole allowedRoles={['advisor']}><Referrals /></RequireRole>} />
+                <Route path="advisor/exit-cases" element={<RequireRole allowedRoles={['advisor']}><ExitCases /></RequireRole>} />
 
-        {/* Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
-              <Users className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-semibold text-slate-900 mb-1">Student & Advisor Roles</h3>
-            <p className="text-xs text-slate-500">Separated views and permissions tailored for Students, Advisors, Program Chairs, and Admins.</p>
-          </div>
+                {/* QA Routes */}
+                <Route path="qa" element={<RequireRole allowedRoles={['qa_chair']}><QADashboard /></RequireRole>} />
+                <Route path="qa/exit-review" element={<RequireRole allowedRoles={['qa_chair']}><ExitCaseReview /></RequireRole>} />
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="h-10 w-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-semibold text-slate-900 mb-1">Meeting & Records</h3>
-            <p className="text-xs text-slate-500">Track scheduled appointments, log meeting notes, action items, and student progress over time.</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="h-10 w-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-semibold text-slate-900 mb-1">QA Reporting & Analytics</h3>
-            <p className="text-xs text-slate-500">Generate AUN-QA compliance reports, analytical charts, and exportable Excel/CSV summaries.</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
-            <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <h3 className="text-base font-semibold text-slate-900 mb-1">Privacy & Data Security</h3>
-            <p className="text-xs text-slate-500">Strict ID-based access controls and encrypted database storage with Cloudflare D1.</p>
-          </div>
-        </div>
-
-        {/* Tech Stack Status Section */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-indigo-600" />
-            Active Architecture & Tech Stack Setup
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium">
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Frontend</span>
-              React + Vite + TypeScript
-            </div>
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Styling</span>
-              Tailwind CSS + shadcn/ui
-            </div>
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Backend</span>
-              Cloudflare Workers + Hono
-            </div>
-            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Database</span>
-              Cloudflare D1 + Drizzle ORM
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+                {/* Admin Routes */}
+                <Route path="admin" element={<RequireRole allowedRoles={['admin']}><AdminDashboard /></RequireRole>} />
+                <Route path="admin/users" element={<RequireRole allowedRoles={['admin']}><UserManagement /></RequireRole>} />
+                <Route path="admin/roster" element={<RequireRole allowedRoles={['admin']}><Roster /></RequireRole>} />
+                <Route path="admin/categories" element={<RequireRole allowedRoles={['admin']}><Categories /></RequireRole>} />
+                <Route path="admin/document-types" element={<RequireRole allowedRoles={['admin']}><DocumentTypes /></RequireRole>} />
+                <Route path="admin/audit-logs" element={<RequireRole allowedRoles={['admin']}><AuditLogs /></RequireRole>} />
+              </Route>
+            </Routes>
+            <ToastContainer />
+          </ToastProvider>
+        </AuthProvider>
+      </StoreProvider>
+    </BrowserRouter>
   )
 }
