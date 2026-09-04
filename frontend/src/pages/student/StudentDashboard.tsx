@@ -67,19 +67,19 @@ export default function StudentDashboard() {
         <div className="lg:col-span-2 space-y-6">
           {/* Upcoming Appointment */}
           <Card>
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-sky-600" /> {t('ตารางนัดหมายที่ได้รับการยืนยัน', 'Confirmed Upcoming Appointment')}
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ตารางนัดหมายที่ได้รับการยืนยัน', 'Confirmed Upcoming Appointment')}
               </h3>
               {upcomingAppointment && (
-                <span className="text-[11px] font-semibold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">
+                <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-0.5 rounded-full border border-sky-100 dark:border-sky-800">
                   {t('ภาคการศึกษา 1/2569', 'Semester 1/2026')}
                 </span>
               )}
             </div>
 
             {upcomingAppointment ? (
-              <div className="p-4 bg-sky-50/40 border border-sky-200/60 rounded-2xl">
+              <div className="p-4 bg-sky-50/40 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/60 rounded-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-start gap-3.5">
                     <div className="h-11 w-11 rounded-xl bg-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
@@ -87,14 +87,14 @@ export default function StudentDashboard() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-slate-900">{upcomingAppointment.scheduledDate}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{upcomingAppointment.scheduledDate}</p>
                         <StatusBadge status={upcomingAppointment.status} />
                       </div>
-                      <p className="text-xs text-slate-600 mt-1 flex items-center gap-2 font-medium">
-                        <span className="flex items-center gap-1 text-sky-700 font-semibold">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 flex items-center gap-2 font-medium">
+                        <span className="flex items-center gap-1 text-sky-700 dark:text-sky-400 font-semibold">
                           <Clock className="h-3.5 w-3.5" /> {upcomingAppointment.scheduledTime}
                         </span>
-                        <span className="text-slate-300">·</span>
+                        <span className="text-slate-300 dark:text-slate-600">·</span>
                         <span>{t('สถานที่:', 'Location:')} {upcomingAppointment.location}</span>
                       </p>
                     </div>
@@ -119,40 +119,40 @@ export default function StudentDashboard() {
 
           {/* Recent Advising Requests Table (REG MFU Academic Table Style) */}
           <Card>
-            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-sky-600" /> {t('ประวัติคำร้องขอรับคำปรึกษาล่าสุด', 'Recent Advising Petitions')}
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประวัติคำร้องขอรับคำปรึกษาล่าสุด', 'Recent Advising Petitions')}
               </h3>
-              <Button size="sm" variant="ghost" onClick={() => navigate('/student/history')} className="text-xs text-sky-600">
+              <Button size="sm" variant="ghost" onClick={() => navigate('/student/history')} className="text-xs text-sky-600 dark:text-sky-400">
                 {t('ดูทั้งหมด', 'View All')} <ArrowRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
 
             {myRequests.length > 0 ? (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {myRequests.slice(0, 4).map(req => {
                   const catLabel = getCategoryLabel(req.category)
                   return (
                     <div
                       key={req.id}
                       onClick={() => navigate(`/student/history/${req.id}`)}
-                      className="py-3.5 px-2 hover:bg-sky-50/30 rounded-xl transition-all duration-150 cursor-pointer flex items-center justify-between gap-4 group"
+                      className="py-3.5 px-2 hover:bg-sky-50/30 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-150 cursor-pointer flex items-center justify-between gap-4 group"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
                             {req.id}
                           </span>
-                          <p className="text-xs sm:text-sm font-bold text-slate-900 truncate group-hover:text-sky-900">
+                          <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-sky-900 dark:group-hover:text-sky-300">
                             {catLabel}
                           </p>
                         </div>
-                        <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{req.details}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">{t('ยื่นคำร้องเมื่อ:', 'Submitted on:')} {req.createdAt}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">{req.details}</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">{t('ยื่นคำร้องเมื่อ:', 'Submitted on:')} {req.createdAt}</p>
                       </div>
                       <div className="flex-shrink-0 flex items-center gap-2">
                         <StatusBadge status={req.status} />
-                        <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-sky-600 group-hover:translate-x-0.5 transition-all" />
+                        <ArrowRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-sky-600 dark:group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all" />
                       </div>
                     </div>
                   )
@@ -168,11 +168,11 @@ export default function StudentDashboard() {
         <div className="space-y-6">
           {/* Pending Follow-ups */}
           <Card>
-            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <ListChecks className="h-4 w-4 text-sky-600" /> {t('งานที่ต้องดำเนินการ', 'Assigned Action Items')}
+            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <ListChecks className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('งานที่ต้องดำเนินการ', 'Assigned Action Items')}
               </h3>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
                 {myFollowUps.length} {t('รายการ', 'Items')}
               </span>
             </div>
@@ -180,10 +180,10 @@ export default function StudentDashboard() {
             {myFollowUps.length > 0 ? (
               <div className="space-y-2.5">
                 {myFollowUps.slice(0, 4).map(fu => (
-                  <div key={fu.id} className="p-3 bg-slate-50/80 border border-slate-200/70 rounded-xl hover:border-sky-200 transition-all">
-                    <p className="text-xs font-bold text-slate-900">{fu.task}</p>
-                    <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200/50">
-                      <span className="text-[10px] text-slate-500 font-medium">{t('กำหนดส่ง:', 'Due:')} {fu.dueDate}</span>
+                  <div key={fu.id} className="p-3 bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 rounded-xl hover:border-sky-200 dark:hover:border-sky-800 transition-all">
+                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{fu.task}</p>
+                    <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200/50 dark:border-slate-700/60">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{t('กำหนดส่ง:', 'Due:')} {fu.dueDate}</span>
                       <StatusBadge status={fu.status} />
                     </div>
                   </div>
@@ -195,34 +195,34 @@ export default function StudentDashboard() {
             ) : (
               <div className="py-6 text-center">
                 <CheckCircle2 className="h-7 w-7 text-emerald-500 mx-auto mb-2 opacity-80" />
-                <p className="text-xs font-semibold text-slate-700">{t('ไม่มีงานค้างที่ต้องส่ง', 'All tasks completed')}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">{t('คุณได้ปฏิบัติตามคำแนะนำครบถ้วนแล้ว', 'You have no pending advisor action items.')}</p>
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{t('ไม่มีงานค้างที่ต้องส่ง', 'All tasks completed')}</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{t('คุณได้ปฏิบัติตามคำแนะนำครบถ้วนแล้ว', 'You have no pending advisor action items.')}</p>
               </div>
             )}
           </Card>
 
           {/* Academic Notices / Notifications */}
           <Card>
-            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Bell className="h-4 w-4 text-sky-600" /> {t('ประกาศและการแจ้งเตือน', 'System Notices')}
+            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Bell className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประกาศและการแจ้งเตือน', 'System Notices')}
               </h3>
             </div>
 
             {myNotifications.length > 0 ? (
               <div className="space-y-2.5">
                 {myNotifications.slice(0, 4).map(n => (
-                  <div key={n.id} className="p-3 bg-sky-50/40 border border-sky-100 rounded-xl">
+                  <div key={n.id} className="p-3 bg-sky-50/40 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/60 rounded-xl">
                     <div className="flex items-start justify-between gap-1">
-                      <p className="text-xs font-bold text-slate-900">{n.title}</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{n.title}</p>
                       <span className="h-1.5 w-1.5 rounded-full bg-sky-500 flex-shrink-0 mt-1" />
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-400 py-6 text-center font-medium">{t('ไม่มีข้อความแจ้งเตือนใหม่', 'No new notifications')}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center font-medium">{t('ไม่มีข้อความแจ้งเตือนใหม่', 'No new notifications')}</p>
             )}
           </Card>
         </div>

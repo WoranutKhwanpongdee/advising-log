@@ -21,17 +21,17 @@ export default function UserManagement() {
       header: t('ชื่อ-นามสกุล', 'Full Name'),
       render: (u: User) => (
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs flex-shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-xs flex-shrink-0">
             {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-900">{u.name}</p>
-            <p className="text-[11px] text-slate-400 font-mono">{u.email}</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{u.name}</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-400 font-mono">{u.email}</p>
           </div>
         </div>
       ),
     },
-    { key: 'code', header: t('รหัสประจำตัว', 'User ID / Code'), render: (u: User) => <span className="text-xs font-mono text-slate-600 font-medium">{u.code}</span> },
+    { key: 'code', header: t('รหัสประจำตัว', 'User ID / Code'), render: (u: User) => <span className="text-xs font-mono text-slate-600 dark:text-slate-300 font-medium">{u.code}</span> },
     {
       key: 'role',
       header: t('บทบาทในระบบ', 'System Role'),
@@ -44,13 +44,13 @@ export default function UserManagement() {
         }
         const r = roleLabels[u.role] || { th: u.role, en: u.role }
         return (
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700">
+          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-slate-700 dark:text-slate-200">
             {t(r.th, r.en)}
           </span>
         )
       },
     },
-    { key: 'dept', header: t('สำนักวิชา / ส่วนงาน', 'Department'), render: (u: User) => <span className="text-xs text-slate-600">{u.department || '—'}</span> },
+    { key: 'dept', header: t('สำนักวิชา / ส่วนงาน', 'Department'), render: (u: User) => <span className="text-xs text-slate-600 dark:text-slate-300">{u.department || '—'}</span> },
     { key: 'status', header: t('สถานะ', 'Status'), render: (u: User) => <StatusBadge status={u.isActive ? 'active' : 'inactive'} /> },
     {
       key: 'actions',

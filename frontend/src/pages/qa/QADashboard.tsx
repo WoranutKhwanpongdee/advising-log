@@ -181,7 +181,7 @@ export default function QADashboard() {
             {/* Category Distribution */}
             <Card>
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-sky-600" /> {t('สัดส่วนหัวข้อการขอคำปรึกษา', 'Advising Distribution by Topic')}
+                <BarChart3 className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('สัดส่วนหัวข้อการขอคำปรึกษา', 'Advising Distribution by Topic')}
               </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -209,7 +209,7 @@ export default function QADashboard() {
             {/* Exit Reason Distribution */}
             <Card>
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <UserX className="h-4 w-4 text-rose-600" /> {t('สัดส่วนสาเหตุการขอลาออกและลาพัก', 'Exit & Leave Cases by Category')}
+                <UserX className="h-4 w-4 text-rose-600 dark:text-rose-400" /> {t('สัดส่วนสาเหตุการขอลาออกและลาพัก', 'Exit & Leave Cases by Category')}
               </h3>
               <div className="h-64">
                 {exitData.length > 0 ? (
@@ -252,7 +252,7 @@ export default function QADashboard() {
           {/* Advisor Workload */}
           <Card>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-              <CalendarClock className="h-4 w-4 text-sky-600" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
+              <CalendarClock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
             </h3>
             <div className="h-60">
               <ResponsiveContainer width="100%" height="100%">
@@ -321,7 +321,7 @@ export default function QADashboard() {
           {/* Primary Factors Chart */}
           <Card>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-sky-600" />
+              <BarChart3 className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               {t('ปัจจัยสำคัญที่นักศึกษาระบุว่าส่งผลต่อการลาออก / ลาพัก', 'Key Contributing Factors from Student Voice')}
             </h3>
             <div className="h-64">
@@ -355,7 +355,7 @@ export default function QADashboard() {
           {/* Qualitative Feedback Cards */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Quote className="h-4 w-4 text-sky-600" />
+              <Quote className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               {t('เสียงสะท้อนและความคิดเห็นของนักศึกษา (Verbatim Qualitative Feedback)', 'Verbatim Student Voice Quotes')}
             </h3>
 
@@ -433,4 +433,3 @@ export default function QADashboard() {
     </div>
   )
 }
-

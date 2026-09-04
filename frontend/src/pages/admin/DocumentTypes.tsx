@@ -21,10 +21,10 @@ export default function DocumentTypes() {
       header: t('ชื่อเอกสาร / แบบฟอร์ม', 'Document Name'),
       render: (d: DocumentType) => (
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center flex-shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 flex items-center justify-center flex-shrink-0">
             <FileText className="h-4 w-4" />
           </div>
-          <span className="text-xs sm:text-sm font-semibold text-slate-900">{d.name}</span>
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{d.name}</span>
         </div>
       ),
     },
@@ -32,7 +32,7 @@ export default function DocumentTypes() {
       key: 'signature',
       header: t('รูปแบบการลงนาม', 'Validation Method'),
       render: (d: DocumentType) => (
-        <span className="text-xs font-medium text-slate-700">
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
           {d.signatureMethod === 'wet_signature' ? t('ลงนามด้วยตนเอง (ส่งเอกสารฉบับจริง)', 'Wet Signature (Physical Submission)') : t('ลงนามดิจิทัล (ยืนยันผ่านระบบ)', 'E-Signature (Digital Confirmation)')}
         </span>
       ),

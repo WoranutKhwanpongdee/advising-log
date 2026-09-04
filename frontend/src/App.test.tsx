@@ -76,7 +76,7 @@ describe('App component', () => {
       </ThemeProvider>
     )
 
-    const toggleButton = screen.getByRole('button')
+    const toggleButton = screen.getByRole('button', { name: /เปลี่ยนเป็นโหมด|Switch to/i })
     expect(toggleButton).toBeInTheDocument()
 
     // Clicking toggles theme instantly

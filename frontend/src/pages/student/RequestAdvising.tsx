@@ -102,13 +102,13 @@ export default function RequestAdvising() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Advisor info banner */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-premium flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 flex-shrink-0">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-premium flex items-center gap-3.5">
+          <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-sky-600 dark:text-sky-400 flex-shrink-0">
             <User className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('อาจารย์ที่ปรึกษาที่รับผิดชอบ', 'Assigned Advisor')}</p>
-            <p className="text-sm font-bold text-slate-900 mt-0.5">
+            <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('อาจารย์ที่ปรึกษาที่รับผิดชอบ', 'Assigned Advisor')}</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
               {advisor ? `${advisor.name} · ${advisor.department || 'School of IT'}` : t('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา', 'No assigned advisor')}
             </p>
           </div>
@@ -117,13 +117,13 @@ export default function RequestAdvising() {
         <Card className="space-y-5">
           {/* Category */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('หมวดหมู่คำปรึกษา', 'Advising Category')} <span className="text-rose-500">*</span>
             </label>
             <select
               value={category}
               onChange={e => { setCategory(e.target.value as AdvisingCategory); setSubCategory('') }}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
             >
               <option value="">{t('-- กรุณาเลือกหมวดหมู่ --', 'Select a category')}</option>
               {ADVISING_CATEGORIES.map(c => (
@@ -135,13 +135,13 @@ export default function RequestAdvising() {
           {/* Sub-category */}
           {subCategories.length > 0 && (
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('หัวข้อย่อย', 'Sub-category')} <span className="text-slate-400 font-normal">({t('ไม่บังคับ', 'Optional')})</span>
               </label>
               <select
                 value={subCategory}
                 onChange={e => setSubCategory(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
               >
                 <option value="">{t('-- เลือกหัวข้อย่อย --', 'Select specific topic')}</option>
                 {subCategories.map(sc => (
@@ -153,7 +153,7 @@ export default function RequestAdvising() {
 
           {/* Details */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('หัวข้อ / รายละเอียดที่ต้องการปรึกษา', 'Problem / Advising Details')} <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -161,50 +161,50 @@ export default function RequestAdvising() {
               onChange={e => setDetails(e.target.value)}
               rows={4}
               placeholder={t('ระบุคำถาม ปัญหาที่พบ หรือประเด็นที่ต้องการปรึกษาอาจารย์...', 'Describe your questions, topics to discuss, or issues you are experiencing...')}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs resize-none leading-relaxed"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs resize-none leading-relaxed"
             />
           </div>
 
           {/* Date and Time */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('วันที่สะดวกเข้าพบ', 'Preferred Date')} <span className="text-rose-500">*</span>
               </label>
               <input
                 type="date"
                 value={preferredDate}
                 onChange={e => setPreferredDate(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
               />
             </div>
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('เวลาที่สะดวกเข้าพบ', 'Preferred Time')} <span className="text-rose-500">*</span>
               </label>
               <input
                 type="time"
                 value={preferredTime}
                 onChange={e => setPreferredTime(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
               />
             </div>
           </div>
 
           {/* Attachments */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('เอกสารประกอบ (ถ้ามี)', 'Supporting Documents')}
             </label>
             <div className="flex flex-wrap gap-2 mb-2.5">
               {attachments.map((f, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-50 border border-sky-100 rounded-lg text-xs font-medium text-sky-800">
+                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 rounded-lg text-xs font-medium text-sky-800 dark:text-sky-300">
                   <Paperclip className="h-3 w-3" />
                   {f}
                   <button
                     type="button"
                     onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-sky-400 hover:text-sky-700 ml-0.5 cursor-pointer"
+                    className="text-sky-400 hover:text-sky-700 dark:hover:text-sky-200 ml-0.5 cursor-pointer"
                   >
                     &times;
                   </button>
@@ -217,17 +217,17 @@ export default function RequestAdvising() {
           </div>
 
           {/* PDPA Consent */}
-          <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-xl">
+          <div className="p-4 bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={pdpaConsent}
                 onChange={e => setPdpaConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500/30 accent-sky-600"
+                className="mt-0.5 h-4 w-4 text-sky-600 border-slate-300 dark:border-slate-600 rounded focus:ring-sky-500/30 accent-sky-600"
               />
-              <span className="text-xs text-slate-600 leading-relaxed">
-                <span className="font-semibold text-slate-900 flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-sky-600 inline" /> {t('ความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)', 'PDPA / Privacy & Advising Consent')} <span className="text-rose-500">*</span>
+              <span className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1">
+                  <ShieldCheck className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 inline" /> {t('ความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)', 'PDPA / Privacy & Advising Consent')} <span className="text-rose-500">*</span>
                 </span>
                 {t(
                   'ข้าพเจ้ายินยอมให้อาจารย์ที่ปรึกษาและมหาวิทยาลัยเก็บรวบรวมและใช้ข้อมูลทางการศึกษาเพื่อประโยชน์ในการให้คำปรึกษาทางวิชาการตามนโยบายคุ้มครองข้อมูลส่วนบุคคล',

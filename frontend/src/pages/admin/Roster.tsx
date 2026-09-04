@@ -58,7 +58,7 @@ export default function Roster() {
       key: 'studentCode',
       header: t('รหัสนักศึกษา', 'Student ID'),
       render: (r: StudentAdvisorAssignment) => (
-        <span className="text-xs font-mono font-semibold text-slate-700">
+        <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300">
           {store.users.find(u => u.id === r.studentId)?.code}
         </span>
       ),
@@ -67,7 +67,7 @@ export default function Roster() {
       key: 'studentName',
       header: t('ชื่อ-นามสกุล นักศึกษา', 'Student Name'),
       render: (r: StudentAdvisorAssignment) => (
-        <span className="text-xs sm:text-sm font-semibold text-slate-900">
+        <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
           {store.users.find(u => u.id === r.studentId)?.name}
         </span>
       ),
@@ -76,7 +76,7 @@ export default function Roster() {
       key: 'advisor',
       header: t('อาจารย์ที่ปรึกษาที่ดูแล', 'Assigned Faculty Advisor'),
       render: (r: StudentAdvisorAssignment) => (
-        <span className="text-xs text-sky-800 font-medium bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
+        <span className="text-xs text-sky-800 dark:text-sky-300 font-medium bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-800">
           {store.users.find(u => u.id === r.advisorId)?.name}
         </span>
       ),
@@ -85,7 +85,7 @@ export default function Roster() {
       key: 'date',
       header: t('วันที่มอบหมาย', 'Assignment Date'),
       render: (r: StudentAdvisorAssignment) => (
-        <span className="text-xs text-slate-500 font-medium">{r.assignedAt}</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{r.assignedAt}</span>
       ),
     },
     {
@@ -111,7 +111,7 @@ export default function Roster() {
         actions={
           <div className="flex items-center gap-2">
             <Button variant="secondary" onClick={handleImport}>
-              <Upload className="h-4 w-4 mr-1.5 text-slate-500" /> {t('นำเข้าไฟล์ CSV', 'Import CSV')}
+              <Upload className="h-4 w-4 mr-1.5 text-slate-500 dark:text-slate-400" /> {t('นำเข้าไฟล์ CSV', 'Import CSV')}
             </Button>
             <Button onClick={() => { setSelectedStudent(''); setSelectedAdvisor(''); setShowAssign(true) }}>
               <Plus className="h-4 w-4 mr-1.5" /> {t('กำหนดที่ปรึกษา', 'Assign Advisor')}
@@ -127,28 +127,28 @@ export default function Roster() {
       <Modal isOpen={showAssign} onClose={() => setShowAssign(false)} title={t('จับคู่นักศึกษากับอาจารย์ที่ปรึกษา', 'Assign Student to Advisor')} size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('นักศึกษา', 'Student')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('นักศึกษา', 'Student')} *</label>
             <select
               value={selectedStudent}
               onChange={e => setSelectedStudent(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
               <option value="">{t('-- เลือกนักศึกษา --', 'Select student')}</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('อาจารย์ที่ปรึกษา', 'Assigned Faculty Advisor')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('อาจารย์ที่ปรึกษา', 'Assigned Faculty Advisor')} *</label>
             <select
               value={selectedAdvisor}
               onChange={e => setSelectedAdvisor(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
               <option value="">{t('-- เลือกอาจารย์ที่ปรึกษา --', 'Select advisor')}</option>
               {advisors.map(a => <option key={a.id} value={a.id}>{a.name} ({a.department})</option>)}
             </select>
           </div>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => setShowAssign(false)}>{t('ยกเลิก', 'Cancel')}</Button>
             <Button variant="primary" onClick={handleAssign}>{t('บันทึกการจับคู่', 'Save Assignment')}</Button>
           </div>

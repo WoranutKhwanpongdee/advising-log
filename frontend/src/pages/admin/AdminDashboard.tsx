@@ -48,47 +48,47 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <ScrollText className="h-4 w-4 text-sky-600" /> {t('ประวัติการทำงานล่าสุดของระบบ', 'Recent System Audit Activity')}
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <ScrollText className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประวัติการทำงานล่าสุดของระบบ', 'Recent System Audit Activity')}
           </h3>
           <Timeline items={recentActivity} />
         </Card>
 
         <div className="space-y-6">
           <Card>
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" /> {t('สถานะโครงสร้างพื้นฐานระบบ', 'Infrastructure & Integration Health')}
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> {t('สถานะโครงสร้างพื้นฐานระบบ', 'Infrastructure & Integration Health')}
             </h3>
             <div className="space-y-3 pt-2">
-              <div className="flex justify-between items-center text-xs sm:text-sm border-b border-slate-100 pb-2.5">
-                <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <Database className="h-4 w-4 text-sky-600" /> Cloudflare D1 Database
+              <div className="flex justify-between items-center text-xs sm:text-sm border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+                  <Database className="h-4 w-4 text-sky-600 dark:text-sky-400" /> Cloudflare D1 Database
                 </span>
-                <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full text-xs border border-emerald-100">
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-50 dark:bg-emerald-500/12 px-2.5 py-0.5 rounded-full text-xs border border-emerald-100 dark:border-emerald-500/25">
                   {t('ปกติ (Healthy)', 'Healthy')}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs sm:text-sm border-b border-slate-100 pb-2.5">
-                <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <Server className="h-4 w-4 text-sky-600" /> In-Memory State & React Store
+              <div className="flex justify-between items-center text-xs sm:text-sm border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+                  <Server className="h-4 w-4 text-sky-600 dark:text-sky-400" /> In-Memory State & React Store
                 </span>
-                <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full text-xs border border-emerald-100">
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-50 dark:bg-emerald-500/12 px-2.5 py-0.5 rounded-full text-xs border border-emerald-100 dark:border-emerald-500/25">
                   {t('ซิงค์ข้อมูลแล้ว', 'Synchronized')}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs sm:text-sm border-b border-slate-100 pb-2.5">
-                <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <Server className="h-4 w-4 text-sky-600" /> Workers API Gateway (Hono)
+              <div className="flex justify-between items-center text-xs sm:text-sm border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+                  <Server className="h-4 w-4 text-sky-600 dark:text-sky-400" /> Workers API Gateway (Hono)
                 </span>
-                <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full text-xs border border-emerald-100">
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-50 dark:bg-emerald-500/12 px-2.5 py-0.5 rounded-full text-xs border border-emerald-100 dark:border-emerald-500/25">
                   {t('ออนไลน์', 'Online')}
                 </span>
               </div>
               <div className="flex justify-between items-center text-xs sm:text-sm pt-1">
-                <span className="text-slate-600 font-medium flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-sky-600" /> Notification Queue (Simulated)
+                <span className="text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-sky-600 dark:text-sky-400" /> Notification Queue (Simulated)
                 </span>
-                <span className="text-sky-700 font-semibold bg-sky-50 px-2 py-0.5 rounded-full text-xs border border-sky-100">
+                <span className="text-sky-700 dark:text-sky-300 font-semibold bg-sky-50 dark:bg-sky-500/12 px-2.5 py-0.5 rounded-full text-xs border border-sky-100 dark:border-sky-500/25">
                   {t('ทำงานอยู่', 'Active')}
                 </span>
               </div>

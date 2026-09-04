@@ -98,8 +98,8 @@ export default function AdvisingSessions() {
         const s = store.users.find(u => u.id === r.studentId)
         return (
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-900">{s?.name}</p>
-            <p className="text-[11px] font-mono text-slate-400">{s?.code}</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{s?.name}</p>
+            <p className="text-[11px] font-mono text-slate-400 dark:text-slate-500">{s?.code}</p>
           </div>
         )
       },
@@ -108,7 +108,7 @@ export default function AdvisingSessions() {
       key: 'category',
       header: t('หมวดหมู่', 'Category'),
       render: (r: AdvisingRequest) => (
-        <span className="text-xs font-semibold text-slate-800">
+        <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
           {getCategoryLabel(r.category)}
         </span>
       ),
@@ -116,13 +116,13 @@ export default function AdvisingSessions() {
     {
       key: 'date',
       header: t('วันที่ยื่นคำร้อง', 'Requested Date'),
-      render: (r: AdvisingRequest) => <span className="text-xs text-slate-500 font-medium">{r.createdAt}</span>,
+      render: (r: AdvisingRequest) => <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{r.createdAt}</span>,
     },
     {
       key: 'preferred',
       header: t('เวลาที่สะดวก', 'Preferred Slot'),
       render: (r: AdvisingRequest) => (
-        <span className="text-xs text-slate-600">
+        <span className="text-xs text-slate-600 dark:text-slate-300">
           {r.preferredDate} · {r.preferredTime}
         </span>
       ),
@@ -144,7 +144,7 @@ export default function AdvisingSessions() {
           )}
           {(r.status === 'requested' || r.status === 'pending') && (
             <Button size="sm" variant="secondary" onClick={() => { setSelectedReq(r); setShowSchedule(true) }}>
-              <Calendar className="h-3 w-3 mr-1 text-sky-600" /> {t('นัดหมาย', 'Schedule')}
+              <Calendar className="h-3 w-3 mr-1 text-sky-600 dark:text-sky-400" /> {t('นัดหมาย', 'Schedule')}
             </Button>
           )}
           {r.status === 'scheduled' && (
@@ -175,34 +175,34 @@ export default function AdvisingSessions() {
       <Modal isOpen={showSchedule} onClose={() => setShowSchedule(false)} title={t('นัดหมายเวลาเข้าพบอาจารย์ที่ปรึกษา', 'Schedule Advising Appointment')} size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('วันที่นัดหมาย', 'Appointment Date')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('วันที่นัดหมาย', 'Appointment Date')} *</label>
             <input
               type="date"
               value={schedDate}
               onChange={e => setSchedDate(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('เวลานัดหมาย', 'Appointment Time')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('เวลานัดหมาย', 'Appointment Time')} *</label>
             <input
               type="time"
               value={schedTime}
               onChange={e => setSchedTime(e.target.value)}
-              className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('สถานที่ / ห้องเข้าพบ', 'Location / Meeting Room')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('สถานที่ / ห้องเข้าพบ', 'Location / Meeting Room')} *</label>
             <input
               type="text"
               value={schedLoc}
               onChange={e => setSchedLoc(e.target.value)}
               placeholder={t('เช่น ห้องพักอาจารย์ S2-301 หรือ Zoom Online', 'e.g. Office Room S2-301 or Online (Zoom)')}
-              className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 placeholder-slate-400"
+              className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors"
             />
           </div>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => setShowSchedule(false)}>{t('ยกเลิก', 'Cancel')}</Button>
             <Button variant="primary" onClick={handleSchedule}>{t('ยืนยันนัดหมาย', 'Confirm Schedule')}</Button>
           </div>

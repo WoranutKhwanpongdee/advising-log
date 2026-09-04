@@ -130,9 +130,9 @@ export default function ExitForm() {
         description={t('ยื่นคำร้องอย่างเป็นทางการสำหรับการขอลาพักการศึกษา ลาออก หรือโอนย้ายสถานศึกษา', 'Submit an official request for withdrawal, leave of absence, or university transfer.')}
       />
 
-      <div className="mb-5 p-4 bg-amber-50/60 border border-amber-200/70 rounded-2xl flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-800 leading-relaxed font-medium">
+      <div className="mb-5 p-4 bg-amber-50/60 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 rounded-2xl flex items-start gap-3">
+        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed font-medium">
           {t(
             'ก่อนยื่นคำร้องขอลาพักหรือลาออก มหาวิทยาลัยแนะนำให้นักศึกษาเข้าพบและปรึกษาอาจารย์ที่ปรึกษาก่อน เพื่อรับทราบแนวทางการช่วยเหลือและทางเลือกอื่นทางวิชาการ',
             'Before submitting an exit or leave request, we strongly encourage speaking with your faculty advisor to discuss support options and alternative academic plans.'
@@ -143,13 +143,13 @@ export default function ExitForm() {
       <Card>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('ประเภทคำร้อง', 'Exit Type')} <span className="text-rose-500">*</span>
             </label>
             <select
               value={exitType}
               onChange={e => setExitType(e.target.value as ExitType)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
             >
               <option value="">{t('-- เลือกประเภท --', 'Select type')}</option>
               <option value="withdrawal">{t('ขอลาออกจากการเป็นนักศึกษา', 'Withdrawal / Drop Out')}</option>
@@ -159,13 +159,13 @@ export default function ExitForm() {
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('สาเหตุหลัก', 'Primary Reason')} <span className="text-rose-500">*</span>
             </label>
             <select
               value={reasonCode}
               onChange={e => setReasonCode(e.target.value as ExitReasonCode)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
             >
               <option value="">{t('-- เลือกสาเหตุ --', 'Select reason')}</option>
               {EXIT_REASON_CODES.map(r => (
@@ -175,7 +175,7 @@ export default function ExitForm() {
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('รายละเอียดและเหตุผลประกอบ', 'Details & Context')} <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -183,41 +183,41 @@ export default function ExitForm() {
               onChange={e => setDetails(e.target.value)}
               rows={4}
               placeholder={t('อธิบายเหตุผล ความจำเป็น และสถานการณ์ประกอบการพิจารณา...', 'Explain your circumstances and rationale in detail...')}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs resize-none leading-relaxed"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs resize-none leading-relaxed"
             />
           </div>
 
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
               {t('วันที่มีผลตามความประสงค์', 'Preferred Effective Date')} <span className="text-rose-500">*</span>
             </label>
             <input
               type="date"
               value={effectiveDate}
               onChange={e => setEffectiveDate(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
             />
           </div>
 
-          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 cursor-pointer">
+          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-sky-100 dark:border-sky-800/80 bg-sky-50/50 dark:bg-sky-950/40 cursor-pointer">
             <input
               type="checkbox"
               checked={dataAnalysisConsent}
               onChange={e => setDataAnalysisConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-sky-600 focus:ring-sky-500 accent-sky-600"
             />
-            <span className="text-xs text-slate-700 leading-relaxed">
-              <span className="font-semibold text-slate-900">
-                <ShieldCheck className="inline h-3.5 w-3.5 mr-1 text-sky-600" />
+            <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                <ShieldCheck className="inline h-3.5 w-3.5 mr-1 text-sky-600 dark:text-sky-400" />
                 {t('ยินยอมให้ใช้ข้อมูลเพื่อการวิเคราะห์และปรับปรุงบริการ', 'Consent to data use for analysis and service improvement')} <span className="text-rose-500">*</span>
               </span>
-              <span className="block mt-1 text-slate-500">
+              <span className="block mt-1 text-slate-500 dark:text-slate-400">
                 {t('ข้อมูลจะถูกนำไปใช้ในภาพรวมและปกปิดตัวตนของนักศึกษา โดยไม่กระทบต่อการพิจารณาคำร้อง', 'Your information will be de-identified and used in aggregate for analysis and service improvement. This will not affect your request review.')}
               </span>
             </span>
           </label>
 
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => navigate('/student')}>{t('ยกเลิก', 'Cancel')}</Button>
             <Button type="submit" variant="primary">{t('ยื่นคำร้อง', 'Submit Request')}</Button>
           </div>
