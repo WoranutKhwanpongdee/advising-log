@@ -76,7 +76,7 @@ describe('App component', () => {
       </ThemeProvider>
     )
 
-    const toggleButton = screen.getByLabelText('Toggle theme')
+    const toggleButton = screen.getByRole('button')
     expect(toggleButton).toBeInTheDocument()
 
     // Clicking toggles theme instantly
@@ -92,4 +92,5 @@ describe('App component', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 })
+
 

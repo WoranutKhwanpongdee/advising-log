@@ -112,6 +112,7 @@ export type AuditAction =
   | 'document_signed'
   | 'exit_case_created'
   | 'exit_case_updated'
+  | 'student_voice_submitted'
   | 'warning_created'
   | 'qa_viewed_case'
   | 'qa_exported_data'
@@ -295,6 +296,29 @@ export interface SatisfactionSurvey {
   studentId: string
   rating: number  // 1-5
   feedback: string
+  createdAt: string
+}
+
+export interface StudentVoiceResponse {
+  id: string
+  exitCaseId?: string
+  studentId?: string
+  studentCode?: string
+  isAnonymous: boolean
+  exitType: ExitType
+  academicYear: string
+  primaryFactors: string[]
+  ratings: {
+    curriculumRelevance: number
+    teachingQuality: number
+    advisorSupport: number
+    universityServices: number
+    overallExperience: number
+  }
+  whatCouldUniversityDoBetter: string
+  curriculumImprovementSuggestions: string
+  adviceForFutureStudents: string
+  shareWithAdvisor: boolean
   createdAt: string
 }
 

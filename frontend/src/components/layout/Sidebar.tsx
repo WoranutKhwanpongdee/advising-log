@@ -24,6 +24,7 @@ import {
   GraduationCap,
   X,
   Sparkles,
+  MessageSquareHeart,
 } from 'lucide-react'
 
 interface NavItem {
@@ -47,6 +48,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           { to: '/student/documents', label: t('เอกสารที่เกี่ยวข้อง', 'Documents'), icon: <FileText className="h-4 w-4" /> },
           { to: '/student/followups', label: t('งานที่ต้องดำเนินการ', 'Follow-ups'), icon: <ListChecks className="h-4 w-4" /> },
           { to: '/student/exit', label: t('ยื่นคำร้องลาพัก/ลาออก', 'Exit & Leave'), icon: <LogOutIcon className="h-4 w-4" /> },
+          { to: '/student/voice', label: t('เสียงของนักศึกษา', 'Student Voice'), icon: <MessageSquareHeart className="h-4 w-4" /> },
         ]
       case 'advisor':
         return [

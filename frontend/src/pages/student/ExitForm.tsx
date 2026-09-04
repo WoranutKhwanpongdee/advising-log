@@ -25,6 +25,8 @@ export default function ExitForm() {
   const [effectiveDate, setEffectiveDate] = useState('')
   const [dataAnalysisConsent, setDataAnalysisConsent] = useState(false)
 
+  const [submittedCaseId, setSubmittedCaseId] = useState<string | null>(null)
+
   if (!currentUser) return null
 
   const rosterEntry = store.roster.find(r => r.studentId === currentUser!.id && r.isActive)
@@ -67,7 +69,58 @@ export default function ExitForm() {
       targetId: exitCase.id,
     })
     addToast('success', t('ส่งคำร้องสำเร็จ', 'Exit Form Submitted'), t('ส่งคำร้องไปยังอาจารย์ที่ปรึกษาเพื่อพิจารณาเรียบร้อยแล้ว', 'Your request has been submitted to your advisor for review.'))
-    navigate('/student')
+    setSubmittedCaseId(exitCase.id)
+  }
+
+  if (submittedCaseId) {
+    return (
+      <div className="max-w-2xl mx-auto py-6">
+        <Card className="text-center py-8 px-6 border-sky-200/80 bg-white dark:bg-slate-900 shadow-xl space-y-5">
+          <div className="h-14 w-14 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
+            <ShieldCheck className="h-8 w-8" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+              {t('ยื่นคำร้องขอลาออก / ลาพักเรียบร้อยแล้ว', 'Exit Request Submitted Successfully')}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+              {t('คำร้องของคุณถูกส่งไปยังอาจารย์ที่ปรึกษาเรียบร้อยแล้ว', 'Your request has been forwarded to your advisor.')}
+            </p>
+          </div>
+
+          {/* Student Voice Invitation Banner */}
+          <div className="p-5 bg-sky-50/80 dark:bg-sky-950/60 rounded-2xl border border-sky-200/80 dark:border-sky-800 text-left space-y-2.5">
+            <div className="flex items-center gap-2 text-sky-900 dark:text-sky-200 font-bold text-sm">
+              <span className="p-1 rounded-lg bg-sky-600 text-white text-xs">AUN-QA</span>
+              {t('เสียงของนักศึกษา (กรณีลาออก/พักการศึกษา)', 'Student Voice — Resignation/Leave')}
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {t(
+                'แบบสอบถามโดยสมัครใจ เพื่อให้นักศึกษาเล่าด้วยคำพูดของตนเอง ข้อมูลใช้พัฒนาหลักสูตรเท่านั้นและไม่มีผลต่อกระบวนการลาออก',
+                'Voluntary survey in your own words. Used only to improve the programme and does NOT affect your resignation process.'
+              )}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Button
+              variant="primary"
+              onClick={() => navigate(`/student/voice?caseId=${submittedCaseId}`)}
+              className="w-full sm:w-auto"
+            >
+              {t('ร่วมทำแบบสอบถามเสียงของนักศึกษา', 'Share Your Voice (Voluntary Survey)')}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/student')}
+              className="w-full sm:w-auto"
+            >
+              {t('กลับสู่หน้าหลัก', 'Return to Dashboard')}
+            </Button>
+          </div>
+        </Card>
+      </div>
+    )
   }
 
   return (

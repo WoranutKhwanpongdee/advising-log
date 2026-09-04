@@ -18,6 +18,7 @@ import type {
   EarlyWarningCase,
   ExitCase,
   AdvisorExitAssessment,
+  StudentVoiceResponse,
   AuditLog,
 } from '@/types'
 
@@ -164,11 +165,102 @@ export const mockEarlyWarnings: EarlyWarningCase[] = [
 
 export const mockExitCases: ExitCase[] = [
   { id: 'EX001', studentId: 'STU006', advisorId: 'ADV002', exitType: 'leave_of_absence', reasonCode: 'personal_family', details: 'Student needs to take a temporary leave to care for an ill family member. Plans to return next academic year.', dataAnalysisConsent: true, preferredEffectiveDate: '2026-10-01', status: 'under_review', createdAt: '2026-09-02', updatedAt: '2026-09-03' },
+  { id: 'EX002', studentId: 'STU009', advisorId: 'ADV003', exitType: 'withdrawal', reasonCode: 'academic', details: 'Found programming subjects overly difficult and wishes to pursue a degree in Graphic Design.', dataAnalysisConsent: true, preferredEffectiveDate: '2026-09-30', status: 'under_review', createdAt: '2026-08-29', updatedAt: '2026-09-01' },
 ]
 
 // --- Advisor Exit Assessments ---
 
-export const mockAdvisorAssessments: AdvisorExitAssessment[] = []
+export const mockAdvisorAssessments: AdvisorExitAssessment[] = [
+  {
+    id: 'ASS001',
+    exitCaseId: 'EX001',
+    advisorId: 'ADV002',
+    assessment: 'Conducted 1-on-1 counseling session with student. Valid personal obligation identified. Student possesses strong academic baseline.',
+    contributingFactors: 'Caregiving duty at hometown during parents surgery recovery.',
+    actionsTaken: 'Explained academic leave procedures, verified credit preservation, formulated re-entry study roadmap.',
+    referralsMade: 'Guidance & Counseling Center for emotional support.',
+    followUpAttempts: '2 follow-up calls completed.',
+    recommendation: 'Approve 1-year temporary leave of absence with planned return for Academic Year 2027.',
+    resolution: 'Approved for leave of absence.',
+    createdAt: '2026-09-03',
+  },
+]
+
+// --- Student Voice Voluntary Responses (Resignation / Leave) ---
+
+export const mockStudentVoiceResponses: StudentVoiceResponse[] = [
+  {
+    id: 'SVR001',
+    exitCaseId: 'EX001',
+    studentId: 'STU006',
+    studentCode: '6631503006',
+    isAnonymous: false,
+    exitType: 'leave_of_absence',
+    academicYear: 'Year 2 (ชั้นปีที่ 2)',
+    primaryFactors: [
+      'ภาระครอบครัว / ส่วนตัว (Family & Personal Circumstances)',
+      'ความเครียดและสุขภาพจิต (Mental Health & Stress)',
+    ],
+    ratings: {
+      curriculumRelevance: 4,
+      teachingQuality: 4,
+      advisorSupport: 5,
+      universityServices: 4,
+      overallExperience: 4,
+    },
+    whatCouldUniversityDoBetter: 'อาจารย์ที่ปรึกษา (อ.วิภาวรรณ) ให้ความช่วยเหลือและแนะนำทางเลือกดีมาก แต่ขั้นตอนการยื่นเอกสารขอพักการศึกษาในส่วนกลางของมหาวิทยาลัยค่อนข้างซับซ้อน อยากให้มีระบบออนไลน์ที่เบ็ดเสร็จรวดเร็วกว่านี้',
+    curriculumImprovementSuggestions: 'หลักสูตรเนื้อหาดีมาก อยากให้มีคลิปย้อนหลังสำหรับทบทวนเมื่อนักศึกษากลับมาเรียนต่อหลังจากพักการศึกษา',
+    adviceForFutureStudents: 'หากมีปัญหาเรื่องครอบครัวหรือความเครียด ให้รีบปรึกษาอาจารย์ที่ปรึกษาตั้งแต่เนิ่นๆ อาจารย์พร้อมรับฟังและหาทางออกให้เสมอ',
+    shareWithAdvisor: true,
+    createdAt: '2026-09-02T11:30:00',
+  },
+  {
+    id: 'SVR002',
+    exitCaseId: 'EX002',
+    isAnonymous: true,
+    exitType: 'withdrawal',
+    academicYear: 'Year 1 (ชั้นปีที่ 1)',
+    primaryFactors: [
+      'ความยากของหลักสูตร / ไม่ตรงกับความถนัด (Curriculum Difficulty & Fit)',
+      'การสอนและภาระงาน (Teaching Pace & Workload)',
+      'เป้าหมายอาชีพเปลี่ยนไป (Career Path Redirection)',
+    ],
+    ratings: {
+      curriculumRelevance: 3,
+      teachingQuality: 2,
+      advisorSupport: 4,
+      universityServices: 3,
+      overallExperience: 3,
+    },
+    whatCouldUniversityDoBetter: 'วิชาพื้นฐานการเขียนโปรแกรมในปี 1 มีความเร็วในการสอนค่อนข้างสูงและภาระการบ้านหนักมากสำหรับคนที่ไม่มีพื้นฐานสายคอมพิวเตอร์มาก่อน อยากให้มีวิชาปรับพื้นฐานหรือติวเสริมแบบเข้มข้น',
+    curriculumImprovementSuggestions: 'ควรมี Track หรือวิชาเลือกด้าน Design / UX/UI ที่เน้นปฏิบัติสำหรับคนที่ไม่ถนัดสาย Coding เชิงทฤษฎี',
+    adviceForFutureStudents: 'ควรศึกษาหลักสูตรและวิชาบังคับล่วงหน้า และกล้าสอบถามอาจารย์ผู้สอนตั้งแต่สัปดาห์แรกๆ',
+    shareWithAdvisor: true,
+    createdAt: '2026-08-30T14:15:00',
+  },
+  {
+    id: 'SVR003',
+    isAnonymous: true,
+    exitType: 'withdrawal',
+    academicYear: 'Year 3 (ชั้นปีที่ 3)',
+    primaryFactors: [
+      'ปัญหาทางการเงินและค่าครองชีพ (Financial Hardship)',
+      'โอกาสในการทำงาน / รายได้ (Employment Opportunity)',
+    ],
+    ratings: {
+      curriculumRelevance: 4,
+      teachingQuality: 4,
+      advisorSupport: 4,
+      universityServices: 3,
+      overallExperience: 4,
+    },
+    whatCouldUniversityDoBetter: 'อยากให้มีทุนการศึกษาฉุกเฉินหรือตำแหน่งงาน Part-time ภายในคณะที่เพียงพอกว่านี้ สำหรับนักศึกษาที่มีปัญหาการเงินกะทันหัน',
+    curriculumImprovementSuggestions: 'อยากให้หลักสูตรมีความยืดหยุ่น เช่น การเรียนแบบ Hybrid หรือรายวิชาแบบ Modular ที่สามารถทำงานควบคู่กับการเรียนได้',
+    adviceForFutureStudents: 'วางแผนการเงินและทุนการศึกษาตั้งแต่เนิ่นๆ หากเริ่มมีปัญหาให้ติดต่อหน่วยทุนของสำนักวิชาทันที',
+    shareWithAdvisor: false,
+    createdAt: '2026-08-15T09:45:00',
+  },
+]
 
 // --- Audit Logs ---
 

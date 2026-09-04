@@ -18,6 +18,7 @@ import AdvisingDetail from '@/pages/student/AdvisingDetail'
 import Documents from '@/pages/student/Documents'
 import FollowUps from '@/pages/student/FollowUps'
 import ExitForm from '@/pages/student/ExitForm'
+import StudentVoiceSurvey from '@/pages/student/StudentVoiceSurvey'
 
 // Advisor Pages
 import AdvisorDashboard from '@/pages/advisor/AdvisorDashboard'
@@ -88,6 +89,7 @@ export default function App() {
                     <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
                     <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
                     <Route path="student/exit" element={<RequireRole allowedRoles={['student']}><ExitForm /></RequireRole>} />
+                    <Route path="student/voice" element={<RequireRole allowedRoles={['student']}><StudentVoiceSurvey /></RequireRole>} />
 
                     {/* Advisor Routes */}
                     <Route path="advisor" element={<RequireRole allowedRoles={['advisor']}><AdvisorDashboard /></RequireRole>} />

@@ -14,6 +14,7 @@ import type {
   EarlyWarningCase,
   ExitCase,
   AdvisorExitAssessment,
+  StudentVoiceResponse,
   StudentDocument,
   User,
   StudentAdvisorAssignment,
@@ -31,6 +32,7 @@ import {
   mockEarlyWarnings,
   mockExitCases,
   mockAdvisorAssessments,
+  mockStudentVoiceResponses,
   mockStudentDocuments,
   mockUsers,
   mockRoster,
@@ -64,6 +66,7 @@ interface StoreState {
   earlyWarnings: EarlyWarningCase[]
   exitCases: ExitCase[]
   advisorAssessments: AdvisorExitAssessment[]
+  studentVoiceResponses: StudentVoiceResponse[]
   documents: StudentDocument[]
   categoryConfigs: AdvisingCategoryConfig[]
   documentTypes: DocumentType[]
@@ -105,6 +108,9 @@ interface StoreActions {
 
   // Advisor Assessments
   addAdvisorAssessment: (a: Omit<AdvisorExitAssessment, 'id' | 'createdAt'>) => AdvisorExitAssessment
+
+  // Student Voice Responses
+  addStudentVoiceResponse: (svr: Omit<StudentVoiceResponse, 'id' | 'createdAt'>) => StudentVoiceResponse
 
   // Documents
   addDocument: (doc: Omit<StudentDocument, 'id'>) => StudentDocument
@@ -152,6 +158,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarningCase[]>([...mockEarlyWarnings])
   const [exitCases, setExitCases] = useState<ExitCase[]>([...mockExitCases])
   const [advisorAssessments, setAdvisorAssessments] = useState<AdvisorExitAssessment[]>([...mockAdvisorAssessments])
+  const [studentVoiceResponses, setStudentVoiceResponses] = useState<StudentVoiceResponse[]>([...mockStudentVoiceResponses])
   const [documents, setDocuments] = useState<StudentDocument[]>([...mockStudentDocuments])
   const [categoryConfigs, setCategoryConfigs] = useState<AdvisingCategoryConfig[]>([...mockCategoryConfigs])
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([...mockDocumentTypes])
@@ -243,6 +250,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return newA
   }, [])
 
+  const addStudentVoiceResponse = useCallback((svr: Omit<StudentVoiceResponse, 'id' | 'createdAt'>): StudentVoiceResponse => {
+    const newSvr: StudentVoiceResponse = { ...svr, id: nextId('SVR'), createdAt: new Date().toISOString() }
+    setStudentVoiceResponses(prev => [newSvr, ...prev])
+    return newSvr
+  }, [])
+
   const addDocument = useCallback((doc: Omit<StudentDocument, 'id'>): StudentDocument => {
     const newDoc: StudentDocument = { ...doc, id: nextId('DOC') }
     setDocuments(prev => [newDoc, ...prev])
@@ -293,7 +306,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     users, roster, requests, appointments, sessions, followUps, referrals,
-    notifications, earlyWarnings, exitCases, advisorAssessments, documents,
+    notifications, earlyWarnings, exitCases, advisorAssessments, studentVoiceResponses, documents,
     categoryConfigs, documentTypes, auditLogs,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
@@ -304,6 +317,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addEarlyWarning, updateEarlyWarningStatus,
     addExitCase, updateExitCaseStatus,
     addAdvisorAssessment,
+    addStudentVoiceResponse,
     addDocument, updateDocumentStatus,
     addUser, updateUser,
     addRosterEntry, updateRosterEntry,
