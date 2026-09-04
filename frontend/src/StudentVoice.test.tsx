@@ -20,7 +20,7 @@ vi.mock('@/contexts/AuthContext', async () => {
         name: 'Somchai Jaidee',
         email: 'somchai.j@student.mfu.ac.th',
         role: 'student',
-        department: 'School of Information Technology',
+        department: 'School of Applied Digital Technology (ADT)',
         isActive: true,
         createdAt: '2024-06-01',
       },

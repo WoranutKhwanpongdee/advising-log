@@ -26,22 +26,22 @@ import type {
 
 export const mockUsers: User[] = [
   // Students
-  { id: 'STU001', code: '6631503001', name: 'Somchai Jaidee', email: 'somchai.j@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5601', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU002', code: '6631503002', name: 'Ploy Srisuk', email: 'ploy.s@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5602', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU003', code: '6631503003', name: 'Nattapong Wongchai', email: 'nattapong.w@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5603', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU004', code: '6631503004', name: 'Kannika Thongkam', email: 'kannika.t@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5604', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU005', code: '6631503005', name: 'Arthit Phanit', email: 'arthit.p@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5605', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU006', code: '6631503006', name: 'Siriporn Meechai', email: 'siriporn.m@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5606', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU007', code: '6631503007', name: 'Tanawat Rungroj', email: 'tanawat.r@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5607', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU008', code: '6631503008', name: 'Pimchanok Saetang', email: 'pimchanok.s@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5608', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU009', code: '6631503009', name: 'Kittipat Somboon', email: 'kittipat.s@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5609', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU010', code: '6631503010', name: 'Waraporn Chantara', email: 'waraporn.c@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5610', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU001', code: '6631503001', name: 'Somchai Jaidee', email: 'somchai.j@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5601', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU002', code: '6631503002', name: 'Ploy Srisuk', email: 'ploy.s@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5602', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU003', code: '6631503003', name: 'Nattapong Wongchai', email: 'nattapong.w@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5603', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU004', code: '6631503004', name: 'Kannika Thongkam', email: 'kannika.t@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5604', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU005', code: '6631503005', name: 'Arthit Phanit', email: 'arthit.p@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5605', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU006', code: '6631503006', name: 'Siriporn Meechai', email: 'siriporn.m@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5606', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU007', code: '6631503007', name: 'Tanawat Rungroj', email: 'tanawat.r@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5607', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU008', code: '6631503008', name: 'Pimchanok Saetang', email: 'pimchanok.s@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5608', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU009', code: '6631503009', name: 'Kittipat Somboon', email: 'kittipat.s@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5609', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU010', code: '6631503010', name: 'Waraporn Chantara', email: 'waraporn.c@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5610', isActive: true, createdAt: '2024-06-01' },
   // Advisors
-  { id: 'ADV001', code: 'EMP-1001', name: 'Dr. Prasit Kanchanawat', email: 'prasit.k@mfu.ac.th', role: 'advisor', department: 'School of Information Technology', phone: '053-916-001', isActive: true, createdAt: '2020-01-15' },
-  { id: 'ADV002', code: 'EMP-1002', name: 'Dr. Wipawan Buathong', email: 'wipawan.b@mfu.ac.th', role: 'advisor', department: 'School of Information Technology', phone: '053-916-002', isActive: true, createdAt: '2019-08-01' },
-  { id: 'ADV003', code: 'EMP-1003', name: 'Dr. Chaiwat Namsai', email: 'chaiwat.n@mfu.ac.th', role: 'advisor', department: 'School of Information Technology', phone: '053-916-003', isActive: true, createdAt: '2021-01-10' },
+  { id: 'ADV001', code: 'EMP-1001', name: 'Dr. Prasit Kanchanawat', email: 'prasit.k@mfu.ac.th', role: 'advisor', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-001', isActive: true, createdAt: '2020-01-15' },
+  { id: 'ADV002', code: 'EMP-1002', name: 'Dr. Wipawan Buathong', email: 'wipawan.b@mfu.ac.th', role: 'advisor', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-002', isActive: true, createdAt: '2019-08-01' },
+  { id: 'ADV003', code: 'EMP-1003', name: 'Dr. Chaiwat Namsai', email: 'chaiwat.n@mfu.ac.th', role: 'advisor', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-003', isActive: true, createdAt: '2021-01-10' },
   // QA Chair
-  { id: 'QA001', code: 'EMP-2001', name: 'Assoc. Prof. Rattana Pongsakorn', email: 'rattana.p@mfu.ac.th', role: 'qa_chair', department: 'School of Information Technology', phone: '053-916-010', isActive: true, createdAt: '2018-01-01' },
+  { id: 'QA001', code: 'EMP-2001', name: 'Assoc. Prof. Rattana Pongsakorn', email: 'rattana.p@mfu.ac.th', role: 'qa_chair', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-010', isActive: true, createdAt: '2018-01-01' },
   // Admin
   { id: 'ADM001', code: 'EMP-3001', name: 'Supattra Kaewmanee', email: 'supattra.k@mfu.ac.th', role: 'admin', department: 'Academic Affairs', phone: '053-916-020', isActive: true, createdAt: '2019-03-01' },
 ]
@@ -105,7 +105,7 @@ export const mockFollowUps: FollowUp[] = [
 // --- Referrals ---
 
 export const mockReferrals: Referral[] = [
-  { id: 'REF001', sessionId: 'SES003', studentId: 'STU007', advisorId: 'ADV003', reason: 'Student needs financial assistance and payment plan options.', destination: 'financial_office', status: 'referred', referredAt: '2026-09-01', createdAt: '2026-09-01' },
+  { id: 'REF001', sessionId: 'SES003', studentId: 'STU007', advisorId: 'ADV003', reason: 'Student needs financial assistance and payment plan options.', destination: 'finance_accounting', status: 'referred', referredAt: '2026-09-01', createdAt: '2026-09-01' },
 ]
 
 // --- Category Config ---

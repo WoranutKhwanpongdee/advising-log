@@ -451,7 +451,7 @@ export function StudentProfileBanner({
 }) {
   const { t } = useLanguage()
   const initials = student.name.split(' ').map(n => n[0]).join('').substring(0, 2)
-  const displaySchool = school || t('สำนักวิชาเทคโนโลยีสารสนเทศ', 'School of Information Technology')
+  const displaySchool = school || t('สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ (ADT)', 'School of Applied Digital Technology (ADT)')
   const displayMajor = major || t('สาขาวิชาวิศวกรรมซอฟต์แวร์', 'Software Engineering')
   const displayStatus = status || t('ปกติ', 'Normal')
   const displaySemester = semester || t('1/2569', 'Semester 1 / Academic Year 2026')
@@ -529,7 +529,7 @@ export function AdvisorCohortBanner({
 }) {
   const { t } = useLanguage()
   const initials = advisor.name.split(' ').map(n => n[0]).join('').substring(0, 2)
-  const displaySchool = school || advisor.department || t('สำนักวิชาเทคโนโลยีสารสนเทศ', 'School of Information Technology')
+  const displaySchool = school || advisor.department || t('สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ (ADT)', 'School of Applied Digital Technology (ADT)')
   const displaySemester = semester || t('1/2569', 'Semester 1 / Academic Year 2026')
 
   return (
