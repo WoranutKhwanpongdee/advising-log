@@ -109,7 +109,7 @@ export default function RequestAdvising() {
           <div>
             <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('อาจารย์ที่ปรึกษาที่รับผิดชอบ', 'Assigned Advisor')}</p>
             <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-              {advisor ? `${advisor.name} · ${advisor.department || 'School of IT'}` : t('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา', 'No assigned advisor')}
+              {advisor ? `${advisor.name} · ${advisor.department || 'School of Applied Digital Technology (ADT)'}` : t('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา', 'No assigned advisor')}
             </p>
           </div>
         </div>

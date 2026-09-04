@@ -42,18 +42,44 @@ export type FollowUpStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
 export type ReferralStatus = 'pending' | 'referred' | 'in_progress' | 'completed'
 
 export type ReferralDestination =
-  | 'guidance_counseling'
+  | 'school_staff'
+  | 'programme_coordinator'
+  | 'school_dean'
+  | 'registrar'
+  | 'finance_accounting'
   | 'scholarship_office'
-  | 'financial_office'
+  | 'student_loan_office'
+  | 'dormitory'
+  | 'discipline_welfare'
+  | 'student_activities'
+  | 'medical_center'
+  | 'guidance_counseling'
   | 'mental_health'
   | 'academic_support'
+  | 'global_relations'
+  | 'professional_experience'
+  | 'library_cits'
 
-export const REFERRAL_DESTINATIONS: { value: ReferralDestination; label: string; labelEn: string; labelTh: string }[] = [
-  { value: 'guidance_counseling', label: 'Guidance & Counseling Center', labelEn: 'Guidance & Counseling Center', labelTh: 'ศูนย์แนะแนวและให้คำปรึกษา' },
-  { value: 'scholarship_office', label: 'Scholarship Office', labelEn: 'Scholarship Office', labelTh: 'งานทุนการศึกษา' },
-  { value: 'financial_office', label: 'Financial Services Office', labelEn: 'Financial Services Office', labelTh: 'ส่วนการเงินและบัญชี' },
-  { value: 'mental_health', label: 'Mental Health & Wellness Unit', labelEn: 'Mental Health & Wellness Unit', labelTh: 'หน่วยบริการสุขภาพจิต' },
-  { value: 'academic_support', label: 'Academic Support Center', labelEn: 'Academic Support Center', labelTh: 'ศูนย์สนับสนุนการเรียนรู้วิชาการ' },
+export type ReferralDestinationGroup = 'school' | 'academic_financial' | 'wellbeing' | 'specialized'
+
+export const REFERRAL_DESTINATIONS: { value: ReferralDestination; group: ReferralDestinationGroup; label: string; labelEn: string; labelTh: string }[] = [
+  { value: 'school_staff', group: 'school', label: 'School Staff / Secretary', labelEn: 'School Staff / Secretary', labelTh: 'เจ้าหน้าที่สายสนับสนุนวิชาการ / เลขานุการสำนักวิชา' },
+  { value: 'programme_coordinator', group: 'school', label: 'Programme Coordinator', labelEn: 'Programme Coordinator', labelTh: 'ประธานหลักสูตร' },
+  { value: 'school_dean', group: 'school', label: 'Dean of the School', labelEn: 'Dean of the School', labelTh: 'คณบดีสำนักวิชา' },
+  { value: 'registrar', group: 'academic_financial', label: 'Registrar Division (REG)', labelEn: 'Registrar Division (REG)', labelTh: 'ส่วนทะเบียนและประมวลผล (REG)' },
+  { value: 'finance_accounting', group: 'academic_financial', label: 'Finance and Accounting Division', labelEn: 'Finance and Accounting Division', labelTh: 'ส่วนการเงินและบัญชี' },
+  { value: 'scholarship_office', group: 'wellbeing', label: 'Scholarships', labelEn: 'Scholarships', labelTh: 'งานทุนการศึกษา' },
+  { value: 'student_loan_office', group: 'wellbeing', label: 'Student Loan Office (กยศ. / กรอ.)', labelEn: 'Student Loan Office', labelTh: 'งานกองทุนเงินให้กู้ยืมเพื่อการศึกษา (กยศ. / กรอ.)' },
+  { value: 'dormitory', group: 'wellbeing', label: 'Dormitory', labelEn: 'Dormitory', labelTh: 'งานหอพักนักศึกษา' },
+  { value: 'discipline_welfare', group: 'wellbeing', label: 'Discipline and Welfare', labelEn: 'Discipline and Welfare', labelTh: 'งานวินัยและสวัสดิการนักศึกษา' },
+  { value: 'student_activities', group: 'wellbeing', label: 'Student Activities', labelEn: 'Student Activities', labelTh: 'งานกิจกรรมนักศึกษา' },
+  { value: 'medical_center', group: 'wellbeing', label: 'MFU Medical Center', labelEn: 'MFU Medical Center', labelTh: 'ส่วนบริการสุขภาพ / โรงพยาบาลศูนย์การแพทย์ มฟล.' },
+  { value: 'guidance_counseling', group: 'wellbeing', label: 'MFU Counselling Center', labelEn: 'MFU Counselling Center', labelTh: 'ศูนย์ให้คำปรึกษาและพัฒนาคุณภาพชีวิตนักศึกษา' },
+  { value: 'mental_health', group: 'wellbeing', label: 'Mental Health and Wellness', labelEn: 'Mental Health and Wellness', labelTh: 'หน่วยบริการสุขภาพจิต' },
+  { value: 'academic_support', group: 'wellbeing', label: 'Academic Support Center', labelEn: 'Academic Support Center', labelTh: 'ศูนย์สนับสนุนการเรียนรู้วิชาการ' },
+  { value: 'global_relations', group: 'specialized', label: 'Global Relations Division (GRD)', labelEn: 'Global Relations Division (GRD)', labelTh: 'ส่วนพัฒนาความสัมพันธ์ระหว่างประเทศ (GRD)' },
+  { value: 'professional_experience', group: 'specialized', label: 'Professional Experience and Co-operative Education', labelEn: 'Professional Experience and Co-operative Education', labelTh: 'ส่วนฝึกปฏิบัติงานวิชาชีพและสหกิจศึกษา' },
+  { value: 'library_cits', group: 'specialized', label: 'Library / MFU CITS', labelEn: 'Library / MFU CITS', labelTh: 'ศูนย์บรรณสารและสื่อการศึกษา (Library / MFU CITS)' },
 ]
 
 export type ExitType = 'withdrawal' | 'leave_of_absence' | 'transfer' | 'dropout'

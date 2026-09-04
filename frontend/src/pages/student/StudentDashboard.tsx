@@ -35,7 +35,7 @@ export default function StudentDashboard() {
       <StudentProfileBanner
         student={currentUser}
         advisor={advisor}
-        school={currentUser.department ? (language === 'th' ? 'สำนักวิชาเทคโนโลยีสารสนเทศ' : 'School of Information Technology') : undefined}
+        school={currentUser.department ? (language === 'th' ? 'สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ (ADT)' : 'School of Applied Digital Technology (ADT)') : undefined}
         major={t('สาขาวิชาวิศวกรรมซอฟต์แวร์', 'Software Engineering')}
         gpax="3.48"
         credits="102 / 136"

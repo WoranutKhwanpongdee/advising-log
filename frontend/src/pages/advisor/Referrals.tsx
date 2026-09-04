@@ -5,7 +5,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, Modal } from '@/components/ui'
 import { REFERRAL_DESTINATIONS } from '@/types'
-import type { Referral, ReferralDestination } from '@/types'
+import type { Referral, ReferralDestination, ReferralDestinationGroup } from '@/types'
 import { Plus } from 'lucide-react'
 
 export default function Referrals() {
@@ -24,6 +24,13 @@ export default function Referrals() {
     .filter(r => r.advisorId === currentUser.id && r.isActive)
     .map(r => store.users.find(u => u.id === r.studentId)!)
     .filter(Boolean)
+
+  const destinationGroups: { value: ReferralDestinationGroup; label: string; labelEn: string }[] = [
+    { value: 'school', label: 'หน่วยงานภายในสำนักวิชา', labelEn: 'Internal School Level' },
+    { value: 'academic_financial', label: 'ส่วนทะเบียนและการเงิน', labelEn: 'Academic and Financial Divisions' },
+    { value: 'wellbeing', label: 'สวัสดิการและคุณภาพชีวิตนักศึกษา', labelEn: 'Student Well-being' },
+    { value: 'specialized', label: 'หน่วยงานเฉพาะทางอื่นๆ', labelEn: 'Specialized Divisions' },
+  ]
 
   function handleCreate() {
     if (!studentId || !reason || !destination) {
@@ -132,8 +139,12 @@ export default function Referrals() {
               className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
               <option value="">{t('-- เลือกหน่วยงาน --', 'Select destination')}</option>
-              {REFERRAL_DESTINATIONS.map(d => (
-                <option key={d.value} value={d.value}>{getReferralLabel(d.value)}</option>
+              {destinationGroups.map(group => (
+                <optgroup key={group.value} label={t(group.label, group.labelEn)}>
+                  {REFERRAL_DESTINATIONS.filter(d => d.group === group.value).map(d => (
+                    <option key={d.value} value={d.value}>{getReferralLabel(d.value)}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
