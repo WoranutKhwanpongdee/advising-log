@@ -24,7 +24,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
   PieChart, Pie, Cell, Legend
 } from 'recharts'
 
@@ -54,13 +54,13 @@ export default function QADashboard() {
 
   // Category distribution
   const categoryData = ADVISING_CATEGORIES.map(c => {
-    const rawName = language === 'th' ? c.labelTh : c.labelEn
-    const name = rawName.length > 24 ? rawName.substring(0, 24) + '...' : rawName
+    const count = store.requests.filter(r => r.category === c.value).length
     return {
-      name,
-      count: store.requests.filter(r => r.category === c.value).length,
+      name: language === 'th' ? c.labelTh : c.labelEn,
+      count,
+      percentage: totalRequests > 0 ? Math.round((count / totalRequests) * 100) : 0,
     }
-  }).filter(d => d.count > 0)
+  }).filter(d => d.count > 0).sort((a, b) => b.count - a.count)
 
   // Exit reason distribution
   const exitData = EXIT_REASON_CODES.map(r => ({
@@ -185,10 +185,10 @@ export default function QADashboard() {
               </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData} layout="vertical" margin={{ left: 0, right: 16 }}>
+                  <BarChart data={categoryData} layout="vertical" margin={{ left: 0, right: 32 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                     <XAxis type="number" tick={{ fontSize: 11, fill: chartTheme.axis }} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} width={140} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} width={170} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: chartTheme.tooltipBg,
@@ -199,8 +199,11 @@ export default function QADashboard() {
                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                       }}
                       itemStyle={{ color: chartTheme.tooltipText }}
+                      formatter={(value, _name, item) => [`${value} ${t('คำร้อง', 'requests')} (${item.payload.percentage}%)`, t('จำนวน', 'Count')]}
                     />
-                    <Bar dataKey="count" fill="#0284c7" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="count" fill="#0284c7" radius={[0, 4, 4, 0]}>
+                      <LabelList dataKey="count" position="right" fill={chartTheme.axis} fontSize={11} />
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>

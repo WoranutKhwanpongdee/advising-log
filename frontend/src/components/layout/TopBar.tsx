@@ -6,6 +6,41 @@ import { Bell, LogOut, Menu, Calendar } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const thaiNotificationTranslations: Record<string, { title: string; message: string }> = {
+  NOT001: {
+    title: 'นัดหมายถูกกำหนดแล้ว',
+    message: 'นัดหมายเข้าพบอาจารย์ที่ปรึกษาของคุณถูกกำหนดไว้วันที่ 10 กันยายน 2569 เวลา 10:00 น. ณ ห้อง S2-301',
+  },
+  NOT002: {
+    title: 'ต้องดำเนินการติดตามผล',
+    message: 'กรุณาดำเนินการส่งแบบฟอร์มเพิ่มถอนรายวิชาก่อนถึงกำหนดเวลา',
+  },
+  NOT003: {
+    title: 'ดำเนินการติดตามผลเสร็จสิ้น',
+    message: 'ส่งแบบฟอร์มต่ออายุทุนการศึกษาของคุณเรียบร้อยแล้ว',
+  },
+  NOT004: {
+    title: 'มีคำร้องขอรับคำปรึกษาใหม่',
+    message: 'Nattapong Wongchai (6631503003) ยื่นคำร้องขอรับคำปรึกษาใหม่เกี่ยวกับปัญหาส่วนตัว',
+  },
+  NOT005: {
+    title: 'มีคำร้องขอรับคำปรึกษาใหม่',
+    message: 'Waraporn Chantara (6631503010) ยื่นคำร้องขอรับคำปรึกษาใหม่เกี่ยวกับผลการเรียน',
+  },
+  NOT006: {
+    title: 'นัดหมายถูกกำหนดแล้ว',
+    message: 'นัดหมายเข้าพบอาจารย์ที่ปรึกษาของคุณถูกกำหนดไว้วันที่ 15 กันยายน 2569 เวลา 10:00 น. ณ ห้อง S2-205',
+  },
+  NOT007: {
+    title: 'ใกล้ถึงกำหนดส่งงานติดตามผล',
+    message: 'งานติดตามผล “ส่งใบสมัครขอความช่วยเหลือทางการเงินฉุกเฉิน” ของคุณมีกำหนดส่งวันที่ 15 กันยายน',
+  },
+  NOT008: {
+    title: 'มีคำร้องรอดำเนินการ',
+    message: 'Kannika Thongkam (6631503004) มีคำร้องขอรับคำปรึกษาเกี่ยวกับการฝึกงาน/อาชีพที่รอการตรวจสอบ',
+  },
+}
+
 export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const { currentUser, logout } = useAuth()
   const { language, setLanguage, t } = useLanguage()
@@ -107,19 +142,22 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                 {myNotifs.length === 0 ? (
                   <p className="px-4 py-8 text-xs text-slate-400 dark:text-slate-500 text-center font-medium">{t('ไม่มีการแจ้งเตือนใหม่', 'No pending notifications')}</p>
                 ) : (
-                  myNotifs.slice(0, 10).map(n => (
-                    <div
-                      key={n.id}
-                      onClick={() => { store.markNotificationRead(n.id); setShowNotifs(false) }}
-                      className={`px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/60 cursor-pointer hover:bg-sky-50/30 dark:hover:bg-slate-800/60 transition-colors ${!n.isRead ? 'bg-sky-50/50 dark:bg-sky-500/10' : ''}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className={`text-xs ${n.isRead ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-bold'}`}>{n.title}</p>
-                        {!n.isRead && <span className="h-2 w-2 rounded-full bg-sky-500 flex-shrink-0 mt-1 ring-2 ring-sky-100 dark:ring-sky-900" />}
+                  myNotifs.slice(0, 10).map(n => {
+                    const translated = language === 'th' ? thaiNotificationTranslations[n.id] : undefined
+                    return (
+                      <div
+                        key={n.id}
+                        onClick={() => { store.markNotificationRead(n.id); setShowNotifs(false) }}
+                        className={`px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/60 cursor-pointer hover:bg-sky-50/30 dark:hover:bg-slate-800/60 transition-colors ${!n.isRead ? 'bg-sky-50/50 dark:bg-sky-500/10' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className={`text-xs ${n.isRead ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-bold'}`}>{translated?.title ?? n.title}</p>
+                          {!n.isRead && <span className="h-2 w-2 rounded-full bg-sky-500 flex-shrink-0 mt-1 ring-2 ring-sky-100 dark:ring-sky-900" />}
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">{translated?.message ?? n.message}</p>
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
-                    </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </>

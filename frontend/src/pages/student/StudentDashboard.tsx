@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, StatCard, Card, StatusBadge, EmptyState, Button, StudentProfileBanner } from '@/components/ui'
-import { Calendar, Clock, ListChecks, Bell, FileEdit, ArrowRight, BookOpen, CheckCircle2 } from 'lucide-react'
+import { Calendar, Clock, ListChecks, FileEdit, ArrowRight, BookOpen, CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export default function StudentDashboard() {
@@ -25,8 +25,6 @@ export default function StudentDashboard() {
   const myRequests = store.requests.filter(r => r.studentId === currentUser.id)
   const myAppointments = store.appointments.filter(a => a.studentId === currentUser.id && a.status === 'scheduled')
   const myFollowUps = store.followUps.filter(f => f.studentId === currentUser.id && f.status !== 'completed')
-  const myNotifications = store.notifications.filter(n => n.userId === currentUser.id && !n.isRead)
-
   const upcomingAppointment = myAppointments[0]
 
   return (
@@ -55,11 +53,10 @@ export default function StudentDashboard() {
       />
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <StatCard label={t('คำร้องทั้งหมด', 'Total Requests')} value={myRequests.length} icon={<FileEdit className="h-5 w-5" />} color="sky" />
         <StatCard label={t('นัดหมายที่กำลังมาถึง', 'Upcoming Sessions')} value={myAppointments.length} icon={<Calendar className="h-5 w-5" />} color="sky" />
         <StatCard label={t('งานติดตามผลคงค้าง', 'Pending Follow-ups')} value={myFollowUps.length} icon={<ListChecks className="h-5 w-5" />} color="amber" />
-        <StatCard label={t('ข้อความแจ้งเตือนใหม่', 'Unread Notices')} value={myNotifications.length} icon={<Bell className="h-5 w-5" />} color="red" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -201,30 +198,6 @@ export default function StudentDashboard() {
             )}
           </Card>
 
-          {/* Academic Notices / Notifications */}
-          <Card>
-            <div className="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Bell className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประกาศและการแจ้งเตือน', 'System Notices')}
-              </h3>
-            </div>
-
-            {myNotifications.length > 0 ? (
-              <div className="space-y-2.5">
-                {myNotifications.slice(0, 4).map(n => (
-                  <div key={n.id} className="p-3 bg-sky-50/40 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/60 rounded-xl">
-                    <div className="flex items-start justify-between gap-1">
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{n.title}</p>
-                      <span className="h-1.5 w-1.5 rounded-full bg-sky-500 flex-shrink-0 mt-1" />
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-slate-400 dark:text-slate-500 py-6 text-center font-medium">{t('ไม่มีข้อความแจ้งเตือนใหม่', 'No new notifications')}</p>
-            )}
-          </Card>
         </div>
       </div>
     </div>
