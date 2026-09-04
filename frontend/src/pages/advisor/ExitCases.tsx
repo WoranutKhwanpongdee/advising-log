@@ -9,7 +9,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, Modal, Timeline } from '@/components/ui'
 import type { ExitCase } from '@/types'
-import { Eye } from 'lucide-react'
+import { Eye, MessageSquareHeart } from 'lucide-react'
 
 export default function ExitCases() {
   const { currentUser } = useAuth()
@@ -166,6 +166,36 @@ export default function ExitCases() {
                 {selectedCase.details}
               </p>
             </div>
+            {/* Student Voice Survey (if shared) */}
+            {(() => {
+              const svr = store.studentVoiceResponses.find(v => (v.exitCaseId === selectedCase.id || v.studentId === selectedCase.studentId) && v.shareWithAdvisor)
+              if (!svr) return null
+              return (
+                <div className="border-t border-sky-100 dark:border-sky-900/60 pt-3.5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <h4 className="text-xs font-bold text-sky-900 dark:text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquareHeart className="h-4 w-4 text-sky-600" />
+                      {t('เสียงสะท้อนของนักศึกษา (Student Voice Feedback)', 'Student Voice Feedback')}
+                    </h4>
+                  </div>
+                  <div className="p-3 bg-sky-50/60 dark:bg-sky-950/40 rounded-xl border border-sky-100 dark:border-sky-900/40 text-xs space-y-2">
+                    <div className="flex flex-wrap gap-1">
+                      {svr.primaryFactors.map((fac, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium">
+                          {fac}
+                        </span>
+                      ))}
+                    </div>
+                    {svr.whatCouldUniversityDoBetter && (
+                      <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                        "{svr.whatCouldUniversityDoBetter}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
+
             <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
               <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3">{t('ประวัติการรับคำปรึกษาที่ผ่านมา', 'Student Advising History & Timeline')}</h4>
               <Timeline items={caseTimeline} />
