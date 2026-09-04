@@ -22,28 +22,28 @@ export default function Categories() {
       header: t('ชื่อหมวดหมู่การให้คำปรึกษา', 'Category Name'),
       render: (c: AdvisingCategoryConfig) => (
         <div className="flex items-center gap-2">
-          <Tag className="h-3.5 w-3.5 text-sky-600 flex-shrink-0" />
-          <span className="text-xs sm:text-sm font-semibold text-slate-900">{getCategoryLabel(c.value)}</span>
+          <Tag className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{getCategoryLabel(c.value)}</span>
         </div>
       ),
     },
-    { key: 'value', header: t('รหัสอ้างอิงระบบ', 'Internal Key'), render: (c: AdvisingCategoryConfig) => <span className="text-xs font-mono text-slate-500">{c.value}</span> },
+    { key: 'value', header: t('รหัสอ้างอิงระบบ', 'Internal Key'), render: (c: AdvisingCategoryConfig) => <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{c.value}</span> },
     {
       key: 'sub',
       header: t('หัวข้อย่อยที่กำหนด', 'Configured Sub-categories'),
       render: (c: AdvisingCategoryConfig) => (
         <div className="flex flex-wrap gap-1.5 max-w-sm">
           {c.subCategories.slice(0, 3).map((sc, i) => (
-            <span key={i} className="px-2 py-0.5 bg-slate-100/80 rounded-md text-[11px] font-medium text-slate-700 border border-slate-200/50">
+            <span key={i} className="px-2 py-0.5 bg-slate-100/80 dark:bg-slate-800 rounded-md text-[11px] font-medium text-slate-700 dark:text-slate-200 border border-slate-200/50 dark:border-slate-700">
               {sc}
             </span>
           ))}
           {c.subCategories.length > 3 && (
-            <span className="px-1.5 py-0.5 bg-sky-50 rounded-md text-[11px] font-medium text-sky-700">
+            <span className="px-1.5 py-0.5 bg-sky-50 dark:bg-sky-950/60 rounded-md text-[11px] font-medium text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-800">
               +{c.subCategories.length - 3} {t('รายการเพิ่มเติม', 'more')}
             </span>
           )}
-          {c.subCategories.length === 0 && <span className="text-xs text-slate-400">{t('ไม่มี', 'None configured')}</span>}
+          {c.subCategories.length === 0 && <span className="text-xs text-slate-400 dark:text-slate-500">{t('ไม่มี', 'None configured')}</span>}
         </div>
       ),
     },

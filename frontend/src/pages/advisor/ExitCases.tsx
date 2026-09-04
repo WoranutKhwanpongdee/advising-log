@@ -34,8 +34,8 @@ export default function ExitCases() {
         const s = store.users.find(u => u.id === e.studentId)
         return (
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-900">{s?.name}</p>
-            <p className="text-[11px] font-mono text-slate-400">{s?.code}</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{s?.name}</p>
+            <p className="text-[11px] font-mono text-slate-400 dark:text-slate-400">{s?.code}</p>
           </div>
         )
       },
@@ -44,7 +44,7 @@ export default function ExitCases() {
       key: 'type',
       header: t('ประเภทคำร้อง', 'Exit Type'),
       render: (e: ExitCase) => (
-        <span className="text-xs font-semibold capitalize text-slate-800">
+        <span className="text-xs font-semibold capitalize text-slate-800 dark:text-slate-200">
           {e.exitType.replace(/_/g, ' ')}
         </span>
       ),
@@ -53,12 +53,12 @@ export default function ExitCases() {
       key: 'reason',
       header: t('สาเหตุที่ระบุ', 'Declared Reason'),
       render: (e: ExitCase) => (
-        <span className="text-xs text-slate-600">
+        <span className="text-xs text-slate-600 dark:text-slate-300">
           {getExitReasonLabel(e.reasonCode)}
         </span>
       ),
     },
-    { key: 'date', header: t('วันที่มีผล', 'Effective Date'), render: (e: ExitCase) => <span className="text-xs text-slate-500 font-medium">{e.preferredEffectiveDate}</span> },
+    { key: 'date', header: t('วันที่มีผล', 'Effective Date'), render: (e: ExitCase) => <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{e.preferredEffectiveDate}</span> },
     { key: 'status', header: t('สถานะ', 'Status'), render: (e: ExitCase) => <StatusBadge status={e.status} /> },
     {
       key: 'actions',
@@ -66,7 +66,7 @@ export default function ExitCases() {
       render: (e: ExitCase) => (
         <div className="flex items-center gap-1.5">
           <Button size="sm" variant="secondary" onClick={() => setSelectedCase(e)}>
-            <Eye className="h-3 w-3 mr-1 text-slate-500" /> {t('ดูรายละเอียด', 'View')}
+            <Eye className="h-3 w-3 mr-1 text-slate-500 dark:text-slate-400" /> {t('ดูรายละเอียด', 'View')}
           </Button>
           {e.status !== 'closed' && (
             <Button size="sm" variant="primary" onClick={() => { setSelectedCase(e); setShowAssessment(true) }}>
@@ -142,32 +142,32 @@ export default function ExitCases() {
       {selectedCase && !showAssessment && (
         <Modal isOpen={!!selectedCase} onClose={() => setSelectedCase(null)} title={t('รายละเอียดคำร้องขอลาออก / ลาพัก', 'Exit Case Details')} size="lg">
           <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs p-3.5 bg-slate-50/70 border border-slate-100 rounded-xl">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs p-3.5 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl">
               <div>
-                <span className="text-slate-400 block font-medium">{t('นักศึกษา', 'Student')}</span>
-                <p className="font-semibold text-slate-900 mt-0.5">{store.users.find(u => u.id === selectedCase.studentId)?.name}</p>
+                <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('นักศึกษา', 'Student')}</span>
+                <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{store.users.find(u => u.id === selectedCase.studentId)?.name}</p>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">{t('ประเภท', 'Exit Type')}</span>
-                <p className="font-semibold capitalize text-slate-900 mt-0.5">{selectedCase.exitType.replace(/_/g, ' ')}</p>
+                <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('ประเภท', 'Exit Type')}</span>
+                <p className="font-semibold capitalize text-slate-900 dark:text-slate-100 mt-0.5">{selectedCase.exitType.replace(/_/g, ' ')}</p>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">{t('สาเหตุ', 'Reason')}</span>
-                <p className="font-semibold text-slate-900 mt-0.5">{getExitReasonLabel(selectedCase.reasonCode)}</p>
+                <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('สาเหตุ', 'Reason')}</span>
+                <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{getExitReasonLabel(selectedCase.reasonCode)}</p>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">{t('สถานะ', 'Status')}</span>
+                <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('สถานะ', 'Status')}</span>
                 <div className="mt-1"><StatusBadge status={selectedCase.status} /></div>
               </div>
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">{t('เหตุผลประกอบจากนักศึกษา', 'Student Stated Details')}</span>
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed p-3 bg-slate-50/50 rounded-lg border border-slate-100">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">{t('เหตุผลประกอบจากนักศึกษา', 'Student Stated Details')}</span>
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed p-3 bg-slate-50/50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                 {selectedCase.details}
               </p>
             </div>
-            <div className="border-t border-slate-100 pt-4">
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">{t('ประวัติการรับคำปรึกษาที่ผ่านมา', 'Student Advising History & Timeline')}</h4>
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3">{t('ประวัติการรับคำปรึกษาที่ผ่านมา', 'Student Advising History & Timeline')}</h4>
               <Timeline items={caseTimeline} />
             </div>
           </div>
@@ -178,46 +178,46 @@ export default function ExitCases() {
       <Modal isOpen={showAssessment} onClose={() => { setShowAssessment(false); setSelectedCase(null) }} title={t('บันทึกผลการประเมินคำร้องโดยอาจารย์ที่ปรึกษา', 'Advisor Exit Assessment')} size="md">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('ความเห็นและบันทึกการสัมภาษณ์นักศึกษา', 'Advisor Evaluation & Notes')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('ความเห็นและบันทึกการสัมภาษณ์นักศึกษา', 'Advisor Evaluation & Notes')} *</label>
             <textarea
               value={assessment}
               onChange={e => setAssessment(e.target.value)}
               rows={3}
               placeholder={t('บันทึกข้อเท็จจริงจากการพูดคุย ความเห็นเชิงวิชาการ และเหตุผลที่นักศึกษาประสงค์จะออก...', 'Your professional assessment of the student\'s departure...')}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('ปัจจัยแวดล้อมที่ส่งผลกระทบ', 'Contributing Factors')}</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('ปัจจัยแวดล้อมที่ส่งผลกระทบ', 'Contributing Factors')}</label>
             <textarea
               value={factors}
               onChange={e => setFactors(e.target.value)}
               rows={2}
               placeholder={t('เช่น ปัญหาผลการเรียน ภาระค่าใช้จ่าย การย้ายถิ่นฐาน...', 'Academic difficulty, financial pressure, relocation...')}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('มาตรการช่วยเหลือและแนวทางแก้ไขที่ได้พยายามแล้ว', 'Preventative Actions Tried')}</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('มาตรการช่วยเหลือและแนวทางแก้ไขที่ได้พยายามแล้ว', 'Preventative Actions Tried')}</label>
             <textarea
               value={actions}
               onChange={e => setActions(e.target.value)}
               rows={2}
               placeholder={t('การแนะนำแผนการเรียนใหม่ การส่งต่อทุน หรือการให้เวลาปรับตัว...', 'Academic remediation, referrals made, counseling sessions...')}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('ข้อเสนอแนะต่อประธานหลักสูตร / ประกันคุณภาพ', 'Recommendation to QA & Chair')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('ข้อเสนอแนะต่อประธานหลักสูตร / ประกันคุณภาพ', 'Recommendation to QA & Chair')} *</label>
             <textarea
               value={recommendation}
               onChange={e => setRecommendation(e.target.value)}
               rows={2}
               placeholder="Recommended next steps for QA review..."
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
             />
           </div>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => { setShowAssessment(false); setSelectedCase(null) }}>{t('ยกเลิก', 'Cancel')}</Button>
             <Button variant="primary" onClick={() => handleSaveAssessment()}>{t('บันทึกความเห็นอาจารย์', 'Submit Assessment')}</Button>
           </div>

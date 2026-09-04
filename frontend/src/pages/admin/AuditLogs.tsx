@@ -25,7 +25,7 @@ export default function AuditLogs() {
       key: 'date',
       header: t('วัน-เวลา', 'Timestamp'),
       render: (l: AuditLog) => (
-        <span className="text-xs font-mono text-slate-500 font-medium">
+        <span className="text-xs font-mono text-slate-500 dark:text-slate-400 font-medium">
           {l.createdAt.replace('T', ' ').substring(0, 19)}
         </span>
       ),
@@ -43,8 +43,8 @@ export default function AuditLogs() {
         const r = roleLabels[l.userRole] || { th: l.userRole, en: l.userRole }
         return (
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-900">{l.userName}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t(r.th, r.en)}</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{l.userName}</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider">{t(r.th, r.en)}</p>
           </div>
         )
       },
@@ -53,7 +53,7 @@ export default function AuditLogs() {
       key: 'action',
       header: t('ประเภทเหตุการณ์', 'Event Action'),
       render: (l: AuditLog) => (
-        <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-800 border border-sky-100">
+        <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-100 dark:border-sky-800">
           {l.action}
         </span>
       ),
@@ -61,12 +61,12 @@ export default function AuditLogs() {
     {
       key: 'desc',
       header: t('รายละเอียดเหตุการณ์', 'Event Details'),
-      render: (l: AuditLog) => <span className="text-xs sm:text-sm text-slate-700 leading-relaxed">{l.description}</span>,
+      render: (l: AuditLog) => <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{l.description}</span>,
     },
     {
       key: 'target',
       header: t('รหัสอ้างอิงเป้าหมาย', 'Entity Ref'),
-      render: (l: AuditLog) => <span className="text-xs text-slate-400 font-mono">{l.targetId || '—'}</span>,
+      render: (l: AuditLog) => <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">{l.targetId || '—'}</span>,
     },
   ]
 

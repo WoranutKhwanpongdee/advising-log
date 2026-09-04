@@ -21,10 +21,10 @@ export default function Documents() {
       header: t('ชื่อเอกสาร', 'Document Name'),
       render: (d: StudentDocument) => (
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
             <FileText className="h-4 w-4" />
           </div>
-          <span className="text-xs sm:text-sm font-semibold text-slate-900">{d.documentName}</span>
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{d.documentName}</span>
         </div>
       ),
     },
@@ -32,7 +32,7 @@ export default function Documents() {
       key: 'method',
       header: t('รูปแบบการลงนาม', 'Signature Type'),
       render: (d: StudentDocument) => (
-        <span className="text-xs text-slate-600 font-medium">
+        <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">
           {d.signatureMethod === 'wet_signature' ? t('ลงนามด้วยตนเอง (กระดาษ)', 'Wet Signature (Physical)') : t('ลงนามอิเล็กทรอนิกส์ (ดิจิทัล)', 'E-Signature (Digital)')}
         </span>
       ),
@@ -40,7 +40,7 @@ export default function Documents() {
     {
       key: 'file',
       header: t('ชื่อไฟล์', 'File Name'),
-      render: (d: StudentDocument) => <span className="text-xs text-slate-500 font-mono">{d.fileName || '—'}</span>,
+      render: (d: StudentDocument) => <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{d.fileName || '—'}</span>,
     },
     {
       key: 'status',

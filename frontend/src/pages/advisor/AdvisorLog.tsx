@@ -109,13 +109,13 @@ export default function AdvisorLog() {
         <Card>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('เลือกนัดหมายที่เสร็จสิ้นแล้ว', 'Select Completed Session')} <span className="text-rose-500">*</span>
               </label>
               <select
                 value={selectedRequestId}
                 onChange={e => setSelectedRequestId(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs cursor-pointer"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs cursor-pointer"
               >
                 <option value="">{t('-- เลือกรายการนัดหมายที่ต้องการบันทึก --', 'Select a completed session to log')}</option>
                 {completedRequests.map(r => {
@@ -130,16 +130,16 @@ export default function AdvisorLog() {
             </div>
 
             {selectedReq && (
-              <div className="p-4 bg-sky-50/40 border border-sky-100 rounded-xl text-xs space-y-1">
-                <p className="font-semibold text-slate-900 flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5 text-sky-600" /> {t('นักศึกษา:', 'Student:')} {student?.name} ({student?.code})
+              <div className="p-4 bg-sky-50/40 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800/80 rounded-xl text-xs space-y-1">
+                <p className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" /> {t('นักศึกษา:', 'Student:')} {student?.name} ({student?.code})
                 </p>
-                <p className="text-slate-600 leading-relaxed"><span className="text-slate-400 font-medium">{t('หัวข้อคำร้อง:', 'Topic Details:')}</span> {selectedReq.details}</p>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed"><span className="text-slate-400 font-medium">{t('หัวข้อคำร้อง:', 'Topic Details:')}</span> {selectedReq.details}</p>
               </div>
             )}
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('สรุปผลการให้คำปรึกษา', 'Session Summary')} <span className="text-rose-500">*</span>
               </label>
               <textarea
@@ -147,12 +147,12 @@ export default function AdvisorLog() {
                 onChange={e => setSummary(e.target.value)}
                 rows={3}
                 placeholder={t('สรุปภาพรวมประเด็นการเข้าพบและพูดคุย...', 'High-level summary of the advising meeting...')}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('ปัญหา / อุปสรรคที่นักศึกษาประสบ', 'Student Problem / Challenges')} <span className="text-rose-500">*</span>
               </label>
               <textarea
@@ -160,12 +160,12 @@ export default function AdvisorLog() {
                 onChange={e => setProblem(e.target.value)}
                 rows={2}
                 placeholder={t('ปัญหาหลักที่พบระหว่างการให้คำปรึกษา...', 'Key issues identified during the session...')}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 {t('คำแนะนำและแนวทางแก้ไขที่มอบให้', 'Advice & Solutions Provided')} <span className="text-rose-500">*</span>
               </label>
               <textarea
@@ -173,63 +173,63 @@ export default function AdvisorLog() {
                 onChange={e => setAdvice(e.target.value)}
                 rows={2}
                 placeholder={t('ข้อแนะนำทางวิชาการหรือแนวทางปฏิบัติตน...', 'Specific academic or personal recommendations given...')}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">{t('การดำเนินการทันที (ถ้ามี)', 'Actions Taken')}</label>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">{t('การดำเนินการทันที (ถ้ามี)', 'Actions Taken')}</label>
                 <textarea
                   value={actionsTaken}
                   onChange={e => setActionsTaken(e.target.value)}
                   rows={2}
                   placeholder={t('ขั้นตอนที่ได้ดำเนินการไปแล้วระหว่างเข้าพบ...', 'Immediate steps completed...')}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-800 mb-1.5">{t('ผลลัพธ์ที่คาดหวัง', 'Outcome / Expected Result')}</label>
+                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">{t('ผลลัพธ์ที่คาดหวัง', 'Outcome / Expected Result')}</label>
                 <textarea
                   value={outcome}
                   onChange={e => setOutcome(e.target.value)}
                   rows={2}
                   placeholder={t('ผลลัพธ์หรือเป้าหมายที่คาดว่าจะเกิดขึ้น...', 'Expected follow-up result...')}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
                 />
               </div>
             </div>
 
             {/* Follow-up section */}
-            <div className="border-t border-slate-100 pt-4">
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 mb-3 flex items-center gap-1.5">
-                <PlusCircle className="h-4 w-4 text-sky-600" /> {t('มอบหมายงานติดตามผล (ไม่บังคับ)', 'Assign Follow-up Task (Optional)')}
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-1.5">
+                <PlusCircle className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('มอบหมายงานติดตามผล (ไม่บังคับ)', 'Assign Follow-up Task (Optional)')}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('รายละเอียดงานที่มอบหมาย', 'Task Description')}</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('รายละเอียดงานที่มอบหมาย', 'Task Description')}</label>
                   <input
                     type="text"
                     value={followUpTask}
                     onChange={e => setFollowUpTask(e.target.value)}
                     placeholder={t('เช่น ส่งแบบคำร้องเพิ่ม-ถอนรายวิชาที่แก้ไขแล้ว', 'e.g. Submit updated course registration form')}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">{t('กำหนดส่งงาน', 'Target Due Date')}</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('กำหนดส่งงาน', 'Target Due Date')}</label>
                   <input
                     type="date"
                     value={followUpDate}
                     onChange={e => setFollowUpDate(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
               <Button type="submit" variant="primary">{t('บันทึกผลการให้คำปรึกษา', 'Save Advising Log')}</Button>
             </div>
           </form>

@@ -93,11 +93,11 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
       )}
 
       <aside className={cn(
-        'fixed top-0 left-0 z-40 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto shadow-xs',
+        'fixed top-0 left-0 z-40 h-full w-64 bg-white dark:bg-[#0e1424] border-r border-slate-200/80 dark:border-slate-800/80 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto shadow-xs',
         isOpen ? 'translate-x-0' : '-translate-x-full',
       )}>
         {/* Logo area */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 dark:border-slate-800">
+        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100 dark:border-slate-800/80">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md shadow-sky-600/20 ring-2 ring-sky-100 dark:ring-sky-950">
               <GraduationCap className="h-5 w-5" />
@@ -117,8 +117,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         </div>
 
         {/* Role label badge */}
-        <div className="px-4 py-3 border-b border-slate-100/80 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/40">
-          <div className="p-2 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 shadow-2xs flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-slate-100/80 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-900/40">
+          <div className="p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 shadow-2xs flex items-center justify-between">
             <div>
               <p className="text-[11px] font-bold text-slate-900 dark:text-slate-100 leading-tight">{roleMeta.title}</p>
               <p className="text-[10px] text-slate-400 dark:text-slate-400 font-medium">{roleMeta.subtitle}</p>
@@ -138,7 +138,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               className={({ isActive }) => cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group cursor-pointer',
                 isActive
-                  ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 font-bold border border-sky-200/70 dark:border-sky-800/80 shadow-2xs'
+                  ? 'bg-sky-50 dark:bg-sky-500/12 text-sky-800 dark:text-sky-300 font-bold border border-sky-200/70 dark:border-sky-500/25 shadow-2xs'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100 border border-transparent',
               )}
             >
@@ -158,7 +158,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         </nav>
 
         {/* Footer info */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
+        <div className="p-4 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
           <span className="font-medium">AdvisingLog v2.1</span>
           <span className="inline-flex items-center gap-1 font-semibold text-sky-600 dark:text-sky-400">
             <Sparkles className="h-3 w-3" /> Online

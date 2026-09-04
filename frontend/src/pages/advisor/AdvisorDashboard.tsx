@@ -58,11 +58,11 @@ export default function AdvisorDashboard() {
         {/* Pending Requests */}
         <Card>
           <div className="flex items-center justify-between mb-3.5">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <FileEdit className="h-4 w-4 text-sky-600" /> {t('คำร้องขอรับคำปรึกษาที่รอดำเนินการ', 'Pending Advising Requests')}
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <FileEdit className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('คำร้องขอรับคำปรึกษาที่รอดำเนินการ', 'Pending Advising Requests')}
             </h3>
             {pendingRequests.length > 0 && (
-              <button onClick={() => navigate('/advisor/sessions')} className="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1 cursor-pointer">
+              <button onClick={() => navigate('/advisor/sessions')} className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 cursor-pointer">
                 {t('ดูทั้งหมด', 'View all')} <ArrowRight className="h-3 w-3" />
               </button>
             )}
@@ -75,12 +75,12 @@ export default function AdvisorDashboard() {
                 return (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between p-3 bg-slate-50/80 border border-slate-100 rounded-xl cursor-pointer hover:bg-sky-50/40 hover:border-sky-200/60 transition-all duration-150"
+                    className="flex items-center justify-between p-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 rounded-xl cursor-pointer hover:bg-sky-50/40 dark:hover:bg-slate-800/80 hover:border-sky-200/60 dark:hover:border-sky-500/30 transition-all duration-150"
                     onClick={() => navigate('/advisor/sessions')}
                   >
                     <div>
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">{student?.name} <span className="text-slate-400 font-normal">({student?.code})</span></p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{catLabel}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{student?.name} <span className="text-slate-400 dark:text-slate-400 font-normal">({student?.code})</span></p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{catLabel}</p>
                     </div>
                     <StatusBadge status={r.status} />
                   </div>
@@ -94,19 +94,19 @@ export default function AdvisorDashboard() {
 
         {/* Upcoming Appointments */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-3.5 flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-sky-600" /> {t('ตารางนัดหมายที่กำลังจะมาถึง', 'Upcoming Appointments')}
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3.5 flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ตารางนัดหมายที่กำลังจะมาถึง', 'Upcoming Appointments')}
           </h3>
           {upcomingApts.length > 0 ? (
             <div className="space-y-2">
               {upcomingApts.map(a => {
                 const student = store.users.find(u => u.id === a.studentId)
                 return (
-                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50/80 border border-slate-100 rounded-xl">
+                  <div key={a.id} className="flex items-center justify-between p-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 rounded-xl">
                     <div>
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">{student?.name}</p>
-                      <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                        <Clock className="h-3 w-3 text-sky-600" /> {a.scheduledDate} · {a.scheduledTime} · {a.location}
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{student?.name}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <Clock className="h-3 w-3 text-sky-600 dark:text-sky-400" /> {a.scheduledDate} · {a.scheduledTime} · {a.location}
                       </p>
                     </div>
                     <StatusBadge status={a.status} />
@@ -122,11 +122,11 @@ export default function AdvisorDashboard() {
         {/* Active Early Warnings */}
         <Card>
           <div className="flex items-center justify-between mb-3.5">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600" /> {t('รายการเตือนภัยวิชาการที่กำลังติดตาม', 'Active Early Warnings')}
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" /> {t('รายการเตือนภัยวิชาการที่กำลังติดตาม', 'Active Early Warnings')}
             </h3>
             {myWarnings.length > 0 && (
-              <button onClick={() => navigate('/advisor/warnings')} className="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1 cursor-pointer">
+              <button onClick={() => navigate('/advisor/warnings')} className="text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 flex items-center gap-1 cursor-pointer">
                 {t('ดูทั้งหมด', 'View all')} <ArrowRight className="h-3 w-3" />
               </button>
             )}
@@ -138,12 +138,12 @@ export default function AdvisorDashboard() {
                 return (
                   <div
                     key={w.id}
-                    className="flex items-center justify-between p-3 bg-slate-50/80 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-100/70 transition-colors"
+                    className="flex items-center justify-between p-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 rounded-xl cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/80 transition-colors"
                     onClick={() => navigate('/advisor/warnings')}
                   >
                     <div>
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">{student?.name}</p>
-                      <p className="text-[11px] text-slate-500 capitalize mt-0.5">{w.warningType.replace(/_/g, ' ')}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{student?.name}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 capitalize mt-0.5">{w.warningType.replace(/_/g, ' ')}</p>
                     </div>
                     <StatusBadge status={w.severity} />
                   </div>
@@ -157,20 +157,20 @@ export default function AdvisorDashboard() {
 
         {/* Recent Sessions */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-3.5 flex items-center gap-2">
-            <ListChecks className="h-4 w-4 text-sky-600" /> {t('ประวัติการให้คำปรึกษาล่าสุด', 'Recent Advising Sessions')}
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3.5 flex items-center gap-2">
+            <ListChecks className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประวัติการให้คำปรึกษาล่าสุด', 'Recent Advising Sessions')}
           </h3>
           {recentSessions.length > 0 ? (
             <div className="space-y-2">
               {recentSessions.map(s => {
                 const student = store.users.find(u => u.id === s.studentId)
                 return (
-                  <div key={s.id} className="p-3 bg-slate-50/80 border border-slate-100 rounded-xl">
+                  <div key={s.id} className="p-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 rounded-xl">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900">{student?.name}</p>
-                      <span className="text-[11px] font-medium text-slate-400">{s.sessionDate}</span>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{student?.name}</p>
+                      <span className="text-[11px] font-medium text-slate-400 dark:text-slate-400">{s.sessionDate}</span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1 line-clamp-1 leading-relaxed">{s.summary}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 leading-relaxed">{s.summary}</p>
                   </div>
                 )
               })}

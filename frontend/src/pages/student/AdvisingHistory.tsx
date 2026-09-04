@@ -29,12 +29,12 @@ export default function AdvisingHistory() {
     })
 
   const columns = [
-    { key: 'date', header: t('วันที่ยื่น', 'Date'), render: (r: AdvisingRequest) => <span className="text-xs text-slate-500 font-medium">{r.createdAt}</span> },
-    { key: 'category', header: t('หมวดหมู่', 'Category'), render: (r: AdvisingRequest) => <span className="text-xs sm:text-sm font-semibold text-slate-900">{getCategoryLabel(r.category)}</span> },
-    { key: 'advisor', header: t('อาจารย์ที่ปรึกษา', 'Faculty Advisor'), render: (r: AdvisingRequest) => <span className="text-xs text-slate-600">{store.users.find(u => u.id === r.advisorId)?.name || '-'}</span> },
+    { key: 'date', header: t('วันที่ยื่น', 'Date'), render: (r: AdvisingRequest) => <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{r.createdAt}</span> },
+    { key: 'category', header: t('หมวดหมู่', 'Category'), render: (r: AdvisingRequest) => <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{getCategoryLabel(r.category)}</span> },
+    { key: 'advisor', header: t('อาจารย์ที่ปรึกษา', 'Faculty Advisor'), render: (r: AdvisingRequest) => <span className="text-xs text-slate-600 dark:text-slate-300">{store.users.find(u => u.id === r.advisorId)?.name || '-'}</span> },
     { key: 'appointment', header: t('เวลานัดหมาย', 'Appointment'), render: (r: AdvisingRequest) => {
       const apt = store.appointments.find(a => a.requestId === r.id)
-      return <span className="text-xs text-slate-500">{apt ? `${apt.scheduledDate} · ${apt.scheduledTime}` : '—'}</span>
+      return <span className="text-xs text-slate-500 dark:text-slate-400">{apt ? `${apt.scheduledDate} · ${apt.scheduledTime}` : '—'}</span>
     }},
     { key: 'status', header: t('สถานะ', 'Status'), render: (r: AdvisingRequest) => <StatusBadge status={r.status} /> },
   ]

@@ -20,7 +20,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2)
 
   return (
-    <header className="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs">
+    <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs">
       {/* Left: Menu button (mobile) */}
       <button
         onClick={onMenuClick}
@@ -31,13 +31,13 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       </button>
 
       {/* Academic Term Indicator (REG MFU Style) */}
-      <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 shadow-2xs">
+      <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 shadow-2xs">
         <Calendar className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
         <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
           {t('ภาคการศึกษา 1/2569', 'Semester 1 / 2026')}
         </span>
         <span className="text-slate-300 dark:text-slate-600">·</span>
-        <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2 py-0.5 rounded border border-sky-100 dark:border-sky-800">
+        <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 px-2 py-0.5 rounded border border-sky-100 dark:border-sky-500/25">
           {t('ระบบบริการการศึกษา มฟล.', 'MFU SIS Advising')}
         </span>
       </div>
@@ -45,7 +45,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       {/* Right: Language + Theme + Notifications + User */}
       <div className="flex items-center gap-2.5">
         {/* Language switch (TH/EN) */}
-        <div className="flex items-center text-[11px] font-bold bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200/70 dark:border-slate-700 shadow-2xs">
+        <div className="flex items-center text-[11px] font-bold bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-xl border border-slate-200/70 dark:border-slate-700/60 shadow-2xs">
           <button
             type="button"
             onClick={() => setLanguage('th')}
@@ -92,8 +92,8 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           {showNotifs && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotifs(false)} />
-              <div className="absolute right-0 top-full mt-2.5 w-88 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-96 overflow-y-auto animate-[slideIn_0.15s_ease-out]">
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+              <div className="absolute right-0 top-full mt-2.5 w-88 bg-white dark:bg-[#0e1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-96 overflow-y-auto animate-[slideIn_0.15s_ease-out]">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/60">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{t('การแจ้งเตือนของระบบ', 'System Notifications')}</span>
                   {unreadCount > 0 && (
                     <button
@@ -111,7 +111,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                     <div
                       key={n.id}
                       onClick={() => { store.markNotificationRead(n.id); setShowNotifs(false) }}
-                      className={`px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/60 cursor-pointer hover:bg-sky-50/30 dark:hover:bg-slate-800/50 transition-colors ${!n.isRead ? 'bg-sky-50/50 dark:bg-sky-950/30' : ''}`}
+                      className={`px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/60 cursor-pointer hover:bg-sky-50/30 dark:hover:bg-slate-800/60 transition-colors ${!n.isRead ? 'bg-sky-50/50 dark:bg-sky-500/10' : ''}`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <p className={`text-xs ${n.isRead ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-bold'}`}>{n.title}</p>

@@ -21,15 +21,15 @@ export default function FollowUps() {
       header: t('งานที่ได้รับมอบหมาย', 'Assigned Task'),
       render: (f: FollowUp) => (
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
             <ListChecks className="h-4 w-4" />
           </div>
-          <span className="text-xs sm:text-sm font-semibold text-slate-900">{f.task}</span>
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{f.task}</span>
         </div>
       ),
     },
-    { key: 'session', header: t('รหัสคำร้องอ้างอิง', 'Request Reference'), render: (f: FollowUp) => <span className="text-xs text-slate-500 font-mono">{f.requestId}</span> },
-    { key: 'due', header: t('กำหนดส่ง', 'Due Date'), render: (f: FollowUp) => <span className="text-xs font-semibold text-slate-700">{f.dueDate}</span> },
+    { key: 'session', header: t('รหัสคำร้องอ้างอิง', 'Request Reference'), render: (f: FollowUp) => <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{f.requestId}</span> },
+    { key: 'due', header: t('กำหนดส่ง', 'Due Date'), render: (f: FollowUp) => <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{f.dueDate}</span> },
     { key: 'status', header: t('สถานะ', 'Status'), render: (f: FollowUp) => <StatusBadge status={f.status} /> },
     {
       key: 'actions',

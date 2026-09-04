@@ -25,8 +25,8 @@ export default function QADashboard() {
   const chartTheme = {
     grid: isDark ? '#1e293b' : '#f1f5f9',
     axis: isDark ? '#94a3b8' : '#64748b',
-    tooltipBg: isDark ? '#0f172a' : '#ffffff',
-    tooltipBorder: isDark ? '#334155' : '#e2e8f0',
+    tooltipBg: isDark ? '#0e1424' : '#ffffff',
+    tooltipBorder: isDark ? '#1e293b' : '#e2e8f0',
     tooltipText: isDark ? '#f8fafc' : '#0f172a',
   }
 
@@ -100,8 +100,8 @@ export default function QADashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Category Distribution */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-sky-600" /> {t('สัดส่วนหัวข้อการขอคำปรึกษา', 'Advising Distribution by Topic')}
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('สัดส่วนหัวข้อการขอคำปรึกษา', 'Advising Distribution by Topic')}
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -172,7 +172,7 @@ export default function QADashboard() {
       {/* Advisor Workload */}
       <Card>
         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-          <CalendarClock className="h-4 w-4 text-sky-600" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
+          <CalendarClock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
         </h3>
         <div className="h-60">
           <ResponsiveContainer width="100%" height="100%">

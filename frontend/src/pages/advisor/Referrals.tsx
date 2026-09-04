@@ -59,8 +59,8 @@ export default function Referrals() {
         const s = store.users.find(u => u.id === r.studentId)
         return (
           <div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-900">{s?.name}</p>
-            <p className="text-[11px] font-mono text-slate-400">{s?.code}</p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{s?.name}</p>
+            <p className="text-[11px] font-mono text-slate-400 dark:text-slate-400">{s?.code}</p>
           </div>
         )
       },
@@ -69,13 +69,13 @@ export default function Referrals() {
       key: 'dest',
       header: t('หน่วยงานที่ส่งต่อ', 'Referred Unit'),
       render: (r: Referral) => (
-        <span className="text-xs font-semibold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
+        <span className="text-xs font-semibold text-sky-800 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-800">
           {getReferralLabel(r.destination)}
         </span>
       ),
     },
-    { key: 'reason', header: t('เหตุผลในการส่งต่อ', 'Referral Reason'), render: (r: Referral) => <span className="text-xs text-slate-600 line-clamp-1 max-w-xs">{r.reason}</span> },
-    { key: 'date', header: t('วันที่ส่งต่อ', 'Referred Date'), render: (r: Referral) => <span className="text-xs text-slate-500 font-medium">{r.referredAt}</span> },
+    { key: 'reason', header: t('เหตุผลในการส่งต่อ', 'Referral Reason'), render: (r: Referral) => <span className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 max-w-xs">{r.reason}</span> },
+    { key: 'date', header: t('วันที่ส่งต่อ', 'Referred Date'), render: (r: Referral) => <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{r.referredAt}</span> },
     { key: 'status', header: t('สถานะ', 'Status'), render: (r: Referral) => <StatusBadge status={r.status} /> },
     {
       key: 'actions',
@@ -111,11 +111,11 @@ export default function Referrals() {
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title={t('ส่งต่อนักศึกษาไปยังหน่วยงานสนับสนุน', 'Create Student Support Referral')} size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('เลือกนักศึกษาในความดูแล', 'Select Advisee')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('เลือกนักศึกษาในความดูแล', 'Select Advisee')} *</label>
             <select
               value={studentId}
               onChange={e => setStudentId(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
               <option value="">{t('-- เลือกนักศึกษา --', 'Select a student')}</option>
               {myStudents.map(s => (
@@ -125,11 +125,11 @@ export default function Referrals() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('หน่วยงานปลายทาง', 'Target Department / Unit')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('หน่วยงานปลายทาง', 'Target Department / Unit')} *</label>
             <select
               value={destination}
               onChange={e => setDestination(e.target.value as ReferralDestination)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
               <option value="">{t('-- เลือกหน่วยงาน --', 'Select destination')}</option>
               {REFERRAL_DESTINATIONS.map(d => (
@@ -139,17 +139,17 @@ export default function Referrals() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-800 mb-1">{t('เหตุผลและความช่วยเหลือที่ต้องการ', 'Reason & Context')} *</label>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('เหตุผลและความช่วยเหลือที่ต้องการ', 'Reason & Context')} *</label>
             <textarea
               value={reason}
               onChange={e => setReason(e.target.value)}
               rows={3}
               placeholder={t('ระบุรายละเอียด ปูมหลัง และประเด็นที่ต้องการให้หน่วยงานช่วยเหลือนักศึกษา...', 'Explain the background and specific support needed...')}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => setShowCreate(false)}>{t('ยกเลิก', 'Cancel')}</Button>
             <Button variant="primary" onClick={handleCreate}>{t('ยืนยันส่งต่อ', 'Submit Referral')}</Button>
           </div>
