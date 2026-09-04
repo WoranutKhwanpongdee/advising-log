@@ -10,7 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, Button, Card } from '@/components/ui'
 import { EXIT_REASON_CODES } from '@/types'
 import type { ExitType, ExitReasonCode } from '@/types'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, ShieldCheck } from 'lucide-react'
 
 export default function ExitForm() {
   const { currentUser } = useAuth()
@@ -23,6 +23,7 @@ export default function ExitForm() {
   const [reasonCode, setReasonCode] = useState<ExitReasonCode | ''>('')
   const [details, setDetails] = useState('')
   const [effectiveDate, setEffectiveDate] = useState('')
+  const [dataAnalysisConsent, setDataAnalysisConsent] = useState(false)
 
   if (!currentUser) return null
 
@@ -31,7 +32,7 @@ export default function ExitForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!exitType || !reasonCode || !details || !effectiveDate) {
+    if (!exitType || !reasonCode || !details || !effectiveDate || !dataAnalysisConsent) {
       addToast('error', t('ข้อมูลไม่ครบถ้วน', 'Validation Error'), t('กรุณากรอกข้อมูลที่จำเป็นให้ครบทุกช่อง', 'Please fill in all required fields.'))
       return
     }
@@ -45,6 +46,7 @@ export default function ExitForm() {
       exitType: exitType as ExitType,
       reasonCode: reasonCode as ExitReasonCode,
       details,
+      dataAnalysisConsent,
       preferredEffectiveDate: effectiveDate,
       status: 'open',
     })
@@ -143,6 +145,24 @@ export default function ExitForm() {
               className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
             />
           </div>
+
+          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={dataAnalysisConsent}
+              onChange={e => setDataAnalysisConsent(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+            />
+            <span className="text-xs text-slate-700 leading-relaxed">
+              <span className="font-semibold text-slate-900">
+                <ShieldCheck className="inline h-3.5 w-3.5 mr-1 text-sky-600" />
+                {t('ยินยอมให้ใช้ข้อมูลเพื่อการวิเคราะห์และปรับปรุงบริการ', 'Consent to data use for analysis and service improvement')} <span className="text-rose-500">*</span>
+              </span>
+              <span className="block mt-1 text-slate-500">
+                {t('ข้อมูลจะถูกนำไปใช้ในภาพรวมและปกปิดตัวตนของนักศึกษา โดยไม่กระทบต่อการพิจารณาคำร้อง', 'Your information will be de-identified and used in aggregate for analysis and service improvement. This will not affect your request review.')}
+              </span>
+            </span>
+          </label>
 
           <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
             <Button variant="secondary" onClick={() => navigate('/student')}>{t('ยกเลิก', 'Cancel')}</Button>

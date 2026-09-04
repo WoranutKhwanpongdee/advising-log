@@ -163,7 +163,7 @@ export const mockEarlyWarnings: EarlyWarningCase[] = [
 // --- Exit Cases ---
 
 export const mockExitCases: ExitCase[] = [
-  { id: 'EX001', studentId: 'STU006', advisorId: 'ADV002', exitType: 'leave_of_absence', reasonCode: 'personal_family', details: 'Student needs to take a temporary leave to care for an ill family member. Plans to return next academic year.', preferredEffectiveDate: '2026-10-01', status: 'under_review', createdAt: '2026-09-02', updatedAt: '2026-09-03' },
+  { id: 'EX001', studentId: 'STU006', advisorId: 'ADV002', exitType: 'leave_of_absence', reasonCode: 'personal_family', details: 'Student needs to take a temporary leave to care for an ill family member. Plans to return next academic year.', dataAnalysisConsent: true, preferredEffectiveDate: '2026-10-01', status: 'under_review', createdAt: '2026-09-02', updatedAt: '2026-09-03' },
 ]
 
 // --- Advisor Exit Assessments ---

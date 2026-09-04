@@ -268,6 +268,7 @@ export interface ExitCase {
   exitType: ExitType
   reasonCode: ExitReasonCode
   details: string
+  dataAnalysisConsent: boolean
   preferredEffectiveDate: string
   status: ExitCaseStatus
   createdAt: string

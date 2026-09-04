@@ -9,20 +9,31 @@ interface ThemeToggleProps {
 export function ThemeToggle({ className = '' }: ThemeToggleProps) {
   const { isDark, toggleTheme } = useTheme()
   const { t } = useLanguage()
+  const nextThemeLabel = isDark
+    ? t('เปลี่ยนเป็นโหมดสว่าง', 'Switch to light mode')
+    : t('เปลี่ยนเป็นโหมดมืด', 'Switch to dark mode')
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      className={`p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 cursor-pointer flex items-center justify-center group ${className}`}
-      title={isDark ? t('เปลี่ยนเป็นโหมดสว่าง (คลิกเพื่อสลับทันที)', 'Switch to Light Mode (Click to toggle)') : t('เปลี่ยนเป็นโหมดมืด (คลิกเพื่อสลับทันที)', 'Switch to Dark Mode (Click to toggle)')}
-      aria-label="Toggle theme"
+      className={`relative inline-flex h-9 w-[4.25rem] items-center rounded-full border border-slate-200/80 bg-amber-50 p-1 shadow-inner shadow-amber-100/70 transition-all duration-300 hover:border-amber-300 hover:shadow-md hover:shadow-amber-100/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-950 dark:shadow-black/20 dark:hover:border-slate-600 dark:hover:shadow-black/30 dark:focus-visible:ring-offset-slate-900 cursor-pointer group ${className}`}
+      title={nextThemeLabel}
+      aria-label={nextThemeLabel}
+      aria-pressed={isDark}
     >
-      {isDark ? (
-        <Sun className="h-4.5 w-4.5 text-amber-400 transition-transform duration-300 group-hover:rotate-90 group-hover:scale-110" />
-      ) : (
-        <Moon className="h-4.5 w-4.5 text-slate-600 dark:text-slate-300 transition-transform duration-300 group-hover:-rotate-12 group-hover:scale-110" />
-      )}
+      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-between px-2">
+        <Sun className={`h-4 w-4 transition-all duration-300 ${isDark ? 'text-slate-500' : 'text-amber-500 group-hover:rotate-45 group-hover:scale-110'}`} />
+        <Moon className={`h-4 w-4 transition-all duration-300 ${isDark ? 'text-sky-200 group-hover:-rotate-12 group-hover:scale-110' : 'text-slate-400'}`} />
+      </span>
+      <span
+        aria-hidden="true"
+        className={`relative z-10 h-7 w-7 rounded-full shadow-md transition-transform duration-300 ease-out ${
+          isDark
+            ? 'translate-x-7 bg-slate-800 ring-1 ring-slate-700'
+            : 'translate-x-0 bg-white ring-1 ring-amber-200/80'
+        }`}
+      />
     </button>
   )
 }
