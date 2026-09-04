@@ -99,6 +99,15 @@ export const mockFollowUps: FollowUp[] = [
   { id: 'FU002', sessionId: 'SES002', requestId: 'REQ005', studentId: 'STU005', advisorId: 'ADV002', task: 'Verify course registration is complete after hold removal', dueDate: '2026-09-05', status: 'completed', completedAt: '2026-08-30', createdAt: '2026-08-28' },
   { id: 'FU003', sessionId: 'SES003', requestId: 'REQ007', studentId: 'STU007', advisorId: 'ADV003', task: 'Submit emergency financial aid application', dueDate: '2026-09-15', status: 'pending', createdAt: '2026-09-01' },
   { id: 'FU004', sessionId: 'SES003', requestId: 'REQ007', studentId: 'STU007', advisorId: 'ADV003', task: 'Visit Financial Office to set up payment plan', dueDate: '2026-09-10', status: 'in_progress', createdAt: '2026-09-01' },
+  // Follow-ups for STU001 (Somchai Jaidee)
+  { id: 'FU005', sessionId: 'SES004', requestId: 'REQ001', studentId: 'STU001', advisorId: 'ADV001', task: 'Complete course add/drop form and submit to Registrar', dueDate: '2026-09-08', status: 'pending', createdAt: '2026-09-02' },
+  { id: 'FU006', sessionId: 'SES004', requestId: 'REQ001', studentId: 'STU001', advisorId: 'ADV001', task: 'Meet with academic support center for tutoring', dueDate: '2026-09-12', status: 'pending', createdAt: '2026-09-02' },
+  // Follow-ups for STU003 (Nattapong Wongchai)
+  { id: 'FU007', sessionId: 'SES005', requestId: 'REQ003', studentId: 'STU003', advisorId: 'ADV001', task: 'Contact counseling center to arrange session', dueDate: '2026-09-06', status: 'in_progress', createdAt: '2026-09-01' },
+  // Follow-ups for STU004 (Kannika Thongkam)
+  { id: 'FU008', sessionId: 'SES006', requestId: 'REQ004', studentId: 'STU004', advisorId: 'ADV002', task: 'Prepare internship application documents', dueDate: '2026-09-20', status: 'pending', createdAt: '2026-09-02' },
+  // Follow-ups for STU006 (Siriporn Meechai)
+  { id: 'FU009', sessionId: 'SES007', requestId: 'REQ006', studentId: 'STU006', advisorId: 'ADV002', task: 'Submit leave of absence form with supporting documents', dueDate: '2026-09-11', status: 'pending', createdAt: '2026-09-01' },
 ]
 
 // --- Referrals ---

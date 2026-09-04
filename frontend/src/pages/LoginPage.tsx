@@ -1,32 +1,44 @@
 // ============================================================
-// AdvisingLog — Fake SSO Login Page
+// AdvisingLog — Login Page
 // ============================================================
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import type { UserRole } from '@/types'
-import { GraduationCap, Users, BarChart3, Shield, ChevronRight } from 'lucide-react'
+import { GraduationCap } from 'lucide-react'
 
-const roleConfig: Record<UserRole, { label: string; description: string; icon: React.ReactNode; redirect: string }> = {
-  student: { label: 'Student', description: 'View advising dashboard, submit requests, track follow-ups', icon: <GraduationCap className="h-5 w-5" />, redirect: '/student' },
-  advisor: { label: 'Advisor', description: 'Manage sessions, write logs, create referrals and early warnings', icon: <Users className="h-5 w-5" />, redirect: '/advisor' },
-  qa_chair: { label: 'Program Chair / QA', description: 'View aggregate statistics, review exit cases, generate reports', icon: <BarChart3 className="h-5 w-5" />, redirect: '/qa' },
-  admin: { label: 'Admin', description: 'Manage users, roster, categories, and system configuration', icon: <Shield className="h-5 w-5" />, redirect: '/admin' },
+const roleRoutes: Record<string, string> = {
+  student: '/student',
+  advisor: '/advisor',
+  qa_chair: '/qa',
+  admin: '/admin',
 }
 
 export default function LoginPage() {
-  const { login, getDemoUsers } = useAuth()
+  const { loginWithCredentials } = useAuth()
   const navigate = useNavigate()
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const demoGroups = getDemoUsers()
-  const selectedGroup = demoGroups.find(g => g.role === selectedRole)
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
 
-  function handleLogin(userId: string) {
-    login(userId)
-    if (selectedRole) {
-      navigate(roleConfig[selectedRole].redirect)
+    try {
+      const user = await loginWithCredentials(username, password)
+      if (user) {
+        const route = roleRoutes[user.role] || '/'
+        navigate(route)
+      } else {
+        setError('Invalid username or password')
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -43,79 +55,70 @@ export default function LoginPage() {
         </div>
 
         {/* Login card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100">
-            <h2 className="text-sm font-semibold text-slate-900">
-              {selectedRole ? 'Select Demo User' : 'Select Role to Sign In'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {selectedRole
-                ? `Choose a ${roleConfig[selectedRole].label} account to continue`
-                : 'This is a prototype using simulated SSO authentication'}
-            </p>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-slate-900">Sign In</h2>
+            <p className="text-sm text-slate-500 mt-1">Enter your credentials to continue</p>
           </div>
 
-          {/* Role selection */}
-          {!selectedRole && (
-            <div className="divide-y divide-slate-100">
-              {(Object.keys(roleConfig) as UserRole[]).map(role => {
-                const config = roleConfig[role]
-                return (
-                  <button
-                    key={role}
-                    onClick={() => setSelectedRole(role)}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="h-9 w-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                      {config.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900">{config.label}</p>
-                      <p className="text-xs text-slate-500 truncate">{config.description}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-slate-300 flex-shrink-0" />
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          {/* User selection */}
-          {selectedRole && selectedGroup && (
+          {/* Login form */}
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Username field */}
             <div>
-              <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
-                {selectedGroup.users.map(user => (
-                  <button
-                    key={user.id}
-                    onClick={() => handleLogin(user.id)}
-                    className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-slate-50 transition-colors"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 flex-shrink-0 text-xs font-semibold">
-                      {user.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900">{user.name}</p>
-                      <p className="text-xs text-slate-500">{user.code}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-slate-300 flex-shrink-0" />
-                  </button>
-                ))}
-              </div>
-              <div className="px-5 py-3 border-t border-slate-100">
-                <button
-                  onClick={() => setSelectedRole(null)}
-                  className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
-                >
-                  Back to role selection
-                </button>
-              </div>
+              <label htmlFor="username" className="block text-sm font-medium text-slate-700 mb-1.5">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                disabled={isLoading}
+              />
             </div>
-          )}
-        </div>
 
-        <p className="text-center text-xs text-slate-400 mt-4">
-          Prototype environment. No real authentication is performed.
-        </p>
+            {/* Password field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Error message */}
+            {error && (
+              <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            {/* Login button */}
+            <button
+              type="submit"
+              disabled={isLoading || !username || !password}
+              className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          {/* Demo info */}
+          <div className="mt-6 pt-4 border-t border-slate-200">
+            <p className="text-xs text-slate-500 text-center">
+              Demo mode: Use any user ID (e.g., <code className="bg-slate-100 px-1 rounded">STU001</code>, <code className="bg-slate-100 px-1 rounded">ADV001</code>, <code className="bg-slate-100 px-1 rounded">QA001</code>, <code className="bg-slate-100 px-1 rounded">ADM001</code>) with any password
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
