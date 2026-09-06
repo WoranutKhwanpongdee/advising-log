@@ -18,6 +18,7 @@ import type {
   EarlyWarningCase,
   ExitCase,
   AdvisorExitAssessment,
+  StudentVoiceResponse,
   AuditLog,
 } from '@/types'
 
@@ -25,22 +26,22 @@ import type {
 
 export const mockUsers: User[] = [
   // Students
-  { id: 'STU001', code: '6631503001', name: 'Somchai Jaidee', email: 'somchai.j@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5601', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU002', code: '6631503002', name: 'Ploy Srisuk', email: 'ploy.s@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5602', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU003', code: '6631503003', name: 'Nattapong Wongchai', email: 'nattapong.w@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5603', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU004', code: '6631503004', name: 'Kannika Thongkam', email: 'kannika.t@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5604', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU005', code: '6631503005', name: 'Arthit Phanit', email: 'arthit.p@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5605', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU006', code: '6631503006', name: 'Siriporn Meechai', email: 'siriporn.m@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5606', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU007', code: '6631503007', name: 'Tanawat Rungroj', email: 'tanawat.r@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5607', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU008', code: '6631503008', name: 'Pimchanok Saetang', email: 'pimchanok.s@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5608', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU009', code: '6631503009', name: 'Kittipat Somboon', email: 'kittipat.s@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5609', isActive: true, createdAt: '2024-06-01' },
-  { id: 'STU010', code: '6631503010', name: 'Waraporn Chantara', email: 'waraporn.c@student.mfu.ac.th', role: 'student', department: 'School of Information Technology', phone: '081-234-5610', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU001', code: '6631503001', name: 'Somchai Jaidee', email: 'somchai.j@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5601', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU002', code: '6631503002', name: 'Ploy Srisuk', email: 'ploy.s@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5602', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU003', code: '6631503003', name: 'Nattapong Wongchai', email: 'nattapong.w@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5603', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU004', code: '6631503004', name: 'Kannika Thongkam', email: 'kannika.t@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5604', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU005', code: '6631503005', name: 'Arthit Phanit', email: 'arthit.p@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5605', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU006', code: '6631503006', name: 'Siriporn Meechai', email: 'siriporn.m@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5606', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU007', code: '6631503007', name: 'Tanawat Rungroj', email: 'tanawat.r@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5607', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU008', code: '6631503008', name: 'Pimchanok Saetang', email: 'pimchanok.s@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5608', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU009', code: '6631503009', name: 'Kittipat Somboon', email: 'kittipat.s@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5609', isActive: true, createdAt: '2024-06-01' },
+  { id: 'STU010', code: '6631503010', name: 'Waraporn Chantara', email: 'waraporn.c@student.mfu.ac.th', role: 'student', department: 'School of Applied Digital Technology (ADT)', phone: '081-234-5610', isActive: true, createdAt: '2024-06-01' },
   // Advisors
-  { id: 'ADV001', code: 'EMP-1001', name: 'Dr. Prasit Kanchanawat', email: 'prasit.k@mfu.ac.th', role: 'advisor', department: 'School of Information Technology', phone: '053-916-001', isActive: true, createdAt: '2020-01-15' },
-  { id: 'ADV002', code: 'EMP-1002', name: 'Dr. Wipawan Buathong', email: 'wipawan.b@mfu.ac.th', role: 'advisor', department: 'School of Information Technology', phone: '053-916-002', isActive: true, createdAt: '2019-08-01' },
-  { id: 'ADV003', code: 'EMP-1003', name: 'Dr. Chaiwat Namsai', email: 'chaiwat.n@mfu.ac.th', role: 'advisor', department: 'School of Information Technology', phone: '053-916-003', isActive: true, createdAt: '2021-01-10' },
+  { id: 'ADV001', code: 'EMP-1001', name: 'Dr. Prasit Kanchanawat', email: 'prasit.k@mfu.ac.th', role: 'advisor', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-001', isActive: true, createdAt: '2020-01-15' },
+  { id: 'ADV002', code: 'EMP-1002', name: 'Dr. Wipawan Buathong', email: 'wipawan.b@mfu.ac.th', role: 'advisor', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-002', isActive: true, createdAt: '2019-08-01' },
+  { id: 'ADV003', code: 'EMP-1003', name: 'Dr. Chaiwat Namsai', email: 'chaiwat.n@mfu.ac.th', role: 'advisor', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-003', isActive: true, createdAt: '2021-01-10' },
   // QA Chair
-  { id: 'QA001', code: 'EMP-2001', name: 'Assoc. Prof. Rattana Pongsakorn', email: 'rattana.p@mfu.ac.th', role: 'qa_chair', department: 'School of Information Technology', phone: '053-916-010', isActive: true, createdAt: '2018-01-01' },
+  { id: 'QA001', code: 'EMP-2001', name: 'Assoc. Prof. Rattana Pongsakorn', email: 'rattana.p@mfu.ac.th', role: 'qa_chair', department: 'School of Applied Digital Technology (ADT)', phone: '053-916-010', isActive: true, createdAt: '2018-01-01' },
   // Admin
   { id: 'ADM001', code: 'EMP-3001', name: 'Supattra Kaewmanee', email: 'supattra.k@mfu.ac.th', role: 'admin', department: 'Academic Affairs', phone: '053-916-020', isActive: true, createdAt: '2019-03-01' },
 ]
@@ -113,7 +114,7 @@ export const mockFollowUps: FollowUp[] = [
 // --- Referrals ---
 
 export const mockReferrals: Referral[] = [
-  { id: 'REF001', sessionId: 'SES003', studentId: 'STU007', advisorId: 'ADV003', reason: 'Student needs financial assistance and payment plan options.', destination: 'financial_office', status: 'referred', referredAt: '2026-09-01', createdAt: '2026-09-01' },
+  { id: 'REF001', sessionId: 'SES003', studentId: 'STU007', advisorId: 'ADV003', reason: 'Student needs financial assistance and payment plan options.', destination: 'finance_accounting', status: 'referred', referredAt: '2026-09-01', createdAt: '2026-09-01' },
 ]
 
 // --- Category Config ---
@@ -172,12 +173,103 @@ export const mockEarlyWarnings: EarlyWarningCase[] = [
 // --- Exit Cases ---
 
 export const mockExitCases: ExitCase[] = [
-  { id: 'EX001', studentId: 'STU006', advisorId: 'ADV002', exitType: 'leave_of_absence', reasonCode: 'personal_family', details: 'Student needs to take a temporary leave to care for an ill family member. Plans to return next academic year.', preferredEffectiveDate: '2026-10-01', status: 'under_review', createdAt: '2026-09-02', updatedAt: '2026-09-03' },
+  { id: 'EX001', studentId: 'STU006', advisorId: 'ADV002', exitType: 'leave_of_absence', reasonCode: 'personal_family', details: 'Student needs to take a temporary leave to care for an ill family member. Plans to return next academic year.', dataAnalysisConsent: true, preferredEffectiveDate: '2026-10-01', status: 'under_review', createdAt: '2026-09-02', updatedAt: '2026-09-03' },
+  { id: 'EX002', studentId: 'STU009', advisorId: 'ADV003', exitType: 'withdrawal', reasonCode: 'academic', details: 'Found programming subjects overly difficult and wishes to pursue a degree in Graphic Design.', dataAnalysisConsent: true, preferredEffectiveDate: '2026-09-30', status: 'under_review', createdAt: '2026-08-29', updatedAt: '2026-09-01' },
 ]
 
 // --- Advisor Exit Assessments ---
 
-export const mockAdvisorAssessments: AdvisorExitAssessment[] = []
+export const mockAdvisorAssessments: AdvisorExitAssessment[] = [
+  {
+    id: 'ASS001',
+    exitCaseId: 'EX001',
+    advisorId: 'ADV002',
+    assessment: 'Conducted 1-on-1 counseling session with student. Valid personal obligation identified. Student possesses strong academic baseline.',
+    contributingFactors: 'Caregiving duty at hometown during parents surgery recovery.',
+    actionsTaken: 'Explained academic leave procedures, verified credit preservation, formulated re-entry study roadmap.',
+    referralsMade: 'Guidance & Counseling Center for emotional support.',
+    followUpAttempts: '2 follow-up calls completed.',
+    recommendation: 'Approve 1-year temporary leave of absence with planned return for Academic Year 2027.',
+    resolution: 'Approved for leave of absence.',
+    createdAt: '2026-09-03',
+  },
+]
+
+// --- Student Voice Voluntary Responses (Resignation / Leave) ---
+
+export const mockStudentVoiceResponses: StudentVoiceResponse[] = [
+  {
+    id: 'SVR001',
+    exitCaseId: 'EX001',
+    studentId: 'STU006',
+    studentCode: '6631503006',
+    isAnonymous: false,
+    exitType: 'leave_of_absence',
+    academicYear: 'Year 2 (ชั้นปีที่ 2)',
+    primaryFactors: [
+      'ภาระครอบครัว / ส่วนตัว (Family & Personal Circumstances)',
+      'ความเครียดและสุขภาพจิต (Mental Health & Stress)',
+    ],
+    ratings: {
+      curriculumRelevance: 4,
+      teachingQuality: 4,
+      advisorSupport: 5,
+      universityServices: 4,
+      overallExperience: 4,
+    },
+    whatCouldUniversityDoBetter: 'อาจารย์ที่ปรึกษา (อ.วิภาวรรณ) ให้ความช่วยเหลือและแนะนำทางเลือกดีมาก แต่ขั้นตอนการยื่นเอกสารขอพักการศึกษาในส่วนกลางของมหาวิทยาลัยค่อนข้างซับซ้อน อยากให้มีระบบออนไลน์ที่เบ็ดเสร็จรวดเร็วกว่านี้',
+    curriculumImprovementSuggestions: 'หลักสูตรเนื้อหาดีมาก อยากให้มีคลิปย้อนหลังสำหรับทบทวนเมื่อนักศึกษากลับมาเรียนต่อหลังจากพักการศึกษา',
+    adviceForFutureStudents: 'หากมีปัญหาเรื่องครอบครัวหรือความเครียด ให้รีบปรึกษาอาจารย์ที่ปรึกษาตั้งแต่เนิ่นๆ อาจารย์พร้อมรับฟังและหาทางออกให้เสมอ',
+    shareWithAdvisor: true,
+    createdAt: '2026-09-02T11:30:00',
+  },
+  {
+    id: 'SVR002',
+    exitCaseId: 'EX002',
+    isAnonymous: true,
+    exitType: 'withdrawal',
+    academicYear: 'Year 1 (ชั้นปีที่ 1)',
+    primaryFactors: [
+      'ความยากของหลักสูตร / ไม่ตรงกับความถนัด (Curriculum Difficulty & Fit)',
+      'การสอนและภาระงาน (Teaching Pace & Workload)',
+      'เป้าหมายอาชีพเปลี่ยนไป (Career Path Redirection)',
+    ],
+    ratings: {
+      curriculumRelevance: 3,
+      teachingQuality: 2,
+      advisorSupport: 4,
+      universityServices: 3,
+      overallExperience: 3,
+    },
+    whatCouldUniversityDoBetter: 'วิชาพื้นฐานการเขียนโปรแกรมในปี 1 มีความเร็วในการสอนค่อนข้างสูงและภาระการบ้านหนักมากสำหรับคนที่ไม่มีพื้นฐานสายคอมพิวเตอร์มาก่อน อยากให้มีวิชาปรับพื้นฐานหรือติวเสริมแบบเข้มข้น',
+    curriculumImprovementSuggestions: 'ควรมี Track หรือวิชาเลือกด้าน Design / UX/UI ที่เน้นปฏิบัติสำหรับคนที่ไม่ถนัดสาย Coding เชิงทฤษฎี',
+    adviceForFutureStudents: 'ควรศึกษาหลักสูตรและวิชาบังคับล่วงหน้า และกล้าสอบถามอาจารย์ผู้สอนตั้งแต่สัปดาห์แรกๆ',
+    shareWithAdvisor: true,
+    createdAt: '2026-08-30T14:15:00',
+  },
+  {
+    id: 'SVR003',
+    isAnonymous: true,
+    exitType: 'withdrawal',
+    academicYear: 'Year 3 (ชั้นปีที่ 3)',
+    primaryFactors: [
+      'ปัญหาทางการเงินและค่าครองชีพ (Financial Hardship)',
+      'โอกาสในการทำงาน / รายได้ (Employment Opportunity)',
+    ],
+    ratings: {
+      curriculumRelevance: 4,
+      teachingQuality: 4,
+      advisorSupport: 4,
+      universityServices: 3,
+      overallExperience: 4,
+    },
+    whatCouldUniversityDoBetter: 'อยากให้มีทุนการศึกษาฉุกเฉินหรือตำแหน่งงาน Part-time ภายในคณะที่เพียงพอกว่านี้ สำหรับนักศึกษาที่มีปัญหาการเงินกะทันหัน',
+    curriculumImprovementSuggestions: 'อยากให้หลักสูตรมีความยืดหยุ่น เช่น การเรียนแบบ Hybrid หรือรายวิชาแบบ Modular ที่สามารถทำงานควบคู่กับการเรียนได้',
+    adviceForFutureStudents: 'วางแผนการเงินและทุนการศึกษาตั้งแต่เนิ่นๆ หากเริ่มมีปัญหาให้ติดต่อหน่วยทุนของสำนักวิชาทันที',
+    shareWithAdvisor: false,
+    createdAt: '2026-08-15T09:45:00',
+  },
+]
 
 // --- Audit Logs ---
 
