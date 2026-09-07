@@ -1,6 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
-import { Bell, LogOut, Menu, User, ChevronDown } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { ThemeToggle } from '@/components/ui'
+import { Bell, LogOut, Menu, Calendar } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -45,7 +47,6 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const store = useStore()
   const navigate = useNavigate()
   const [showNotifs, setShowNotifs] = useState(false)
-  const [showUserMenu, setShowUserMenu] = useState(false)
 
   if (!currentUser) return null
 
@@ -163,55 +164,22 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           )}
         </div>
 
-        {/* User menu dropdown */}
-        <div
-          className="relative"
-          onMouseEnter={() => setShowUserMenu(true)}
-          onMouseLeave={() => setShowUserMenu(false)}
-        >
-          <button className="flex items-center gap-2 pl-2 border-l border-slate-200 hover:bg-slate-50 rounded-md px-2 py-1 transition-colors">
-            <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center">
-              <User className="h-3.5 w-3.5 text-slate-500" />
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-xs font-medium text-slate-900 leading-none">{currentUser.name}</p>
-              <p className="text-[10px] text-slate-400">{currentUser.code}</p>
-            </div>
-            <ChevronDown className="h-4 w-4 text-slate-400" />
+        {/* User info chip */}
+        <div className="flex items-center gap-3 pl-3 border-l border-slate-200/70 dark:border-slate-800">
+          <div className="h-9 w-9 rounded-xl bg-sky-50 dark:bg-sky-950/70 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-xs font-bold text-sky-700 dark:text-sky-400 flex-shrink-0 shadow-2xs">
+            {initials}
+          </div>
+          <div className="hidden sm:block">
+            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">{currentUser.name}</p>
+            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">{currentUser.code}</p>
+          </div>
+          <button
+            onClick={() => { logout(); navigate('/login') }}
+            className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-0.5 cursor-pointer"
+            title={t('ออกจากระบบ', 'Sign out')}
+          >
+            <LogOut className="h-4 w-4" />
           </button>
-
-          {/* User dropdown menu */}
-          {showUserMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50">
-                <div className="py-1">
-                  <button
-                    onClick={() => { navigate('/student/profile'); setShowUserMenu(false) }}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                  >
-                    <User className="h-4 w-4 text-slate-400" />
-                    Profile
-                  </button>
-                  <button
-                    onClick={() => { navigate('/student/settings'); setShowUserMenu(false) }}
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                  >
-                    <span>⚙️</span>
-                    Settings
-                  </button>
-                  <hr className="my-1 border-slate-100" />
-                  <button
-                    onClick={() => { logout(); navigate('/login'); setShowUserMenu(false) }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
         </div>
       </div>
     </header>

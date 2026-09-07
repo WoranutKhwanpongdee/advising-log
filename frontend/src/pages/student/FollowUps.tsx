@@ -1,7 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
-import { PageHeader, DataTable, StatusBadge } from '@/components/ui'
-import { ADVISING_CATEGORIES } from '@/types'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button } from '@/components/ui'
@@ -18,40 +16,6 @@ export default function FollowUps() {
   const myFollowUps = store.followUps.filter(f => f.studentId === currentUser.id)
 
   const columns = [
-    { 
-      key: 'category', 
-      header: 'Category', 
-      render: (f: FollowUp) => {
-        const request = store.requests.find(r => r.id === f.requestId)
-        const categoryLabel = request ? ADVISING_CATEGORIES.find(c => c.value === request.category)?.label : '-'
-        return <span className="text-xs">{categoryLabel}</span>
-      }
-    },
-    { 
-      key: 'teacher', 
-      header: 'Teacher', 
-      render: (f: FollowUp) => {
-        const advisor = store.users.find(u => u.id === f.advisorId)
-        return <span className="text-xs">{advisor?.name || '-'}</span>
-      }
-    },
-    { 
-      key: 'reason', 
-      header: 'Reason', 
-      render: (f: FollowUp) => <span className="text-xs font-medium">{f.task}</span>
-    },
-    { 
-      key: 'meetupTime', 
-      header: 'Meet-up Time', 
-      render: (f: FollowUp) => {
-        const appointment = store.appointments.find(a => a.requestId === f.requestId)
-        return <span className="text-xs">{appointment ? `${appointment.scheduledDate} ${appointment.scheduledTime}` : '-'}</span>
-      }
-    },
-    { 
-      key: 'status', 
-      header: 'Status', 
-      render: (f: FollowUp) => <StatusBadge status={f.status} />
     {
       key: 'task',
       header: t('งานที่ได้รับมอบหมาย', 'Assigned Task'),
@@ -65,6 +29,14 @@ export default function FollowUps() {
       ),
     },
     { key: 'session', header: t('รหัสคำร้องอ้างอิง', 'Request Reference'), render: (f: FollowUp) => <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{f.requestId}</span> },
+    {
+      key: 'advisor',
+      header: t('อาจารย์ที่ปรึกษา', 'Advisor'),
+      render: (f: FollowUp) => {
+        const advisor = store.users.find(u => u.id === f.advisorId)
+        return <span className="text-xs text-slate-600 dark:text-slate-300">{advisor?.name || '-'}</span>
+      },
+    },
     { key: 'due', header: t('กำหนดส่ง', 'Due Date'), render: (f: FollowUp) => <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{f.dueDate}</span> },
     { key: 'status', header: t('สถานะ', 'Status'), render: (f: FollowUp) => <StatusBadge status={f.status} /> },
     {
@@ -88,9 +60,11 @@ export default function FollowUps() {
 
   return (
     <div>
-      <PageHeader title="Follow-ups" description="View your assigned follow-up tasks." />
-      <DataTable columns={columns} data={myFollowUps} emptyMessage="No follow-up tasks assigned." />
+      <PageHeader
+        title={t('งานที่ต้องดำเนินการ / ติดตามผล', 'Assigned Follow-ups')}
+        description={t('ติดตามและจัดการงานมอบหมายที่อาจารย์ที่ปรึกษาให้คำแนะนำไว้', 'Track, manage, and complete action items assigned by your academic advisor.')}
+      />
+      <DataTable columns={columns} data={myFollowUps} emptyMessage={t('ไม่มีงานติดตามผลที่ค้างอยู่', 'No pending follow-ups assigned to your profile.')} />
     </div>
   )
 }
-
