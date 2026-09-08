@@ -29,6 +29,14 @@ export default function FollowUps() {
       ),
     },
     { key: 'session', header: t('รหัสคำร้องอ้างอิง', 'Request Reference'), render: (f: FollowUp) => <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{f.requestId}</span> },
+    {
+      key: 'advisor',
+      header: t('อาจารย์ที่ปรึกษา', 'Advisor'),
+      render: (f: FollowUp) => {
+        const advisor = store.users.find(u => u.id === f.advisorId)
+        return <span className="text-xs text-slate-600 dark:text-slate-300">{advisor?.name || '-'}</span>
+      },
+    },
     { key: 'due', header: t('กำหนดส่ง', 'Due Date'), render: (f: FollowUp) => <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{f.dueDate}</span> },
     { key: 'status', header: t('สถานะ', 'Status'), render: (f: FollowUp) => <StatusBadge status={f.status} /> },
     {
@@ -60,4 +68,3 @@ export default function FollowUps() {
     </div>
   )
 }
-

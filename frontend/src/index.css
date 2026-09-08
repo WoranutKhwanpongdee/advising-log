@@ -126,60 +126,50 @@ body {
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
 }
 
-.shadow-premium-hover {
-  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+/* Keep the dashboard rail attached to the viewport and aligned with the light UI. */
+aside {
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  color: #475569;
+  min-height: 100vh;
 }
 
-.dark .shadow-premium-hover {
-  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(2, 132, 199, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+aside .text-white {
+  color: #0f172a;
 }
 
-/* Custom subtle scrollbar */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+aside .text-slate-300,
+aside .text-slate-400,
+aside .text-slate-500 {
+  color: #64748b;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+aside .text-indigo-300 {
+  color: #4f46e5;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
+aside .bg-indigo-500 {
+  background-color: #4f46e5;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+aside .bg-white\/5 {
+  background-color: #f8fafc;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+aside .border-white\/10 {
+  border-color: #e2e8f0;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+aside button:hover {
+  background-color: #eef2ff;
+  color: #3730a3;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+@media (min-width: 1024px) {
+  aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
   }
 }
-
-
 

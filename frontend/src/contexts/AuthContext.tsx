@@ -3,15 +3,15 @@
 // ============================================================
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import type { User, UserRole } from '@/types'
+import type { User } from '@/types'
 import { mockUsers } from '@/data/mock-data'
 
 interface AuthState {
   currentUser: User | null
   isAuthenticated: boolean
-  login: (userId: string) => void
+  /** Returns true on success, false if userId not found */
+  login: (userId: string, _password: string) => boolean
   logout: () => void
-  getDemoUsers: () => { role: UserRole; users: User[] }[]
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -25,21 +25,18 @@ export function useAuth(): AuthState {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
-  const login = useCallback((userId: string) => {
-    const user = mockUsers.find(u => u.id === userId)
-    if (user) setCurrentUser(user)
+  // Password is ignored for now — any value works
+  const login = useCallback((userId: string, _password: string): boolean => {
+    const user = mockUsers.find(u => u.id === userId.toUpperCase())
+    if (user) {
+      setCurrentUser(user)
+      return true
+    }
+    return false
   }, [])
 
   const logout = useCallback(() => {
     setCurrentUser(null)
-  }, [])
-
-  const getDemoUsers = useCallback(() => {
-    const roles: UserRole[] = ['student', 'advisor', 'qa_chair', 'admin']
-    return roles.map(role => ({
-      role,
-      users: mockUsers.filter(u => u.role === role),
-    }))
   }, [])
 
   return (
@@ -48,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: currentUser !== null,
       login,
       logout,
-      getDemoUsers,
     }}>
       {children}
     </AuthContext.Provider>
