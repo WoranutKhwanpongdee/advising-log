@@ -179,18 +179,22 @@ export default function StudentVoiceSurvey() {
       />
 
       {/* Official Guarantee Banner */}
-      <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-50/90 via-sky-50/40 to-blue-50/80 dark:from-sky-950/70 dark:to-slate-900 border border-sky-200/80 dark:border-sky-800/80 flex items-start gap-3.5 shadow-xs">
-        <div className="p-2 rounded-xl bg-sky-600 text-white flex-shrink-0 shadow-md shadow-sky-600/20">
+      <div className="relative overflow-hidden mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white via-sky-50/30 to-blue-50/40 dark:from-[#0e1424] dark:via-[#111827] dark:to-[#0c1222] border border-sky-200/80 dark:border-slate-800/90 shadow-xs dark:shadow-premium flex items-start gap-3.5 sm:gap-4 transition-all">
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-sky-500/10 dark:bg-sky-500/15 blur-3xl pointer-events-none" />
+        <div className="relative z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-sky-600/25 ring-2 ring-sky-100 dark:ring-sky-400/20">
           <MessageSquareHeart className="h-5 w-5" />
         </div>
-        <div className="space-y-1">
-          <h3 className="text-xs sm:text-sm font-bold text-sky-950 dark:text-sky-200 flex items-center gap-2">
-            <span>{t('แบบสอบถามความสมัครใจเพื่อพัฒนาคุณภาพการศึกษา', 'Voluntary Quality Improvement Survey')}</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-200/70 dark:bg-sky-900 text-sky-800 dark:text-sky-300">
+        <div className="relative z-10 space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+              {t('แบบสอบถามความสมัครใจเพื่อพัฒนาคุณภาพการศึกษา', 'Voluntary Quality Improvement Survey')}
+            </h3>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-500/30 shadow-2xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse" />
               AUN-QA Criteria 6 & 8
             </span>
-          </h3>
-          <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-300/90 leading-relaxed">
             {t(
               'คำตอบของคุณมีคุณค่าอย่างยิ่งในการช่วยอาจารย์และมหาวิทยาลัยทำความเข้าใจปัญหาที่แท้จริง เพื่อปรับปรุงเนื้อหาหลักสูตร วิธีการสอน และระบบช่วยเหลือนักศึกษาในอนาคต',
               'Your sincere feedback helps faculty and leadership understand real challenges to improve curriculum content, teaching methodologies, and support structures for future students.'
