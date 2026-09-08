@@ -91,7 +91,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden" onClick={onClose} />
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs z-40 lg:hidden" onClick={onClose} />
       )}
 
       <aside className={cn(
@@ -108,7 +108,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               <span className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100 block leading-tight">
                 Advising<span className="text-sky-600 dark:text-sky-400">Log</span>
               </span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider leading-tight">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider leading-tight">
                 Academic Advisory
               </span>
             </div>
@@ -123,7 +123,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           <div className="p-2 rounded-xl bg-white dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 shadow-2xs flex items-center justify-between">
             <div>
               <p className="text-[11px] font-bold text-slate-900 dark:text-slate-100 leading-tight">{roleMeta.title}</p>
-              <p className="text-[10px] text-slate-400 dark:text-slate-400 font-medium">{roleMeta.subtitle}</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{roleMeta.subtitle}</p>
             </div>
             <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100 dark:ring-emerald-950" />
           </div>
@@ -140,15 +140,15 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               className={({ isActive }) => cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group cursor-pointer',
                 isActive
-                  ? 'bg-sky-50 dark:bg-sky-500/12 text-sky-800 dark:text-sky-300 font-bold border border-sky-200/70 dark:border-sky-500/25 shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100 border border-transparent',
+                  ? 'bg-sky-50 dark:bg-sky-500/15 text-sky-800 dark:text-sky-300 font-bold border border-sky-200/70 dark:border-sky-500/30 shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white border border-transparent',
               )}
             >
               {({ isActive }) => (
                 <>
                   <span className={cn(
                     'p-1 rounded-lg transition-colors',
-                    isActive ? 'bg-sky-600 text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300',
+                    isActive ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-400 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200',
                   )}>
                     {item.icon}
                   </span>

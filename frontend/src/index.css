@@ -126,50 +126,40 @@ body {
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
 }
 
-/* Keep the dashboard rail attached to the viewport and aligned with the light UI. */
+/* Sidebar and TopBar navigation base & dark mode rules */
 aside {
   background-color: #ffffff;
-  border-right: 1px solid #e2e8f0;
-  color: #475569;
-  min-height: 100vh;
+  border-right-color: #e2e8f0;
 }
 
-aside .text-white {
-  color: #0f172a;
+.dark aside {
+  background-color: #0e1424;
+  border-color: rgba(30, 41, 59, 0.8);
+  color: #f1f5f9;
 }
 
-aside .text-slate-300,
-aside .text-slate-400,
-aside .text-slate-500 {
-  color: #64748b;
+.dark header {
+  background-color: rgba(14, 20, 36, 0.92);
+  border-color: rgba(30, 41, 59, 0.8);
+  color: #f1f5f9;
 }
 
-aside .text-indigo-300 {
-  color: #4f46e5;
+/* Custom scrollbar styling for sidebar nav */
+aside nav::-webkit-scrollbar {
+  width: 4px;
 }
 
-aside .bg-indigo-500 {
-  background-color: #4f46e5;
+aside nav::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-aside .bg-white\/5 {
-  background-color: #f8fafc;
+aside nav::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
 }
 
-aside .border-white\/10 {
-  border-color: #e2e8f0;
+.dark aside nav::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.15);
 }
 
-aside button:hover {
-  background-color: #eef2ff;
-  color: #3730a3;
-}
-
-@media (min-width: 1024px) {
-  aside {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-  }
-}
 

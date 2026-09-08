@@ -55,11 +55,11 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2)
 
   return (
-    <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs">
+    <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs text-slate-900 dark:text-slate-100">
       {/* Left: Menu button (mobile) */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+        className="lg:hidden text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -112,7 +112,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
         <div className="relative">
           <button
             onClick={() => setShowNotifs(!showNotifs)}
-            className="relative text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="relative text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             title="Notifications"
           >
             <Bell className="h-4.5 w-4.5" />

@@ -30,7 +30,7 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
         aria-hidden="true"
         className={`relative z-10 h-7 w-7 rounded-full shadow-md transition-transform duration-300 ease-out ${
           isDark
-            ? 'translate-x-7 bg-slate-800 ring-1 ring-slate-700'
+            ? 'translate-x-7 bg-slate-800 ring-1 ring-sky-500/40'
             : 'translate-x-0 bg-white ring-1 ring-amber-200/80'
         }`}
       />
