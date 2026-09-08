@@ -1,65 +1,69 @@
 // ============================================================
-// AdvisingLog — Fake SSO Login Page (Elevated Minimal White & Sky Blue)
+// AdvisingLog — Login Page (Username + Password)
 // ============================================================
 
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ThemeToggle } from '@/components/ui'
-import type { UserRole } from '@/types'
-import { GraduationCap, Users, BarChart3, Shield, ChevronRight, ArrowLeft, Sparkles } from 'lucide-react'
+import { GraduationCap, Sparkles, Eye, EyeOff, LogIn } from 'lucide-react'
+
+// Map each role to its default route
+const ROLE_REDIRECT: Record<string, string> = {
+  student: '/student',
+  advisor: '/advisor',
+  qa_chair: '/qa',
+  admin: '/admin',
+}
 
 export default function LoginPage() {
-  const { login, getDemoUsers } = useAuth()
+  const { login } = useAuth()
   const { language, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
 
-  const roleConfig: Record<UserRole, { label: string; description: string; icon: React.ReactNode; redirect: string; tag: string }> = {
-    student: {
-      label: t('ระบบนักศึกษา', 'Student Portal'),
-      description: t('ยื่นคำร้องขอคำปรึกษา ติดตามบันทึก และจัดการงานที่ได้รับมอบหมาย', 'Submit advising petitions, track logs & complete action items'),
-      icon: <GraduationCap className="h-5 w-5" />,
-      redirect: '/student',
-      tag: t('นักศึกษา', 'Advisees'),
-    },
-    advisor: {
-      label: t('ระบบอาจารย์ที่ปรึกษา', 'Advisor Portal'),
-      description: t('จัดการเวลานัดหมาย บันทึกผลการเข้าพบ และระบบเตือนภัยวิชาการ', 'Manage appointments, advisor logs & early academic alerts'),
-      icon: <Users className="h-5 w-5" />,
-      redirect: '/advisor',
-      tag: t('อาจารย์', 'Faculty'),
-    },
-    qa_chair: {
-      label: t('ระบบประกันคุณภาพและประธานสาขา', 'QA & Chair Portal'),
-      description: t('ติดตามสถิติการให้คำปรึกษา รายงาน KPI และพิจารณาคำร้องลาออก', 'Advising KPI analytics, institutional reporting & exit petitions'),
-      icon: <BarChart3 className="h-5 w-5" />,
-      redirect: '/qa',
-      tag: t('ประกันคุณภาพ', 'QA & Audit'),
-    },
-    admin: {
-      label: t('ระบบผู้ดูแลระบบ', 'System Administration'),
-      description: t('บริหารจัดการข้อมูลผู้ใช้ จัดสรรอาจารย์ที่ปรึกษา และการตั้งค่าระบบ', 'User identities, faculty advisee rosters & system auditing'),
-      icon: <Shield className="h-5 w-5" />,
-      redirect: '/admin',
-      tag: t('ผู้ดูแล', 'Operations'),
-    },
-  }
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const demoGroups = getDemoUsers()
-  const selectedGroup = demoGroups.find(g => g.role === selectedRole)
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError('')
 
-  function handleLogin(userId: string) {
-    login(userId)
-    if (selectedRole) {
-      navigate(roleConfig[selectedRole].redirect)
+    if (!username.trim()) {
+      setError(t('กรุณากรอกชื่อผู้ใช้', 'Please enter your username'))
+      return
+    }
+    if (!password) {
+      setError(t('กรุณากรอกรหัสผ่าน', 'Please enter your password'))
+      return
+    }
+
+    setLoading(true)
+    const success = login(username.trim(), password)
+    setLoading(false)
+
+    if (success) {
+      // Determine role from logged-in user — re-read from context after login
+      // We navigate based on username prefix as a quick heuristic; the
+      // AuthContext already resolved the actual user object.
+      const id = username.trim().toUpperCase()
+      if (id.startsWith('STU')) navigate(ROLE_REDIRECT.student)
+      else if (id.startsWith('ADV')) navigate(ROLE_REDIRECT.advisor)
+      else if (id.startsWith('QA')) navigate(ROLE_REDIRECT.qa_chair)
+      else if (id.startsWith('ADM')) navigate(ROLE_REDIRECT.admin)
+      else navigate('/')
+    } else {
+      setError(t('ไม่พบผู้ใช้งาน กรุณาตรวจสอบชื่อผู้ใช้', 'User not found. Please check your username.'))
     }
   }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#090d16] bg-dot-pattern flex flex-col items-center justify-center p-4 sm:p-6 relative">
-      {/* Top right language switch + Theme toggle */}
+
+      {/* Top-right: language switch + theme toggle */}
       <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
         <div className="flex items-center text-[11px] font-bold bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
           <button
@@ -86,11 +90,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-lg z-10">
+      <div className="w-full max-w-sm z-10">
         {/* Brand Header */}
         <div className="text-center mb-7">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200/80 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-4 shadow-2xs">
-            <Sparkles className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" /> {t('ระบบอาจารย์ที่ปรึกษาและประกันคุณภาพการศึกษา', 'University Academic Advising System')}
+            <Sparkles className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+            {t('ระบบอาจารย์ที่ปรึกษาและประกันคุณภาพการศึกษา', 'University Academic Advising System')}
           </div>
           <div className="flex items-center justify-center gap-3 mb-2">
             <div className="inline-flex items-center justify-center h-12 w-12 bg-sky-600 text-white rounded-2xl shadow-lg shadow-sky-600/20 ring-4 ring-sky-100 dark:ring-sky-950">
@@ -107,94 +112,92 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl dark:shadow-none overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/40 dark:bg-slate-800/50">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                {selectedRole
-                  ? t(`เข้าสู่ระบบในบทบาท ${roleConfig[selectedRole].label}`, `Sign in as ${roleConfig[selectedRole].label}`)
-                  : t('เลือกบทบาทในการเข้าใช้งาน', 'Select Access Workspace')}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {selectedRole
-                  ? t('คลิกเลือกบัญชีตัวอย่างเพื่อเข้าสู่ระบบ', 'Click a demo persona below to enter the role workspace')
-                  : t('เลือกประเภทผู้ใช้งานเพื่อจำลองการยืนยันตัวตน SSO', 'Select an institutional persona to authenticate via mock SSO')}
-              </p>
-            </div>
-            {selectedRole && (
-              <button
-                onClick={() => setSelectedRole(null)}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" /> {t('ย้อนกลับ', 'Back')}
-              </button>
-            )}
+          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/50">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {t('เข้าสู่ระบบ', 'Sign In')}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {t('กรุณากรอกชื่อผู้ใช้และรหัสผ่านของคุณ', 'Enter your username and password to continue')}
+            </p>
           </div>
 
-          {/* Role selection */}
-          {!selectedRole && (
-            <div className="p-3 sm:p-4 space-y-2">
-              {(Object.keys(roleConfig) as UserRole[]).map(role => {
-                const config = roleConfig[role]
-                return (
-                  <button
-                    key={role}
-                    onClick={() => setSelectedRole(role)}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl text-left border border-slate-100 dark:border-slate-800 hover:border-sky-300/80 dark:hover:border-sky-500/50 hover:bg-sky-50/30 dark:hover:bg-slate-800/60 hover:shadow-xs transition-all duration-200 group cursor-pointer"
-                  >
-                    <div className="h-11 w-11 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 border border-sky-100/80 dark:border-sky-500/25 flex items-center justify-center flex-shrink-0 group-hover:bg-sky-600 group-hover:text-white group-hover:border-sky-600 transition-all duration-200 shadow-2xs">
-                      {config.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-sky-950 dark:group-hover:text-sky-300 transition-colors">{config.label}</p>
-                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-wider bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md group-hover:bg-sky-100 dark:group-hover:bg-sky-900/50 group-hover:text-sky-800 dark:group-hover:text-sky-300 transition-colors">
-                          {config.tag}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{config.description}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-sky-600 dark:group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                  </button>
-                )
-              })}
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {/* Username */}
+            <div className="space-y-1.5">
+              <label htmlFor="username" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t('ชื่อผู้ใช้', 'Username')}
+              </label>
+              <input
+                id="username"
+                type="text"
+                autoComplete="username"
+                placeholder={t('เช่น STU001, ADV001', 'e.g. STU001, ADV001')}
+                value={username}
+                onChange={e => { setUsername(e.target.value); setError('') }}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+              />
             </div>
-          )}
 
-          {/* User selection */}
-          {selectedRole && selectedGroup && (
-            <div className="p-3 sm:p-4 space-y-2 max-h-96 overflow-y-auto">
-              {selectedGroup.users.map(user => {
-                const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2)
-                return (
-                  <button
-                    key={user.id}
-                    onClick={() => handleLogin(user.id)}
-                    className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 text-left hover:bg-sky-50/40 dark:hover:bg-slate-800/60 hover:border-sky-300/70 dark:hover:border-sky-500/40 transition-all duration-200 group cursor-pointer shadow-2xs"
-                  >
-                    <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-500/12 border border-sky-100 dark:border-sky-500/25 flex items-center justify-center text-xs font-bold text-sky-700 dark:text-sky-300 flex-shrink-0 group-hover:bg-sky-600 group-hover:text-white group-hover:border-sky-600 transition-all duration-200 shadow-2xs">
-                      {initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight group-hover:text-sky-950 dark:group-hover:text-sky-300 transition-colors">{user.name}</p>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 font-medium">{user.code} {user.department ? `· ${user.department}` : ''}</p>
-                    </div>
-                    <span className="text-xs font-semibold text-sky-600 dark:text-sky-300 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 bg-white dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-100 dark:border-slate-700/60 shadow-2xs">
-                      {t('เข้าสู่ระบบ', 'Enter')} <ChevronRight className="h-3.5 w-3.5" />
-                    </span>
-                  </button>
-                )
-              })}
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t('รหัสผ่าน', 'Password')}
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder={t('รหัสผ่าน (ใส่อะไรก็ได้)', 'Any value accepted for now')}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError('') }}
+                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
-          )}
+
+            {/* Error */}
+            {error && (
+              <p className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl px-3.5 py-2.5">
+                {error}
+              </p>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-bold shadow-md shadow-sky-600/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+            >
+              <LogIn className="h-4 w-4" />
+              {loading ? t('กำลังเข้าสู่ระบบ…', 'Signing in…') : t('เข้าสู่ระบบ', 'Sign In')}
+            </button>
+          </form>
         </div>
 
-        <p className="text-center text-[11px] text-slate-400 mt-5 font-medium">
+        {/* Hint */}
+        <div className="mt-4 bg-sky-50/70 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900 rounded-2xl px-4 py-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
+          <p className="font-semibold text-slate-600 dark:text-slate-300">{t('บัญชีทดสอบ', 'Demo accounts')}</p>
+          <p>{t('นักศึกษา:', 'Students:')} STU001 – STU010</p>
+          <p>{t('อาจารย์:', 'Advisors:')} ADV001 – ADV003</p>
+          <p>{t('ประกันคุณภาพ:', 'QA Chair:')} QA001</p>
+          <p>{t('ผู้ดูแล:', 'Admin:')} ADM001</p>
+          <p className="mt-1 italic">{t('รหัสผ่าน: ใส่อะไรก็ได้', 'Password: anything works')}</p>
+        </div>
+
+        <p className="text-center text-[11px] text-slate-400 mt-4 font-medium">
           {t('ระบบจำลองการยืนยันตัวตน · ข้อมูลความลับทางการศึกษา', 'Protected Student Information · Local Authentication Simulation')}
         </p>
       </div>
     </div>
   )
 }
-
-
-
