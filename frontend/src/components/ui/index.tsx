@@ -16,7 +16,7 @@ export { ThemeToggle } from './ThemeToggle'
 type BadgeStatus = RequestStatus | FollowUpStatus | ReferralStatus | ExitCaseStatus | AppointmentStatus | EarlyWarningSeverity | DocumentStatus | string
 
 const statusLabelsTh: Record<string, string> = {
-  requested: 'ยื่นคำร้องแล้ว',
+  requested: 'รอการตอบรับ',
   scheduled: 'นัดหมายแล้ว',
   active: 'เปิดใช้งาน / ปกติ',
   in_progress: 'กำลังดำเนินการ',
@@ -40,6 +40,33 @@ const statusLabelsTh: Record<string, string> = {
   low: 'ความเสี่ยงต่ำ',
   referred: 'ส่งต่อหน่วยงานแล้ว',
   inactive: 'ปิดใช้งาน',
+}
+
+const statusLabelsEn: Record<string, string> = {
+  requested: 'Awaiting Response',
+  scheduled: 'Scheduled',
+  active: 'Active',
+  in_progress: 'In Progress',
+  open: 'Open',
+  uploaded: 'Uploaded',
+  completed: 'Completed',
+  resolved: 'Resolved',
+  signed: 'Signed',
+  approved: 'Approved',
+  pending: 'Pending',
+  under_review: 'Under Review',
+  monitoring: 'Monitoring',
+  required: 'Required',
+  medium: 'Medium Risk',
+  overdue: 'Overdue',
+  high: 'High Risk',
+  critical: 'Critical',
+  rejected: 'Rejected',
+  cancelled: 'Cancelled',
+  closed: 'Closed',
+  low: 'Low Risk',
+  referred: 'Referred',
+  inactive: 'Inactive',
 }
 
 const statusConfig: Record<string, { bg: string; text: string; border: string; dot: string }> = {
@@ -81,9 +108,9 @@ const statusConfig: Record<string, { bg: string; text: string; border: string; d
 export function StatusBadge({ status, className }: { status: BadgeStatus; className?: string }) {
   const { language } = useLanguage()
   const conf = statusConfig[status] || { bg: 'bg-slate-50 dark:bg-slate-800/50', text: 'text-slate-600 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-700/60', dot: 'bg-slate-400' }
-  const label = language === 'th' && statusLabelsTh[status]
-    ? statusLabelsTh[status]
-    : status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  const label = language === 'th'
+    ? (statusLabelsTh[status] || status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
+    : (statusLabelsEn[status] || status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))
 
   return (
     <span className={cn(

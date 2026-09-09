@@ -24,7 +24,7 @@ export const ADVISING_CATEGORIES: { value: AdvisingCategory; label: string; labe
   { value: 'academic_performance', label: 'Academic Performance / GPA / Probation', labelEn: 'Academic Performance / GPA / Probation', labelTh: 'ผลการเรียน / GPA / ภาวะวิทยาทัณฑ์' },
   { value: 'internship_career', label: 'Internship / Co-op / Career', labelEn: 'Internship / Co-op / Career', labelTh: 'ฝึกงาน / สหกิจศึกษา / อาชีพ' },
   { value: 'personal', label: 'Personal Issues', labelEn: 'Personal Issues', labelTh: 'ปัญหาส่วนตัว / การปรับตัว' },
-  { value: 'withdrawal_leave', label: 'Withdrawal / Leave of Absence', labelEn: 'Withdrawal / Leave of Absence', labelTh: 'การขอลาพัก / ขอลาออก' },
+  { value: 'withdrawal_leave', label: 'Withdrawal / Leave of Absence / Transfer', labelEn: 'Withdrawal / Leave of Absence / Transfer', labelTh: 'การขอลาพัก / ขอลาออก / ย้ายสาขา' },
 ]
 
 export type RequestStatus =
@@ -145,6 +145,9 @@ export type AuditAction =
   | 'user_role_changed'
   | 'roster_updated'
   | 'category_updated'
+  | 'api_toggled'
+  | 'roster_batch_imported'
+  | 'user_ai_access_toggled'
 
 // --- Core Models ---
 
@@ -157,8 +160,10 @@ export interface User {
   department: string
   phone?: string
   isActive: boolean
+  hasAiAccess?: boolean
   createdAt: string
 }
+
 
 export interface StudentAdvisorAssignment {
   id: string
@@ -359,3 +364,37 @@ export interface AuditLog {
   metadata?: string
   createdAt: string
 }
+
+export interface SystemApiConfig {
+  isAiApiEnabled: boolean
+  provider: string
+  model: string
+  lastToggledAt?: string
+  lastToggledBy?: string
+  notes?: string
+}
+
+export interface RosterImportEntry {
+  studentCode: string
+  advisorCodeOrEmail: string
+  notes?: string
+}
+
+export interface RosterImportResult {
+  mode: 'upsert' | 'replace'
+  totalRows: number
+  addedCount: number
+  updatedCount: number
+  unchangedCount: number
+  skippedCount: number
+  errors: string[]
+  preview: Array<{
+    studentCode: string
+    studentName: string
+    oldAdvisorName?: string
+    newAdvisorName: string
+    action: 'add' | 'update' | 'no_change' | 'error'
+    errorReason?: string
+  }>
+}
+

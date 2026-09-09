@@ -1,227 +1,76 @@
 // ============================================================
-// Student — Exit Form (Minimal White & Sky Blue)
+// Student — Exit Form Redirection & Consolidation Notice
+// Exit, Leave of Absence, and Transfer requests are now consolidated
+// into the Advising Appointment Request flow (/student/request?category=withdrawal_leave)
+// with the required AUN-QA Student Voice survey gate.
 // ============================================================
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
-import { useStore } from '@/data/mock-store'
-import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, Button, Card } from '@/components/ui'
-import { EXIT_REASON_CODES } from '@/types'
-import type { ExitType, ExitReasonCode } from '@/types'
-import { AlertCircle, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CalendarPlus, MessageSquareHeart, CheckCircle2 } from 'lucide-react'
 
 export default function ExitForm() {
-  const { currentUser } = useAuth()
-  const store = useStore()
-  const { addToast } = useToast()
-  const { t, getExitReasonLabel } = useLanguage()
+  const { t } = useLanguage()
   const navigate = useNavigate()
 
-  const [exitType, setExitType] = useState<ExitType | ''>('')
-  const [reasonCode, setReasonCode] = useState<ExitReasonCode | ''>('')
-  const [details, setDetails] = useState('')
-  const [effectiveDate, setEffectiveDate] = useState('')
-  const [dataAnalysisConsent, setDataAnalysisConsent] = useState(false)
-
-  const [submittedCaseId, setSubmittedCaseId] = useState<string | null>(null)
-
-  if (!currentUser) return null
-
-  const rosterEntry = store.roster.find(r => r.studentId === currentUser!.id && r.isActive)
-  const advisor = rosterEntry ? store.users.find(u => u.id === rosterEntry.advisorId) : null
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!exitType || !reasonCode || !details || !effectiveDate || !dataAnalysisConsent) {
-      addToast('error', t('ข้อมูลไม่ครบถ้วน', 'Validation Error'), t('กรุณากรอกข้อมูลที่จำเป็นให้ครบทุกช่อง', 'Please fill in all required fields.'))
-      return
-    }
-    if (!advisor) {
-      addToast('error', t('ไม่พบอาจารย์ที่ปรึกษา', 'No Advisor'), t('คุณยังไม่มีอาจารย์ที่ปรึกษาในระบบ', 'You do not have an assigned advisor.'))
-      return
-    }
-    const exitCase = store.addExitCase({
-      studentId: currentUser!.id,
-      advisorId: advisor.id,
-      exitType: exitType as ExitType,
-      reasonCode: reasonCode as ExitReasonCode,
-      details,
-      dataAnalysisConsent,
-      preferredEffectiveDate: effectiveDate,
-      status: 'open',
-    })
-    store.addNotification({
-      userId: advisor.id,
-      type: 'action_required',
-      title: t('คำร้องขอลาพัก / ลาออกใหม่', 'New Exit Case Request'),
-      message: `${currentUser!.name} ${t('ได้ยื่นคำร้อง', 'has submitted an exit request')} (${exitType.replace(/_/g, ' ')})`,
-      relatedId: exitCase.id,
-      isRead: false,
-    })
-    store.addAuditLog({
-      userId: currentUser!.id,
-      userName: currentUser!.name,
-      userRole: 'student',
-      action: 'exit_case_created',
-      description: `Created exit case: ${exitType.replace(/_/g, ' ')}`,
-      targetId: exitCase.id,
-    })
-    addToast('success', t('ส่งคำร้องสำเร็จ', 'Exit Form Submitted'), t('ส่งคำร้องไปยังอาจารย์ที่ปรึกษาเพื่อพิจารณาเรียบร้อยแล้ว', 'Your request has been submitted to your advisor for review.'))
-    setSubmittedCaseId(exitCase.id)
-  }
-
-  if (submittedCaseId) {
-    return (
-      <div className="max-w-2xl mx-auto py-6">
-        <Card className="text-center py-8 px-6 border-sky-200/80 bg-white dark:bg-slate-900 shadow-xl space-y-5">
-          <div className="h-14 w-14 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
-            <ShieldCheck className="h-8 w-8" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-              {t('ยื่นคำร้องขอลาออก / ลาพักเรียบร้อยแล้ว', 'Exit Request Submitted Successfully')}
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
-              {t('คำร้องของคุณถูกส่งไปยังอาจารย์ที่ปรึกษาเรียบร้อยแล้ว', 'Your request has been forwarded to your advisor.')}
-            </p>
-          </div>
-
-          {/* Student Voice Invitation Banner */}
-          <div className="p-5 bg-sky-50/80 dark:bg-sky-950/60 rounded-2xl border border-sky-200/80 dark:border-sky-800 text-left space-y-2.5">
-            <div className="flex items-center gap-2 text-sky-900 dark:text-sky-200 font-bold text-sm">
-              <span className="p-1 rounded-lg bg-sky-600 text-white text-xs">AUN-QA</span>
-              {t('เสียงของนักศึกษา (กรณีลาออก/พักการศึกษา)', 'Student Voice — Resignation/Leave')}
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {t(
-                'แบบสอบถามโดยสมัครใจ เพื่อให้นักศึกษาเล่าด้วยคำพูดของตนเอง ข้อมูลใช้พัฒนาหลักสูตรเท่านั้นและไม่มีผลต่อกระบวนการลาออก',
-                'Voluntary survey in your own words. Used only to improve the programme and does NOT affect your resignation process.'
-              )}
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Button
-              variant="primary"
-              onClick={() => navigate(`/student/voice?caseId=${submittedCaseId}`)}
-              className="w-full sm:w-auto"
-            >
-              {t('ร่วมทำแบบสอบถามเสียงของนักศึกษา', 'Share Your Voice (Voluntary Survey)')}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/student')}
-              className="w-full sm:w-auto"
-            >
-              {t('กลับสู่หน้าหลัก', 'Return to Dashboard')}
-            </Button>
-          </div>
-        </Card>
-      </div>
-    )
-  }
-
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto py-6">
       <PageHeader
         title={t('คำร้องขอลาพักการศึกษา / ลาออก / โอนย้าย', 'Exit & Leave Request')}
         description={t('ยื่นคำร้องอย่างเป็นทางการสำหรับการขอลาพักการศึกษา ลาออก หรือโอนย้ายสถานศึกษา', 'Submit an official request for withdrawal, leave of absence, or university transfer.')}
       />
 
-      <div className="mb-5 p-4 bg-amber-50/60 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 rounded-2xl flex items-start gap-3">
-        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed font-medium">
-          {t(
-            'ก่อนยื่นคำร้องขอลาพักหรือลาออก มหาวิทยาลัยแนะนำให้นักศึกษาเข้าพบและปรึกษาอาจารย์ที่ปรึกษาก่อน เพื่อรับทราบแนวทางการช่วยเหลือและทางเลือกอื่นทางวิชาการ',
-            'Before submitting an exit or leave request, we strongly encourage speaking with your faculty advisor to discuss support options and alternative academic plans.'
-          )}
-        </p>
-      </div>
+      <Card className="p-6 sm:p-8 text-center space-y-6 border-sky-200/80 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
+        <div className="h-16 w-16 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-600 dark:text-sky-400 mx-auto flex items-center justify-center shadow-sm">
+          <CalendarPlus className="h-8 w-8" />
+        </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-              {t('ประเภทคำร้อง', 'Exit Type')} <span className="text-rose-500">*</span>
-            </label>
-            <select
-              value={exitType}
-              onChange={e => setExitType(e.target.value as ExitType)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
-            >
-              <option value="">{t('-- เลือกประเภท --', 'Select type')}</option>
-              <option value="withdrawal">{t('ขอลาออกจากการเป็นนักศึกษา', 'Withdrawal / Drop Out')}</option>
-              <option value="leave_of_absence">{t('ขอลาพักการศึกษาชั่วคราว', 'Leave of Absence (Temporary)')}</option>
-              <option value="transfer">{t('ขอโอนย้ายสถาบัน / สาขาวิชา', 'Institution / Program Transfer')}</option>
-            </select>
-          </div>
+        <div className="space-y-2 max-w-lg mx-auto">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300">
+            <MessageSquareHeart className="h-3.5 w-3.5" />
+            {t('รวมกระบวนการกับคำขอนัดหมายเข้าพบอาจารย์แล้ว', 'Consolidated with Advising Request')}
+          </span>
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+            {t('การขอลาออก / ลาพักการศึกษา / ย้ายสาขา', 'Withdrawal / Leave / Transfer Advisory')}
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            {t(
+              'เพื่อประโยชน์สูงสุดของนักศึกษาและการประกันคุณภาพการศึกษา (AUN-QA Criteria 6 & 8) มหาวิทยาลัยได้รวมกระบวนการยื่นคำร้องขอลาพัก/ลาออก/ย้ายสาขา เข้ากับ "การยื่นคำร้องขอเข้าพบอาจารย์ที่ปรึกษา" โดยนักศึกษาจะได้นัดหมายเวลาเข้าพบและทำแบบสำรวจ Student Voice ได้ในขั้นตอนเดียว',
+              'For your best academic interest and AUN-QA Criteria 6 & 8 quality assurance, exit and leave petitions are now submitted via the Advising Request workflow. You can schedule an advisor meeting and complete your Student Voice survey in one seamless step.'
+            )}
+          </p>
+        </div>
 
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-              {t('สาเหตุหลัก', 'Primary Reason')} <span className="text-rose-500">*</span>
-            </label>
-            <select
-              value={reasonCode}
-              onChange={e => setReasonCode(e.target.value as ExitReasonCode)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer"
-            >
-              <option value="">{t('-- เลือกสาเหตุ --', 'Select reason')}</option>
-              {EXIT_REASON_CODES.map(r => (
-                <option key={r.value} value={r.value}>{getExitReasonLabel(r.value)}</option>
-              ))}
-            </select>
-          </div>
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 text-left space-y-2 text-xs text-slate-600 dark:text-slate-300 max-w-md mx-auto">
+          <p className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            {t('ขั้นตอนการดำเนินการใหม่:', 'Consolidated Steps:')}
+          </p>
+          <ul className="list-disc list-inside space-y-1 pl-1">
+            <li>{t('เลือกหมวด "การขอลาพัก / ขอลาออก / ย้ายสาขา"', 'Select category "Withdrawal / Leave / Transfer"')}</li>
+            <li>{t('เลือกวันที่และเวลาที่ประสงค์ขอเข้าพบอาจารย์', 'Propose your requested meeting date and time')}</li>
+            <li>{t('ทำแบบสำรวจเสียงสะท้อนนักศึกษา (Student Voice Survey)', 'Complete the mandatory Student Voice survey')}</li>
+            <li>{t('กดยืนยันส่งคำร้องไปยังอาจารย์ที่ปรึกษา', 'Submit your advising request')}</li>
+          </ul>
+        </div>
 
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-              {t('รายละเอียดและเหตุผลประกอบ', 'Details & Context')} <span className="text-rose-500">*</span>
-            </label>
-            <textarea
-              value={details}
-              onChange={e => setDetails(e.target.value)}
-              rows={4}
-              placeholder={t('อธิบายเหตุผล ความจำเป็น และสถานการณ์ประกอบการพิจารณา...', 'Explain your circumstances and rationale in detail...')}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs resize-none leading-relaxed"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
-              {t('วันที่มีผลตามความประสงค์', 'Preferred Effective Date')} <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={effectiveDate}
-              onChange={e => setEffectiveDate(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
-            />
-          </div>
-
-          <label className="flex items-start gap-3 p-3.5 rounded-xl border border-sky-100 dark:border-sky-800/80 bg-sky-50/50 dark:bg-sky-950/40 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={dataAnalysisConsent}
-              onChange={e => setDataAnalysisConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-sky-600 focus:ring-sky-500 accent-sky-600"
-            />
-            <span className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">
-                <ShieldCheck className="inline h-3.5 w-3.5 mr-1 text-sky-600 dark:text-sky-400" />
-                {t('ยินยอมให้ใช้ข้อมูลเพื่อการวิเคราะห์และปรับปรุงบริการ', 'Consent to data use for analysis and service improvement')} <span className="text-rose-500">*</span>
-              </span>
-              <span className="block mt-1 text-slate-500 dark:text-slate-400">
-                {t('ข้อมูลจะถูกนำไปใช้ในภาพรวมและปกปิดตัวตนของนักศึกษา โดยไม่กระทบต่อการพิจารณาคำร้อง', 'Your information will be de-identified and used in aggregate for analysis and service improvement. This will not affect your request review.')}
-              </span>
-            </span>
-          </label>
-
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="secondary" onClick={() => navigate('/student')}>{t('ยกเลิก', 'Cancel')}</Button>
-            <Button type="submit" variant="primary">{t('ยื่นคำร้อง', 'Submit Request')}</Button>
-          </div>
-        </form>
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Button
+            variant="primary"
+            onClick={() => navigate('/student/request?category=withdrawal_leave')}
+            className="w-full sm:w-auto shadow-md shadow-sky-600/20 py-2.5 font-bold text-xs sm:text-sm"
+          >
+            {t('ไปยังหน้ายื่นคำร้องขอเข้าพบ', 'Go to Advising Request Form')}
+            <ArrowRight className="h-4 w-4 ml-1.5" />
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => navigate('/student')}
+            className="w-full sm:w-auto text-xs sm:text-sm"
+          >
+            {t('กลับหน้าหลัก', 'Return to Dashboard')}
+          </Button>
+        </div>
       </Card>
     </div>
   )

@@ -17,7 +17,6 @@ import AdvisingHistory from '@/pages/student/AdvisingHistory'
 import AdvisingDetail from '@/pages/student/AdvisingDetail'
 import Documents from '@/pages/student/Documents'
 import FollowUps from '@/pages/student/FollowUps'
-import ExitForm from '@/pages/student/ExitForm'
 import StudentVoiceSurvey from '@/pages/student/StudentVoiceSurvey'
 
 // Advisor Pages
@@ -35,6 +34,7 @@ import ExitCaseReview from '@/pages/qa/ExitCaseReview'
 // Admin Pages
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import UserManagement from '@/pages/admin/UserManagement'
+import AiGovernance from '@/pages/admin/AiGovernance'
 import Roster from '@/pages/admin/Roster'
 import Categories from '@/pages/admin/Categories'
 import DocumentTypes from '@/pages/admin/DocumentTypes'
@@ -88,7 +88,7 @@ export default function App() {
                     <Route path="student/history/:id" element={<RequireRole allowedRoles={['student']}><AdvisingDetail /></RequireRole>} />
                     <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
                     <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
-                    <Route path="student/exit" element={<RequireRole allowedRoles={['student']}><ExitForm /></RequireRole>} />
+                    <Route path="student/exit" element={<Navigate to="/student/request?category=withdrawal_leave" replace />} />
                     <Route path="student/voice" element={<RequireRole allowedRoles={['student']}><StudentVoiceSurvey /></RequireRole>} />
 
                     {/* Advisor Routes */}
@@ -106,6 +106,7 @@ export default function App() {
                     {/* Admin Routes */}
                     <Route path="admin" element={<RequireRole allowedRoles={['admin']}><AdminDashboard /></RequireRole>} />
                     <Route path="admin/users" element={<RequireRole allowedRoles={['admin']}><UserManagement /></RequireRole>} />
+                    <Route path="admin/ai-governance" element={<RequireRole allowedRoles={['admin']}><AiGovernance /></RequireRole>} />
                     <Route path="admin/roster" element={<RequireRole allowedRoles={['admin']}><Roster /></RequireRole>} />
                     <Route path="admin/categories" element={<RequireRole allowedRoles={['admin']}><Categories /></RequireRole>} />
                     <Route path="admin/document-types" element={<RequireRole allowedRoles={['admin']}><DocumentTypes /></RequireRole>} />
