@@ -67,7 +67,13 @@ Users can click on sidebar links to select specific administrative areas for man
     * **Add Document Type (Branch Add):** Clicks 'Document Type' -> System displays the Document Type form (implicitly).
     * **Disable Document Type (Select 'Document Type' click 'Disable'):** -> System displays the document type and updates the list.
 
-* **E. Audit Logs:**
+* **E. AI Governance:**
+  * Clicks 'AI Governance' link -> System displays the AI Governance Console -> Branches into sub-actions:
+    * **System & API Config:** Navigate to tab -> View Master Switch status and API Key configuration -> Toggle Master Switch on/off -> Save/Update API Key -> Test Connection -> View connection status.
+    * **Personnel Access:** Navigate to tab -> View filtered faculty/staff list -> Filter by role (All/Advisor/QA Chair/Admin) and AI access status (All/Allowed/Revoked) -> Search personnel -> Toggle individual AI access permissions -> View updated authorization count.
+    * **AI Security Logs:** Navigate to tab -> View AI governance audit trail -> Review AI-related actions and permission changes with timestamps.
+
+* **F. Audit Logs:**
   * Clicks 'Audit Logs' link -> System displays the Audit Logs page.
 
 ### 2.3 Session Termination Phase
