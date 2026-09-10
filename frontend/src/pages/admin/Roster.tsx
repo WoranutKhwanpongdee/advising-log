@@ -530,8 +530,8 @@ export default function Roster() {
           </div>
 
           {/* Navigation Tabs (Input vs Preview) */}
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setImportTab('input')}
@@ -562,7 +562,7 @@ export default function Roster() {
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={handleDownloadTemplate}
@@ -704,8 +704,8 @@ export default function Roster() {
                   )}
 
                   {/* Preview Table */}
-                  <div className="max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="max-h-60 overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="min-w-max w-full text-left text-xs border-collapse">
                       <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 text-slate-700 dark:text-slate-300">
                         <tr>
                           <th className="p-2.5">{t('รหัสนักศึกษา', 'Student Code')}</th>
@@ -758,7 +758,7 @@ export default function Roster() {
                     </table>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => setImportTab('input')}
@@ -767,7 +767,7 @@ export default function Roster() {
                       &larr; {t('กลับไปแก้ไขข้อความ CSV', 'Edit CSV Text')}
                     </button>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-full sm:w-auto items-center justify-end gap-2">
                       <Button variant="secondary" onClick={() => setShowImportModal(false)}>
                         {t('ยกเลิก', 'Cancel')}
                       </Button>

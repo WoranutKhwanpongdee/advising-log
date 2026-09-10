@@ -55,7 +55,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2)
 
   return (
-    <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-6 sticky top-0 z-30 shadow-xs text-slate-900 dark:text-slate-100">
+    <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-30 shadow-xs text-slate-900 dark:text-slate-100">
       {/* Left: Menu button (mobile) */}
       <button
         onClick={onMenuClick}
@@ -78,7 +78,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       {/* Right: Language + Theme + Notifications + User */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1 sm:gap-2.5">
         {/* Language switch (TH/EN) */}
         <div className="flex items-center text-[11px] font-bold bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-xl border border-slate-200/70 dark:border-slate-700/60 shadow-2xs">
           <button
@@ -127,7 +127,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           {showNotifs && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotifs(false)} />
-              <div className="absolute right-0 top-full mt-2.5 w-88 bg-white dark:bg-[#0e1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-96 overflow-y-auto animate-[slideIn_0.15s_ease-out]">
+              <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-1.5rem)] max-w-88 bg-white dark:bg-[#0e1424] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-96 overflow-y-auto animate-[slideIn_0.15s_ease-out]">
                 <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/60">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{t('การแจ้งเตือนของระบบ', 'System Notifications')}</span>
                   {unreadCount > 0 && (

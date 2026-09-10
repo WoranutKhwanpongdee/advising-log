@@ -220,7 +220,7 @@ export default function StudentVoiceSurvey() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1: Identity & Context */}
         <Card className="space-y-5 border-slate-200/80 dark:border-slate-800">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span className="h-6 w-6 rounded-lg bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 flex items-center justify-center text-xs font-black">1</span>
               {t('ข้อมูลสถานะและการไม่ระบุตัวตน', 'Context & Anonymity')}
@@ -495,11 +495,11 @@ export default function StudentVoiceSurvey() {
           </div>
         </Card>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button variant="secondary" type="button" onClick={() => navigate('/student')}>
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
+          <Button className="w-full sm:w-auto" variant="secondary" type="button" onClick={() => navigate('/student')}>
             {t('ไว้ทำภายหลัง', 'Skip / Later')}
           </Button>
-          <Button variant="primary" type="submit">
+          <Button className="w-full sm:w-auto" variant="primary" type="submit">
             <Send className="h-4 w-4 mr-1.5" />
             {t('ส่งแบบสอบถามเสียงของนักศึกษา', 'Submit Student Voice')}
           </Button>

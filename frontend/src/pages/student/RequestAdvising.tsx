@@ -201,7 +201,7 @@ export default function RequestAdvising() {
                 <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                   {t('ประเภทคำร้อง', 'Request Type')} <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
                     { value: 'withdrawal', label: t('ขอลาออก', 'Withdrawal') },
                     { value: 'leave_of_absence', label: t('ลาพักการศึกษา', 'Leave of Absence') },
