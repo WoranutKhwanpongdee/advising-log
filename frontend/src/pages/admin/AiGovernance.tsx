@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
   Bot,
-  Sparkles,
   Power,
   ShieldCheck,
   KeyRound,
@@ -16,6 +15,7 @@ import {
   Lock,
   Layers,
   ScrollText,
+  Zap,
 } from 'lucide-react'
 import { PageHeader, Button, DataTable, StatusBadge } from '@/components/ui'
 import { useStore } from '@/data/mock-store'
@@ -162,14 +162,14 @@ export default function AiGovernance() {
       />
 
       {/* Navigation Tabs */}
-      <div className="flex gap-1.5 border-b border-slate-200/70 dark:border-slate-800 mb-6 overflow-x-auto pb-px">
+      <div className="flex gap-2 border-b border-slate-200/70 dark:border-slate-800 mb-8 overflow-x-auto pb-px">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-150 -mb-px whitespace-nowrap cursor-pointer ${
+          className={`flex items-center gap-2.5 px-5 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-200 -mb-px whitespace-nowrap cursor-pointer ${
             activeTab === 'overview'
               ? 'border-sky-600 dark:border-sky-400 text-sky-700 dark:text-sky-300 font-bold'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <Cpu className="h-4 w-4" />
@@ -179,15 +179,15 @@ export default function AiGovernance() {
         <button
           type="button"
           onClick={() => setActiveTab('personnel')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-150 -mb-px whitespace-nowrap cursor-pointer ${
+          className={`flex items-center gap-2.5 px-5 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-200 -mb-px whitespace-nowrap cursor-pointer ${
             activeTab === 'personnel'
               ? 'border-sky-600 dark:border-sky-400 text-sky-700 dark:text-sky-300 font-bold'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <Users className="h-4 w-4" />
           <span>{t('กำหนดสิทธิ์บุคลากร (อาจารย์ / QA)', 'Personnel Access (Faculty & QA)')}</span>
-          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-sky-100 dark:bg-sky-500/12 text-sky-800 dark:text-sky-300 font-bold border border-sky-200/60 dark:border-sky-500/25">
+          <span className="ml-2 px-2.5 py-0.5 rounded-full text-[10px] bg-sky-100 dark:bg-sky-500/12 text-sky-800 dark:text-sky-300 font-bold border border-sky-200/60 dark:border-sky-500/25">
             {authorizedPersonnelCount} / {totalPersonnelCount}
           </span>
         </button>
@@ -195,16 +195,16 @@ export default function AiGovernance() {
         <button
           type="button"
           onClick={() => setActiveTab('audit')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-150 -mb-px whitespace-nowrap cursor-pointer ${
+          className={`flex items-center gap-2.5 px-5 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-200 -mb-px whitespace-nowrap cursor-pointer ${
             activeTab === 'audit'
               ? 'border-sky-600 dark:border-sky-400 text-sky-700 dark:text-sky-300 font-bold'
-              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
           }`}
         >
           <ScrollText className="h-4 w-4" />
           <span>{t('ประวัติความปลอดภัย AI (AI Audit)', 'AI Security Logs')}</span>
           {aiAuditLogs.length > 0 && (
-            <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200/60 dark:border-slate-700/60">
+            <span className="ml-2 px-2.5 py-0.5 rounded-full text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200/60 dark:border-slate-700/60">
               {aiAuditLogs.length}
             </span>
           )}
@@ -217,35 +217,35 @@ export default function AiGovernance() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Master Switch Card */}
-          <div className="relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm hover:shadow-premium transition-all duration-200">
+          <div className="relative overflow-hidden p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-[#0e1424] dark:to-[#0f172a] border border-slate-200/70 dark:border-slate-800/80 shadow-sm hover:shadow-premium transition-all duration-300">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-5">
                 <div
-                  className={`h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
+                  className={`h-14 w-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
                     isEnabled
-                      ? 'bg-emerald-50 dark:bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-200/60 dark:ring-emerald-500/25'
-                      : 'bg-rose-50 dark:bg-rose-500/12 text-rose-600 dark:text-rose-400 ring-1 ring-rose-200/60 dark:ring-rose-500/25'
+                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white dark:from-emerald-400 dark:to-emerald-500 shadow-lg shadow-emerald-500/30'
+                      : 'bg-gradient-to-br from-rose-500 to-rose-600 text-white dark:from-rose-400 dark:to-rose-500 shadow-lg shadow-rose-500/30'
                   }`}
                 >
-                  <Bot className="h-6 w-6" />
+                  <Bot className="h-7 w-7" />
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
                       {t('สวิตช์ควบคุมหลักของระบบ (Tier 1 System Master Switch)', 'Tier 1 System Master Switch')}
                     </h2>
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                         isEnabled
-                          ? 'bg-emerald-50 dark:bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-500/25'
-                          : 'bg-rose-50 dark:bg-rose-500/12 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-500/25'
+                          ? 'bg-emerald-100 dark:bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-500/25'
+                          : 'bg-rose-100 dark:bg-rose-500/12 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-500/25'
                       }`}
                     >
-                      <span className={`h-1.5 w-1.5 rounded-full ${isEnabled ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                      <span className={`h-2 w-2 rounded-full ${isEnabled ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                       {isEnabled ? t('API: เปิดใช้งานอยู่ (Active)', 'API: Active') : t('API: ปิดใช้งาน (Disabled)', 'API: Disabled')}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
                     {t(
                       'สวิตช์ปิดฉุกเฉินระดับมหาวิทยาลัย หากปิดสวิตช์นี้ ระบบจะระงับการเรียกใช้ AI / LLM ทุกจุดในระบบทันที ไม่ว่าผู้ใช้รายบุคคลจะมีสิทธิ์หรือไม่ เหมาะสำหรับควบคุมงบประมาณหรือช่วงปิดปรับปรุง',
                       'Emergency kill-switch. When turned off, all AI / LLM requests are blocked immediately regardless of user permissions.'
@@ -258,7 +258,7 @@ export default function AiGovernance() {
                 <Button
                   variant={isEnabled ? 'danger' : 'primary'}
                   onClick={handleToggleMasterSwitch}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-xs sm:text-sm px-5 py-2.5 font-bold cursor-pointer"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-6 py-3 font-bold cursor-pointer"
                 >
                   <Power className="h-4 w-4" />
                   <span>
@@ -272,23 +272,30 @@ export default function AiGovernance() {
           </div>
 
           {/* Configuration Grid: API Key & Model Specs */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Column 1 & 2: API Credentials & Connection */}
-            <div className="lg:col-span-2 p-5 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-3">
-                <div className="flex items-center gap-2">
-                  <KeyRound className="h-4 w-4 text-sky-500" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                    {t('กุญแจเชื่อมต่อโมเดลภาษา (Google Gemini API Credentials)', 'LLM Gateway Credentials')}
-                  </h3>
+            <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                    <KeyRound className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {t('กุญแจเชื่อมต่อโมเดลภาษา (Google Gemini API Credentials)', 'LLM Gateway Credentials')}
+                    </h3>
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                      {provider} ({model})
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  {provider} ({model})
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {t('เชื่อมต่อภายนอก', 'External')}
                 </span>
               </div>
 
-              <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <div className="space-y-4">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
                   {t('Gemini API Key ส่วนกลางของหลักสูตร', 'Central Gemini API Key')}
                 </label>
                 <div className="relative">
@@ -297,25 +304,25 @@ export default function AiGovernance() {
                     value={apiKeyInput}
                     onChange={e => setApiKeyInput(e.target.value)}
                     placeholder="AIzaSy..."
-                    className="w-full pl-3 pr-10 py-2 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-500 font-mono text-slate-800 dark:text-slate-200"
+                    className="w-full pl-4 pr-12 py-3 rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-mono text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
                     {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                   <div className="flex items-center gap-2">
-                    <Button variant="primary" onClick={handleSaveApiKey} className="text-xs px-3 py-1.5">
-                      <Lock className="h-3.5 w-3.5 mr-1" />
+                    <Button variant="primary" onClick={handleSaveApiKey} className="text-sm px-4 py-2">
+                      <Lock className="h-4 w-4 mr-1.5" />
                       {t('บันทึกกุญแจเชื่อมต่อ', 'Save API Key')}
                     </Button>
                     {apiKeyInput && (
-                      <Button variant="secondary" onClick={handleClearApiKey} className="text-xs px-3 py-1.5 text-rose-600 dark:text-rose-400">
+                      <Button variant="secondary" onClick={handleClearApiKey} className="text-sm px-4 py-2 text-rose-600 dark:text-rose-400">
                         {t('ล้างค่า', 'Clear')}
                       </Button>
                     )}
@@ -325,9 +332,9 @@ export default function AiGovernance() {
                     variant="secondary"
                     onClick={handleTestConnection}
                     disabled={isTesting || !isEnabled}
-                    className="text-xs px-3.5 py-1.5 font-bold cursor-pointer"
+                    className="text-sm px-4 py-2 font-bold cursor-pointer"
                   >
-                    <Sparkles className={`h-3.5 w-3.5 mr-1.5 text-sky-500 ${isTesting ? 'animate-spin' : ''}`} />
+                    <Zap className={`h-4 w-4 mr-2 text-sky-500 ${isTesting ? 'animate-spin' : ''}`} />
                     {isTesting ? t('กำลังทดสอบ...', 'Testing...') : t('ทดสอบการเชื่อมต่อ (Test Connection)', 'Test Connection')}
                   </Button>
                 </div>
@@ -335,32 +342,32 @@ export default function AiGovernance() {
                 {/* Connection Status Box */}
                 {testResult && (
                   <div
-                    className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 transition-all ${
+                    className={`p-4 rounded-xl border text-sm flex items-start gap-3 transition-all ${
                       testResult.success
                         ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-200'
                         : 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/80 text-rose-800 dark:text-rose-200'
                     }`}
                   >
                     {testResult.success ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                      <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                     ) : (
-                      <XCircle className="h-4 w-4 text-rose-600 mt-0.5 flex-shrink-0" />
+                      <XCircle className="h-5 w-5 text-rose-600 mt-0.5 flex-shrink-0" />
                     )}
-                    <div>
+                    <div className="flex-1">
                       <p className="font-bold">{testResult.success ? t('เชื่อมต่อสำเร็จ', 'Verified Successfully') : t('ไม่สามารถเชื่อมต่อได้', 'Connection Failed')}</p>
-                      <p className="text-[11px] opacity-90 mt-0.5">{testResult.message}</p>
+                      <p className="text-xs opacity-90 mt-1">{testResult.message}</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* PDPA & Security Guarantee Card */}
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 text-xs space-y-1.5">
+              <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-sky-50 dark:from-emerald-950/30 dark:to-sky-950/30 border border-emerald-200/60 dark:border-emerald-800/60 text-sm space-y-2">
                 <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-bold">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   <span>{t('การปกป้องข้อมูลส่วนบุคคล (PDPA Data Protection Policy)', 'PDPA Protection Policy')}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   {t(
                     'ข้อมูลเคสที่ส่งไปวิเคราะห์กับ LLM จะถูกนิรนาม (De-identified) โดยอัตโนมัติ โดยระบบจะไม่ส่งชื่อจริง นามสกุล เลขบัตรประชาชน หรือเบอร์โทรศัพท์ของนักศึกษาออกไปยังภายนอกเด็ดขาด',
                     'All outbound prompts are strictly stripped of PII. Names, national IDs, and contact numbers are replaced with anonymous tokens.'
@@ -370,41 +377,59 @@ export default function AiGovernance() {
             </div>
 
             {/* Column 3: Telemetry & Model Overview */}
-            <div className="p-5 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-200/60 dark:border-slate-800/80 pb-3">
-                <Layers className="h-4 w-4 text-indigo-500" />
+            <div className="p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm space-y-5">
+              <div className="flex items-center gap-3 border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md">
+                  <Layers className="h-5 w-5" />
+                </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {t('สถิติและโควตาการใช้งาน', 'Quota & Telemetry')}
                 </h3>
               </div>
 
-              <div className="space-y-3">
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('บุคลากรที่ได้รับสิทธิ์', 'Authorized Personnel')}</p>
-                    <p className="text-base font-bold text-slate-900 dark:text-slate-100">{authorizedPersonnelCount} / {totalPersonnelCount}</p>
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-gradient-to-br from-sky-50 to-indigo-50 dark:from-sky-950/30 dark:to-indigo-950/30 border border-sky-200/60 dark:border-sky-800/60">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('บุคลากรที่ได้รับสิทธิ์', 'Authorized Personnel')}</p>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300">
+                      {Math.round((authorizedPersonnelCount / (totalPersonnelCount || 1)) * 100)}%
+                    </span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300">
-                    {Math.round((authorizedPersonnelCount / (totalPersonnelCount || 1)) * 100)}%
-                  </span>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">{authorizedPersonnelCount} / {totalPersonnelCount}</p>
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-sky-500 to-indigo-600 rounded-full transition-all duration-500"
+                      style={{ width: `${(authorizedPersonnelCount / (totalPersonnelCount || 1)) * 100}%` }}
+                    />
+                  </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('โมเดลหลักที่เปิดใช้งาน', 'Active LLM Engine')}</p>
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">Gemini 1.5 Flash</p>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200/60 dark:border-emerald-800/60">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('โมเดลหลักที่เปิดใช้งาน', 'Active LLM Engine')}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">Gemini 1.5 Flash</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                      <Zap className="h-5 w-5" />
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                  <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
                     Fast & Cost-Smart
                   </span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('โหมดสำรองกรณีออฟไลน์', 'Offline Fallback Engine')}</p>
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{t('เปิดทำงานอัตโนมัติ', 'Active & Ready')}</p>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50 border border-slate-200/60 dark:border-slate-800/60">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('โหมดสำรองกรณีออฟไลน์', 'Offline Fallback Engine')}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">{t('เปิดทำงานอัตโนมัติ', 'Active & Ready')}</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-750 text-slate-700 dark:text-slate-300">
+                  <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                     Smart Engine
                   </span>
                 </div>
@@ -420,19 +445,19 @@ export default function AiGovernance() {
       {activeTab === 'personnel' && (
         <div className="space-y-4">
           {/* Strict Role Filtering Notice Banner */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-50 via-sky-50/40 to-white dark:from-[#0b101b] dark:via-[#0f172a] dark:to-[#0e1424] border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 shadow-2xs">
-                <ShieldCheck className="h-5 w-5" />
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-50 via-sky-50/40 to-white dark:from-[#0b101b] dark:via-[#0f172a] dark:to-[#0e1424] border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-lg flex-shrink-0">
+                <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <p className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 text-sm">
                   <span>{t('ระบบกำหนดสิทธิ์เฉพาะบุคลากร (Faculty & QA Staff Only)', 'Faculty & QA Staff Delegation')}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300">
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300">
                     {authorizedPersonnelCount} / {totalPersonnelCount} {t('ได้รับอนุมัติ', 'authorized')}
                   </span>
                 </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                   {t(
                     '🔒 หน้านี้คัดกรองเฉพาะอาจารย์และฝ่ายประกันคุณภาพเท่านั้น (ตัดนักศึกษาออกทั้งหมด 100%) เพื่อป้องกันการเปิดสิทธิ์ผิดคนและควบคุมค่าใช้จ่ายอย่างรัดกุม',
                     '🔒 Restricted to faculty and QA personnel only. Students are completely excluded from AI access privileges.'
@@ -441,14 +466,14 @@ export default function AiGovernance() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 self-start sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto bg-white dark:bg-slate-800/50 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
               <button
                 type="button"
                 onClick={() => setPersonnelAiFilter('all')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
                   personnelAiFilter === 'all'
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                 }`}
               >
                 {t('ทั้งหมด', 'All')}
@@ -456,9 +481,9 @@ export default function AiGovernance() {
               <button
                 type="button"
                 onClick={() => setPersonnelAiFilter('granted')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
                   personnelAiFilter === 'granted'
-                    ? 'bg-emerald-600 text-white'
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50'
                 }`}
               >
@@ -467,10 +492,10 @@ export default function AiGovernance() {
               <button
                 type="button"
                 onClick={() => setPersonnelAiFilter('revoked')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
                   personnelAiFilter === 'revoked'
-                    ? 'bg-slate-600 text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-600 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                 }`}
               >
                 {t('ระงับสิทธิ์', 'Revoked')}
@@ -479,15 +504,15 @@ export default function AiGovernance() {
           </div>
 
           {/* Search & Role Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
                 placeholder={t('ค้นหาชื่อ, รหัสบุคลากร, สำนักวิชา...', 'Search name, employee ID, department...')}
                 value={personnelSearch}
                 onChange={e => setPersonnelSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-hidden focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-11 pr-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:border-sky-500 placeholder-slate-400 dark:placeholder-slate-500 transition-all"
               />
             </div>
 
@@ -495,7 +520,7 @@ export default function AiGovernance() {
               <select
                 value={personnelRoleFilter}
                 onChange={e => setPersonnelRoleFilter(e.target.value as any)}
-                className="px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-hidden focus:ring-2 focus:ring-sky-500"
+                className="px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:border-sky-500 cursor-pointer transition-all"
               >
                 <option value="all">{t('ทุกบทบาทบุคลากร (All Faculty & Staff)', 'All Faculty & Staff')}</option>
                 <option value="qa_chair">{t('ประกันคุณภาพ / ประธานสาขา (QA Chair)', 'QA Chair')}</option>
@@ -589,43 +614,73 @@ export default function AiGovernance() {
       {/* TAB 3: AI SECURITY AUDIT LOGS */}
       {/* ============================================================ */}
       {activeTab === 'audit' && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/60 dark:border-slate-800/80">
-              <div className="flex items-center gap-2">
-                <ScrollText className="h-4 w-4 text-indigo-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {t('บันทึกการกระทำและประวัติความปลอดภัย AI (AI Governance Audit Trail)', 'AI Governance Audit Trail')}
-                </h3>
+        <div className="space-y-5">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm">
+            <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800/80">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md">
+                  <ScrollText className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {t('บันทึกการกระทำและประวัติความปลอดภัย AI (AI Governance Audit Trail)', 'AI Governance Audit Trail')}
+                  </h3>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {aiAuditLogs.length} {t('รายการที่บันทึก', 'entries recorded')}
+                  </span>
+                </div>
               </div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                {aiAuditLogs.length} {t('รายการที่บันทึก', 'entries recorded')}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {t('บันทึกเรียลไทม์', 'Real-time')}
+                </span>
+              </div>
             </div>
 
             {aiAuditLogs.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-xs">
-                {t('ยังไม่มีประวัติการเปลี่ยนแปลงสิทธิ์ AI ในระบบ', 'No AI security events logged yet.')}
+              <div className="py-16 text-center">
+                <div className="h-16 w-16 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-center text-slate-400 dark:text-slate-500 mx-auto mb-4">
+                  <ScrollText className="h-8 w-8" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  {t('ยังไม่มีประวัติการเปลี่ยนแปลงสิทธิ์ AI ในระบบ', 'No AI security events logged yet.')}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                  {t('การเปลี่ยนแปลงสิทธิ์ AI และการกระทำที่เกี่ยวข้องจะถูกบันทึกที่นี่เมื่อเกิดขึ้น', 'AI permission changes and related actions will be logged here as they occur.')}
+                </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
-                {aiAuditLogs.map(log => (
-                  <div key={log.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                    <div className="flex items-start gap-3">
-                      <div className="h-7 w-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Bot className="h-3.5 w-3.5" />
+              <div className="space-y-3">
+                {aiAuditLogs.map((log, index) => (
+                  <div 
+                    key={log.id} 
+                    className="group relative p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900/40 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-200/60 dark:hover:border-indigo-800/60 transition-all duration-200"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950/60 dark:to-purple-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <Bot className="h-5 w-5" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-slate-100">{log.description}</p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {t('ดำเนินการโดย', 'By')}: <span className="font-medium text-slate-700 dark:text-slate-300">{log.userName}</span> ({log.userRole})
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <div>
+                            <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">{log.description}</p>
+                            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                              <span className="font-medium text-slate-700 dark:text-slate-300">{log.userName}</span>
+                              <span className="text-slate-300 dark:text-slate-600">•</span>
+                              <span className="font-mono text-xs">{log.userRole}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 font-mono whitespace-nowrap">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span>{new Date(log.createdAt).toLocaleString(language === 'th' ? 'th-TH' : 'en-US')}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono self-start sm:self-auto">
-                      <Clock className="h-3 w-3" />
-                      <span>{new Date(log.createdAt).toLocaleString(language === 'th' ? 'th-TH' : 'en-US')}</span>
-                    </div>
+                    {/* Timeline connector for consecutive items */}
+                    {index < aiAuditLogs.length - 1 && (
+                      <div className="absolute left-9 top-12 bottom-0 w-px bg-gradient-to-b from-indigo-200/60 to-transparent dark:from-indigo-800/60" />
+                    )}
                   </div>
                 ))}
               </div>
