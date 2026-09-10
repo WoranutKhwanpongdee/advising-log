@@ -187,7 +187,7 @@ export default function QADashboard() {
       {activeTab === 'overview' && (
         <>
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             <StatCard label={t('คำร้องทั้งหมด', 'Total Requests')} value={totalRequests} icon={<BarChart3 className="h-5 w-5" />} color="sky" />
             <StatCard label={t('ให้คำปรึกษาสำเร็จ', 'Completed Sessions')} value={totalSessions} icon={<CalendarClock className="h-5 w-5" />} color="sky" />
             <StatCard label={t('งานติดตามผลทั้งหมด', 'Total Follow-ups')} value={totalFollowUps} icon={<ListChecks className="h-5 w-5" />} color="sky" />
@@ -202,26 +202,26 @@ export default function QADashboard() {
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('สัดส่วนหัวข้อการขอคำปรึกษา', 'Advising Distribution by Topic')}
               </h3>
-              <div className="h-64">
+              <div className="h-56 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData} layout="vertical" margin={{ left: 0, right: 32 }}>
+                  <BarChart data={categoryData} layout="vertical" margin={{ left: 0, right: 24 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                    <XAxis type="number" tick={{ fontSize: 11, fill: chartTheme.axis }} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} width={170} />
+                    <XAxis type="number" tick={{ fontSize: 10, fill: chartTheme.axis }} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 9, fill: chartTheme.axis }} width={120} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: chartTheme.tooltipBg,
                         borderColor: chartTheme.tooltipBorder,
                         color: chartTheme.tooltipText,
                         borderRadius: '8px',
-                        fontSize: '12px',
+                        fontSize: '11px',
                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                       }}
                       itemStyle={{ color: chartTheme.tooltipText }}
                       formatter={(value, _name, item) => [`${value} ${t('คำร้อง', 'requests')} (${item.payload.percentage}%)`, t('จำนวน', 'Count')]}
                     />
                     <Bar dataKey="count" fill="#0284c7" radius={[0, 4, 4, 0]}>
-                      <LabelList dataKey="count" position="right" fill={chartTheme.axis} fontSize={11} />
+                      <LabelList dataKey="count" position="right" fill={chartTheme.axis} fontSize={10} />
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -286,24 +286,24 @@ export default function QADashboard() {
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
             </h3>
-            <div className="h-60">
+            <div className="h-52 sm:h-60">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={advisorWorkload}>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: chartTheme.axis }} />
-                  <YAxis tick={{ fontSize: 11, fill: chartTheme.axis }} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} />
+                  <YAxis tick={{ fontSize: 10, fill: chartTheme.axis }} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: chartTheme.tooltipBg,
                       borderColor: chartTheme.tooltipBorder,
                       color: chartTheme.tooltipText,
                       borderRadius: '8px',
-                      fontSize: '12px',
+                      fontSize: '11px',
                       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                     }}
                     itemStyle={{ color: chartTheme.tooltipText }}
                   />
-                  <Legend wrapperStyle={{ fontSize: 11, color: chartTheme.axis }} />
+                  <Legend wrapperStyle={{ fontSize: 10, color: chartTheme.axis }} />
                   <Bar dataKey="students" fill="#0284c7" name={t('นักศึกษาในความดูแล', 'Assigned Advisees')} radius={[4, 4, 0, 0]} />
                   <Bar dataKey="requests" fill="#38bdf8" name={t('คำร้องที่ได้รับ', 'Student Requests')} radius={[4, 4, 0, 0]} />
                   <Bar dataKey="sessions" fill="#64748b" name={t('ครั้งที่ให้คำปรึกษาสำเร็จ', 'Completed Sessions')} radius={[4, 4, 0, 0]} />
@@ -357,7 +357,7 @@ export default function QADashboard() {
           </div>
 
           {/* Average Scores */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label={t('ความพึงพอใจต่อหลักสูตร', 'Curriculum Score')} value={`${avgCurriculum} / 5`} icon={<Star className="h-5 w-5" />} color="sky" />
             <StatCard label={t('คุณภาพการสอน', 'Teaching Quality')} value={`${avgTeaching} / 5`} icon={<Star className="h-5 w-5" />} color="sky" />
             <StatCard label={t('การดูแลของอาจารย์ที่ปรึกษา', 'Advisor Mentorship')} value={`${avgAdvisor} / 5`} icon={<Star className="h-5 w-5" />} color="emerald" />

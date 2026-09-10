@@ -46,7 +46,7 @@ export default function AdvisorDashboard() {
         }
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
         <StatCard label={t('คำร้องรอการตอบรับ', 'Pending Requests')} value={pendingRequests.length} icon={<FileEdit className="h-5 w-5" />} color="amber" />
         <StatCard label={t('นัดหมายที่ยืนยันแล้ว', 'Upcoming Sessions')} value={upcomingApts.length} icon={<CalendarClock className="h-5 w-5" />} color="sky" />
         <StatCard label={t('งานติดตามผลค้างอยู่', 'Open Follow-ups')} value={myFollowUps.length} icon={<ListChecks className="h-5 w-5" />} color="sky" />

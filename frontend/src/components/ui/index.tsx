@@ -128,12 +128,12 @@ export function StatusBadge({ status, className }: { status: BadgeStatus; classN
 
 export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: ReactNode }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 pb-4 border-b border-slate-200/60 dark:border-slate-800/80">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-200/60 dark:border-slate-800/80">
+      <div className="flex-1">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
         {description && <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{description}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2.5 flex-shrink-0">{actions}</div>}
+      {actions && <div className="flex items-center gap-2 flex-shrink-0 sm:self-center sm:gap-2.5">{actions}</div>}
     </div>
   )
 }
@@ -154,14 +154,14 @@ export function StatCard({ label, value, icon, color = 'sky' }: { label: string;
   const theme = colorMap[color] || colorMap.sky
 
   return (
-    <div className="group relative bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 p-4 sm:p-5 shadow-premium hover:shadow-premium-hover hover:border-sky-300/60 dark:hover:border-sky-500/50 transition-all duration-200">
-      <div className="flex items-center gap-3.5">
-        <div className={cn('h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105 duration-200', theme.bg, theme.text, theme.ring)}>
+    <div className="group relative bg-white dark:bg-slate-900/90 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 p-3 sm:p-4 md:p-5 shadow-premium hover:shadow-premium-hover hover:border-sky-300/60 dark:hover:border-sky-500/50 transition-all duration-200">
+      <div className="flex items-center gap-2.5 sm:gap-3.5">
+        <div className={cn('h-9 w-9 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105 duration-200', theme.bg, theme.text, theme.ring)}>
           {icon}
         </div>
-        <div className="min-w-0">
-          <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-sans">{value}</p>
-          <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 mt-0.5 truncate tracking-wide">{label}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-sans">{value}</p>
+          <p className="text-[10px] sm:text-xs font-semibold text-slate-400 dark:text-slate-400 mt-0.5 truncate tracking-wide">{label}</p>
         </div>
       </div>
     </div>
@@ -206,16 +206,16 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: { isOpe
   if (!isOpen) return null
   const sizeClass = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' }[size]
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" onClick={onClose} />
-      <div className={cn('relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xl w-full max-h-[90vh] flex flex-col z-10 animate-[slideIn_0.15s_ease-out] text-slate-900 dark:text-slate-100', sizeClass)}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-          <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h2>
+      <div className={cn('relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xl w-full h-full sm:h-auto sm:max-h-[90vh] flex flex-col z-10 animate-[slideIn_0.15s_ease-out] text-slate-900 dark:text-slate-100', sizeClass)}>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 dark:border-slate-800">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">{title}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-6 py-5 overflow-y-auto flex-1">{children}</div>
+        <div className="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   )
@@ -435,8 +435,8 @@ export function Button({ children, onClick, variant = 'primary', size = 'md', di
     ghost: 'bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 border-transparent font-medium',
   }
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs rounded-lg',
-    md: 'px-4 py-2 text-xs sm:text-sm rounded-xl',
+    sm: 'px-2.5 sm:px-3 py-1.5 text-xs rounded-lg',
+    md: 'px-3.5 sm:px-4 py-2 text-xs sm:text-sm rounded-xl',
   }
   return (
     <button
@@ -484,54 +484,54 @@ export function StudentProfileBanner({
   const displaySemester = semester || t('1/2569', 'Semester 1 / Academic Year 2026')
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-premium p-5 sm:p-6 mb-6 relative overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-premium p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 relative overflow-hidden">
       {/* Top sky accent line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
 
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
         {/* Left: Avatar + Identity */}
-        <div className="flex items-start sm:items-center gap-4">
-          <div className="h-16 w-16 sm:h-18 sm:w-18 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-700 dark:text-sky-300 font-extrabold text-lg sm:text-xl shadow-xs flex-shrink-0">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+          <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-700 dark:text-sky-300 font-extrabold text-base sm:text-lg md:text-xl shadow-xs flex-shrink-0">
             {initials}
           </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-xs font-mono font-bold border border-sky-200/60 dark:border-sky-800">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-[10px] sm:text-xs font-mono font-bold border border-sky-200/60 dark:border-sky-800">
                 {student.code}
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800 text-[11px] font-semibold">
+              <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800 text-[10px] sm:text-[11px] font-semibold">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 {displayStatus}
               </span>
-              <span className="text-[11px] font-medium text-slate-400 dark:text-slate-400">
+              <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 dark:text-slate-400">
                 {t('ภาคการศึกษา:', 'Term:')} {displaySemester}
               </span>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">
               {student.name}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
               {displayMajor} · {displaySchool}
             </p>
           </div>
         </div>
 
         {/* Right: Academic metrics & Advisor */}
-        <div className="flex flex-wrap items-center gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
-          <div className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60">
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('GPAX สะสม', 'Cumulative GPAX')}</p>
-            <p className="text-base font-extrabold text-sky-600 dark:text-sky-400 mt-0.5 font-mono">{gpax}</p>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
+          <div className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 min-w-[80px] sm:min-w-[100px]">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('GPAX สะสม', 'Cumulative GPAX')}</p>
+            <p className="text-sm sm:text-base font-extrabold text-sky-600 dark:text-sky-400 mt-0.5 font-mono">{gpax}</p>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60">
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('หน่วยกิตสะสม', 'Earned Credits')}</p>
-            <p className="text-base font-extrabold text-slate-800 dark:text-slate-200 mt-0.5 font-mono">{credits}</p>
+          <div className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 min-w-[80px] sm:min-w-[100px]">
+            <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('หน่วยกิตสะสม', 'Earned Credits')}</p>
+            <p className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-200 mt-0.5 font-mono">{credits}</p>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-sky-50/50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/25 max-w-xs">
-            <p className="text-[10px] font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider">{t('อาจารย์ที่ปรึกษา', 'Faculty Advisor')}</p>
-            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate mt-0.5">
+          <div className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-sky-50/50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/25 max-w-[180px] sm:max-w-xs flex-1">
+            <p className="text-[9px] sm:text-[10px] font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider">{t('อาจารย์ที่ปรึกษา', 'Faculty Advisor')}</p>
+            <p className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-slate-100 truncate mt-0.5">
               {advisor?.name || t('ยังไม่ได้รับการจัดสรร', 'Not Assigned')}
             </p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-400 truncate">
+            <p className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-400 truncate">
               {advisor?.email || t('กรุณาติดต่อสำนักวิชา', 'Contact School Office')}
             </p>
           </div>
@@ -560,35 +560,35 @@ export function AdvisorCohortBanner({
   const displaySemester = semester || t('1/2569', 'Semester 1 / Academic Year 2026')
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-premium p-5 sm:p-6 mb-6 relative overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-premium p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-700 dark:text-sky-300 font-extrabold text-lg shadow-xs flex-shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-700 dark:text-sky-300 font-extrabold text-base sm:text-lg shadow-xs flex-shrink-0">
             {initials}
           </div>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-[11px] font-mono font-bold border border-sky-200/50 dark:border-sky-800">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+              <span className="px-2 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-[10px] sm:text-[11px] font-mono font-bold border border-sky-200/50 dark:border-sky-800">
                 {advisor.code}
               </span>
-              <span className="text-xs text-slate-400 dark:text-slate-400 font-medium">
+              <span className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-400 font-medium">
                 {t('อาจารย์ที่ปรึกษาทางวิชาการ', 'Academic Advisor')} · {displaySemester}
               </span>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">
               {advisor.name}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium truncate">
               {displaySchool}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/25 text-center">
-            <p className="text-[10px] font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider">{t('นักศึกษาในความดูแล', 'Assigned Advisees')}</p>
-            <p className="text-xl font-extrabold text-sky-800 dark:text-sky-200 mt-0.5 font-mono">{adviseeCount} {t('คน', 'Students')}</p>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/25 text-center min-w-[100px]">
+            <p className="text-[9px] sm:text-[10px] font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider">{t('นักศึกษาในความดูแล', 'Assigned Advisees')}</p>
+            <p className="text-lg sm:text-xl font-extrabold text-sky-800 dark:text-sky-200 mt-0.5 font-mono">{adviseeCount} {t('คน', 'Students')}</p>
           </div>
         </div>
       </div>

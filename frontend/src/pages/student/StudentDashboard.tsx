@@ -53,13 +53,13 @@ export default function StudentDashboard() {
       />
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <StatCard label={t('คำร้องทั้งหมด', 'Total Requests')} value={myRequests.length} icon={<FileEdit className="h-5 w-5" />} color="sky" />
         <StatCard label={t('นัดหมายที่กำลังมาถึง', 'Upcoming Sessions')} value={myAppointments.length} icon={<Calendar className="h-5 w-5" />} color="sky" />
         <StatCard label={t('งานติดตามผลคงค้าง', 'Pending Follow-ups')} value={myFollowUps.length} icon={<ListChecks className="h-5 w-5" />} color="amber" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left column (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Upcoming Appointment */}
