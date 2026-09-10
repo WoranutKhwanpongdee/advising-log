@@ -120,7 +120,7 @@ export default function AdvisingSessions() {
     },
     {
       key: 'preferred',
-      header: t('เวลาที่สะดวก', 'Preferred Slot'),
+      header: t('วัน-เวลาที่ประสงค์ขอเข้าพบ', 'Requested Slot'),
       render: (r: AdvisingRequest) => (
         <span className="text-xs text-slate-600 dark:text-slate-300">
           {r.preferredDate} · {r.preferredTime}

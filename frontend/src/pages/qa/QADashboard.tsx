@@ -22,11 +22,14 @@ import {
   Quote,
   Star,
   ShieldCheck,
+  Brain,
+  ArrowRight,
 } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList,
   PieChart, Pie, Cell, Legend
 } from 'recharts'
+import QualitativeExitAnalysis from './QualitativeExitAnalysis'
 
 const PIE_COLORS = ['#0284c7', '#38bdf8', '#7dd3fc', '#cbd5e1', '#94a3b8', '#64748b', '#f59e0b', '#ef4444']
 
@@ -35,7 +38,7 @@ export default function QADashboard() {
   const { addToast } = useToast()
   const { t, language } = useLanguage()
   const { isDark } = useTheme()
-  const [activeTab, setActiveTab] = useState<'overview' | 'student_voice'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'exit_qualitative' | 'student_voice'>('overview')
 
   const chartTheme = {
     grid: isDark ? '#1e293b' : '#f1f5f9',
@@ -134,11 +137,11 @@ export default function QADashboard() {
       />
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-2 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'overview'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -150,8 +153,24 @@ export default function QADashboard() {
 
         <button
           type="button"
+          onClick={() => setActiveTab('exit_qualitative')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'exit_qualitative'
+              ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          }`}
+        >
+          <Brain className="h-4 w-4" />
+          <span>{t('วิเคราะห์เจาะลึกทำไมลาออก / พักการศึกษา (Qualitative)', 'Why Resign / Leave (Qualitative)')}</span>
+          <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-extrabold border border-rose-200/60 dark:border-rose-800/60">
+            {totalExitCases}
+          </span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('student_voice')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'student_voice'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -165,7 +184,7 @@ export default function QADashboard() {
         </button>
       </div>
 
-      {activeTab === 'overview' ? (
+      {activeTab === 'overview' && (
         <>
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -211,9 +230,19 @@ export default function QADashboard() {
 
             {/* Exit Reason Distribution */}
             <Card>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <UserX className="h-4 w-4 text-rose-600 dark:text-rose-400" /> {t('สัดส่วนสาเหตุการขอลาออกและลาพัก', 'Exit & Leave Cases by Category')}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <UserX className="h-4 w-4 text-rose-600 dark:text-rose-400" /> {t('สัดส่วนสาเหตุการขอลาออกและลาพัก', 'Exit & Leave Cases by Category')}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('exit_qualitative')}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 hover:underline cursor-pointer"
+                >
+                  <span>{t('วิเคราะห์เจาะลึกเชิงคุณภาพ', 'Explore Qualitative')}</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
               <div className="h-64">
                 {exitData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -283,7 +312,13 @@ export default function QADashboard() {
             </div>
           </Card>
         </>
-      ) : (
+      )}
+
+      {activeTab === 'exit_qualitative' && (
+        <QualitativeExitAnalysis />
+      )}
+
+      {activeTab === 'student_voice' && (
         /* Student Voice Tab */
         <div className="space-y-6">
           {/* Banner */}

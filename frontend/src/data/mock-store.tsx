@@ -21,6 +21,9 @@ import type {
   AdvisingCategoryConfig,
   DocumentType,
   AuditLog,
+  SystemApiConfig,
+  RosterImportEntry,
+  RosterImportResult,
 } from '@/types'
 import {
   mockRequests,
@@ -71,6 +74,7 @@ interface StoreState {
   categoryConfigs: AdvisingCategoryConfig[]
   documentTypes: DocumentType[]
   auditLogs: AuditLog[]
+  systemApiConfig: SystemApiConfig
 }
 
 interface StoreActions {
@@ -123,6 +127,11 @@ interface StoreActions {
   // Roster
   addRosterEntry: (entry: Omit<StudentAdvisorAssignment, 'id' | 'assignedAt'>) => void
   updateRosterEntry: (studentId: string, newAdvisorId: string) => void
+  batchImportRoster: (entries: RosterImportEntry[], mode: 'upsert' | 'replace') => RosterImportResult
+
+  // System & API Configuration
+  toggleAiApi: (enabled: boolean, adminName?: string) => void
+  toggleUserAiAccess: (userId: string, enabled: boolean, adminName?: string) => void
 
   // Categories
   addCategory: (cat: Omit<AdvisingCategoryConfig, 'id'>) => void
@@ -135,6 +144,7 @@ interface StoreActions {
   // Audit
   addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>) => void
 }
+
 
 type Store = StoreState & StoreActions
 
@@ -163,6 +173,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [categoryConfigs, setCategoryConfigs] = useState<AdvisingCategoryConfig[]>([...mockCategoryConfigs])
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([...mockDocumentTypes])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([...mockAuditLogs])
+  const [systemApiConfig, setSystemApiConfig] = useState<SystemApiConfig>(() => {
+    const saved = localStorage.getItem('advising_log_system_api_config')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {}
+    }
+    return {
+      isAiApiEnabled: true,
+      provider: 'Google Gemini 1.5 Flash',
+      model: 'gemini-1.5-flash',
+      lastToggledAt: new Date().toISOString(),
+      lastToggledBy: 'Admin (System)',
+      notes: 'Active for Higher Ed QA retention analysis',
+    }
+  })
 
   // --- Actions ---
 
@@ -304,10 +330,232 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setAuditLogs(prev => [{ ...log, id: nextId('AL'), createdAt: new Date().toISOString() }, ...prev])
   }, [])
 
+  const toggleAiApi = useCallback((enabled: boolean, adminName: string = 'Admin') => {
+    setSystemApiConfig(prev => {
+      const updated: SystemApiConfig = {
+        ...prev,
+        isAiApiEnabled: enabled,
+        lastToggledAt: new Date().toISOString(),
+        lastToggledBy: adminName,
+      }
+      localStorage.setItem('advising_log_system_api_config', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
+  const toggleUserAiAccess = useCallback((userId: string, enabled: boolean, adminName: string = 'Admin') => {
+    setUsers(prev => prev.map(u => (u.id === userId ? { ...u, hasAiAccess: enabled } : u)))
+    const target = users.find(u => u.id === userId)
+    setAuditLogs(prev => [
+      {
+        id: nextId('AL'),
+        userId: 'ADM001',
+        userName: adminName,
+        userRole: 'admin',
+        action: 'user_ai_access_toggled',
+        description: `Admin ${enabled ? 'GRANTED' : 'REVOKED'} AI access for user ${target?.name || userId} (${target?.code || ''})`,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ])
+  }, [users])
+
+
+  const batchImportRoster = useCallback((
+    entries: RosterImportEntry[],
+    mode: 'upsert' | 'replace'
+  ): RosterImportResult => {
+    let addedCount = 0
+    let updatedCount = 0
+    let unchangedCount = 0
+    let skippedCount = 0
+    const errors: string[] = []
+    const preview: RosterImportResult['preview'] = []
+
+    const seenStudentCodes = new Set<string>()
+    const validBatch: Array<{ student: User; advisor: User; rawEntry: RosterImportEntry }> = []
+
+    for (const entry of entries) {
+      const sCode = (entry.studentCode || '').trim()
+      const aTarget = (entry.advisorCodeOrEmail || '').trim().toLowerCase()
+
+      if (!sCode) {
+        skippedCount++
+        continue
+      }
+
+      if (seenStudentCodes.has(sCode)) {
+        skippedCount++
+        errors.push(`รหัสนักศึกษา ${sCode} ปรากฏซ้ำในชุดข้อมูล (ยึดรายการแรกและข้ามรายการซ้ำ)`)
+        continue
+      }
+      seenStudentCodes.add(sCode)
+
+      const student = users.find(u => u.code === sCode && u.role === 'student')
+      if (!student) {
+        skippedCount++
+        errors.push(`ไม่พบรหัสนักศึกษา "${sCode}" ในฐานข้อมูล`)
+        preview.push({
+          studentCode: sCode,
+          studentName: 'ไม่พบในระบบ',
+          newAdvisorName: aTarget,
+          action: 'error',
+          errorReason: `ไม่พบนักศึกษารหัส ${sCode}`,
+        })
+        continue
+      }
+
+      const advisor = users.find(u =>
+        u.role === 'advisor' && (
+          u.code.toLowerCase() === aTarget ||
+          u.email.toLowerCase() === aTarget ||
+          u.name.toLowerCase().includes(aTarget) ||
+          u.id.toLowerCase() === aTarget
+        )
+      )
+
+      if (!advisor) {
+        skippedCount++
+        errors.push(`ไม่พบอาจารย์ที่ปรึกษา "${aTarget}" สำหรับนักศึกษา ${sCode}`)
+        preview.push({
+          studentCode: sCode,
+          studentName: student.name,
+          newAdvisorName: 'ไม่พบอาจารย์',
+          action: 'error',
+          errorReason: `ไม่พบอาจารย์ "${aTarget}"`,
+        })
+        continue
+      }
+
+      validBatch.push({ student, advisor, rawEntry: entry })
+    }
+
+    if (mode === 'replace') {
+      // In replace mode: all active roster entries are replaced by this batch
+      setRoster(prev => {
+        const inactives = prev.filter(r => !r.isActive)
+        const updatedList: StudentAdvisorAssignment[] = [...inactives]
+
+        for (const item of validBatch) {
+          const existing = prev.find(r => r.studentId === item.student.id && r.isActive)
+          const oldAdvisor = existing ? users.find(u => u.id === existing.advisorId) : undefined
+
+          updatedList.push({
+            id: nextId('R'),
+            studentId: item.student.id,
+            advisorId: item.advisor.id,
+            assignedAt: now(),
+            isActive: true,
+          })
+
+          if (!existing) {
+            addedCount++
+            preview.push({
+              studentCode: item.student.code,
+              studentName: item.student.name,
+              newAdvisorName: item.advisor.name,
+              action: 'add',
+            })
+          } else if (existing.advisorId !== item.advisor.id) {
+            updatedCount++
+            preview.push({
+              studentCode: item.student.code,
+              studentName: item.student.name,
+              oldAdvisorName: oldAdvisor?.name,
+              newAdvisorName: item.advisor.name,
+              action: 'update',
+            })
+          } else {
+            unchangedCount++
+            preview.push({
+              studentCode: item.student.code,
+              studentName: item.student.name,
+              oldAdvisorName: oldAdvisor?.name,
+              newAdvisorName: item.advisor.name,
+              action: 'no_change',
+            })
+          }
+        }
+
+        return updatedList
+      })
+    } else {
+      // In upsert mode (Default & Recommended):
+      // - Updates existing active student assignment to new advisor (no duplicate rows)
+      // - Adds new assignment if student has no prior active assignment
+      // - Unmentioned students remain completely untouched!
+      setRoster(prev => {
+        const nextRoster = [...prev]
+
+        for (const item of validBatch) {
+          const existingIdx = nextRoster.findIndex(r => r.studentId === item.student.id && r.isActive)
+
+          if (existingIdx >= 0) {
+            const existing = nextRoster[existingIdx]
+            const oldAdvisor = users.find(u => u.id === existing.advisorId)
+
+            if (existing.advisorId === item.advisor.id) {
+              unchangedCount++
+              preview.push({
+                studentCode: item.student.code,
+                studentName: item.student.name,
+                oldAdvisorName: oldAdvisor?.name,
+                newAdvisorName: item.advisor.name,
+                action: 'no_change',
+              })
+            } else {
+              updatedCount++
+              nextRoster[existingIdx] = {
+                ...existing,
+                advisorId: item.advisor.id,
+                assignedAt: now(),
+              }
+              preview.push({
+                studentCode: item.student.code,
+                studentName: item.student.name,
+                oldAdvisorName: oldAdvisor?.name,
+                newAdvisorName: item.advisor.name,
+                action: 'update',
+              })
+            }
+          } else {
+            addedCount++
+            nextRoster.push({
+              id: nextId('R'),
+              studentId: item.student.id,
+              advisorId: item.advisor.id,
+              assignedAt: now(),
+              isActive: true,
+            })
+            preview.push({
+              studentCode: item.student.code,
+              studentName: item.student.name,
+              newAdvisorName: item.advisor.name,
+              action: 'add',
+            })
+          }
+        }
+
+        return nextRoster
+      })
+    }
+
+    return {
+      mode,
+      totalRows: entries.length,
+      addedCount,
+      updatedCount,
+      unchangedCount,
+      skippedCount,
+      errors,
+      preview,
+    }
+  }, [users])
+
   const store: Store = {
     users, roster, requests, appointments, sessions, followUps, referrals,
     notifications, earlyWarnings, exitCases, advisorAssessments, studentVoiceResponses, documents,
-    categoryConfigs, documentTypes, auditLogs,
+    categoryConfigs, documentTypes, auditLogs, systemApiConfig,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
     addSession,
@@ -320,11 +568,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addStudentVoiceResponse,
     addDocument, updateDocumentStatus,
     addUser, updateUser,
-    addRosterEntry, updateRosterEntry,
+    addRosterEntry, updateRosterEntry, batchImportRoster,
+    toggleAiApi, toggleUserAiAccess,
     addCategory, updateCategory,
     addDocumentType, updateDocumentType,
     addAuditLog,
   }
+
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }
