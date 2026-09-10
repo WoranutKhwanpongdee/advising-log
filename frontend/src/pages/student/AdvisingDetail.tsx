@@ -81,11 +81,11 @@ export default function AdvisingDetail() {
               <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{advisor?.name || '-'}</p>
             </div>
             <div>
-              <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('วันที่สะดวกเข้าพบ', 'Preferred Date')}</span>
+              <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('วันที่ประสงค์ขอเข้าพบ', 'Requested Date')}</span>
               <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{request.preferredDate}</p>
             </div>
             <div>
-              <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('เวลาที่สะดวกเข้าพบ', 'Preferred Time')}</span>
+              <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('เวลาที่ประสงค์ขอเข้าพบ', 'Requested Time')}</span>
               <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{request.preferredTime}</p>
             </div>
           </div>

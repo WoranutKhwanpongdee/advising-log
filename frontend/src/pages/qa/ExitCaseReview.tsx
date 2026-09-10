@@ -4,8 +4,8 @@ import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, Modal } from '@/components/ui'
+import { Eye, CheckCircle2, MessageSquareHeart, Brain } from 'lucide-react'
 import type { ExitCase } from '@/types'
-import { Eye, CheckCircle2, MessageSquareHeart } from 'lucide-react'
 
 export default function ExitCaseReview() {
   const { currentUser } = useAuth()
@@ -118,6 +118,30 @@ export default function ExitCaseReview() {
                 <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('วันที่มีผล', 'Effective Date')}</span>
                 <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{selectedCase.preferredEffectiveDate}</p>
               </div>
+            </div>
+
+            {/* Qualitative Root-Cause Diagnostic Banner for QA */}
+            <div className="p-3.5 bg-gradient-to-r from-sky-50 to-indigo-50/40 dark:from-sky-950/40 dark:to-indigo-950/30 rounded-xl border border-sky-200/80 dark:border-sky-900/50 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sky-900 dark:text-sky-300 flex items-center gap-1.5">
+                  <Brain className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                  {t('การวิเคราะห์ปัญหาเชิงคุณภาพ (Qualitative Diagnosis):', 'Qualitative Problem Diagnosis:')}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  #{selectedCase.reasonCode}
+                </span>
+              </div>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
+                {selectedCase.exitType === 'withdrawal' || selectedCase.exitType === 'dropout'
+                  ? t(
+                      'เคสลาออกถาวร: สะท้อนปัญหาเชิงลึกด้านความพร้อมการเรียนและเป้าหมายอาชีพ ควรพิจารณาผลกระทบต่อเกณฑ์รับเข้าและการปูพื้นฐานปี 1',
+                      'Permanent Departure: Underlying factor points to academic foundation gap / career realignment; impacts Term 1 onboarding.'
+                    )
+                  : t(
+                      'เคสพักการศึกษาชั่วคราว: นักศึกษามีเจตนารมณ์จะกลับมาเรียนต่อ ต้องประสานงานติดตามผลเพื่อสนับสนุนการกลับเข้าศึกษา (Re-entry retention)',
+                      'Temporary Leave: Student intends to resume studies; requires structured re-entry roadmap and ongoing wellness check-ins.'
+                    )}
+              </p>
             </div>
 
             <div>

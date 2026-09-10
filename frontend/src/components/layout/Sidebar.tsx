@@ -9,7 +9,6 @@ import {
   History,
   FileText,
   ListChecks,
-  LogOut as LogOutIcon,
   CalendarClock,
   ClipboardList,
   AlertTriangle,
@@ -25,6 +24,7 @@ import {
   X,
   Sparkles,
   MessageSquareHeart,
+  Bot,
 } from 'lucide-react'
 
 interface NavItem {
@@ -47,7 +47,6 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           { to: '/student/history', label: t('ประวัติการขอคำปรึกษา', 'Advising History'), icon: <History className="h-4 w-4" /> },
           { to: '/student/documents', label: t('เอกสารที่เกี่ยวข้อง', 'Documents'), icon: <FileText className="h-4 w-4" /> },
           { to: '/student/followups', label: t('งานที่ต้องดำเนินการ', 'Follow-ups'), icon: <ListChecks className="h-4 w-4" /> },
-          { to: '/student/exit', label: t('ยื่นคำร้องลาพัก/ลาออก', 'Exit & Leave'), icon: <LogOutIcon className="h-4 w-4" /> },
           { to: '/student/voice', label: t('เสียงของนักศึกษา', 'Student Voice'), icon: <MessageSquareHeart className="h-4 w-4" /> },
         ]
       case 'advisor':
@@ -68,6 +67,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         return [
           { to: '/admin', label: t('แดชบอร์ดผู้ดูแล', 'Admin Dashboard'), icon: <LayoutDashboard className="h-4 w-4" /> },
           { to: '/admin/users', label: t('จัดการผู้ใช้งาน', 'User Management'), icon: <Users className="h-4 w-4" /> },
+          { to: '/admin/ai-governance', label: t('จัดการระบบ AI', 'AI Governance'), icon: <Bot className="h-4 w-4" /> },
           { to: '/admin/roster', label: t('จัดสรรอาจารย์ที่ปรึกษา', 'Student-Advisor Roster'), icon: <BookOpen className="h-4 w-4" /> },
           { to: '/admin/categories', label: t('หมวดหมู่คำปรึกษา', 'Categories'), icon: <FolderCog className="h-4 w-4" /> },
           { to: '/admin/document-types', label: t('ประเภทเอกสาร', 'Document Types'), icon: <FileCog className="h-4 w-4" /> },

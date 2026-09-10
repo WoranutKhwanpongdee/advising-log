@@ -8,6 +8,7 @@ import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { PageHeader, Card, Button } from '@/components/ui'
+import { useToast } from '@/contexts/ToastContext'
 import {
   Users,
   BookOpen,
@@ -28,6 +29,8 @@ import {
   ChevronRight,
   CheckCircle2,
   HardDrive,
+  Bot,
+  Power,
 } from 'lucide-react'
 import {
   PieChart,
@@ -45,9 +48,31 @@ export default function AdminDashboard() {
   const { t } = useLanguage()
   const { isDark } = useTheme()
   const navigate = useNavigate()
+  const { addToast } = useToast()
   const [auditFilter, setAuditFilter] = useState<'all' | 'login' | 'roster' | 'request'>('all')
 
   if (!currentUser) return null
+
+  const isAiEnabled = store.systemApiConfig?.isAiApiEnabled !== false
+
+  function handleToggleAiApi() {
+    const nextState = !isAiEnabled
+    store.toggleAiApi(nextState, currentUser?.name || 'Admin')
+    store.addAuditLog({
+      userId: currentUser?.id || 'ADM001',
+      userName: currentUser?.name || 'System Admin',
+      userRole: 'admin',
+      action: 'api_toggled',
+      description: `Administrator ${nextState ? 'ENABLED' : 'DISABLED'} AI/LLM API service platform-wide`,
+    })
+    addToast(
+      nextState ? 'success' : 'warning',
+      nextState ? t('เปิดใช้งาน AI API สำเร็จ', 'AI API Enabled') : t('ปิดการใช้งาน AI API สำเร็จ', 'AI API Disabled'),
+      nextState
+        ? t('ระบบ AI พร้อมใช้งานแล้ว', 'AI system is now active across the platform.')
+        : t('ระงับการเรียกใช้ API ภายนอกชั่วคราว ข้อมูลจะไม่ถูกส่งออก', 'External LLM API requests are paused by Administrator.')
+    )
+  }
 
   // User breakdown
   const totalUsers = store.users.length
@@ -613,8 +638,102 @@ export default function AdminDashboard() {
             </div>
           </Card>
 
+          {/* AI & LLM API Service Control Console */}
+          <Card className={`transition-all duration-300 border ${
+            isAiEnabled
+              ? 'border-sky-300/80 dark:border-sky-800/80 bg-gradient-to-br from-white via-sky-50/20 to-indigo-50/20 dark:from-[#0d1526] dark:via-[#0e172a] dark:to-[#0f172a]'
+              : 'border-amber-300/80 dark:border-amber-900/60 bg-gradient-to-br from-white via-amber-50/20 to-orange-50/20 dark:from-[#1a140d] dark:via-[#1a1208] dark:to-[#0f172a]'
+          }`}>
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-white shadow-xs ${
+                  isAiEnabled ? 'bg-gradient-to-br from-sky-500 to-indigo-600' : 'bg-slate-500'
+                }`}>
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    {t('การควบคุม API & ระบบปัญญาประดิษฐ์', 'AI / LLM API Control Console')}
+                  </h3>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                    {t('สิทธิ์ผู้ดูแลระบบ: เปิด/ปิดการเข้าถึงโมเดลภาษาขนาดใหญ่', 'Admin Role: Toggle LLM model access platform-wide')}
+                  </p>
+                </div>
+              </div>
+
+              <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                isAiEnabled
+                  ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-500/30'
+                  : 'bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-500/30'
+              }`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${isAiEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                {isAiEnabled ? t('API: เปิดใช้งาน', 'API: Active') : t('API: ปิดใช้งาน', 'API: Disabled')}
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800 shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    {t('สวิตช์ควบคุมหลัก (Master API Switch)', 'Master LLM API Switch')}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    {isAiEnabled
+                      ? t('ระบบ AI เปิดให้บริการสำหรับฝ่าย QA และประธานหลักสูตรตามปกติ', 'AI system is accessible for QA & Program Chair.')
+                      : t('ระบบ AI ถูกระงับชั่วคราว หน้า QA จะแสดงคำเตือนและไม่ส่งข้อมูลออกภายนอก', 'AI is paused; QA interface will show disabled warning.')}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleToggleAiApi}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold text-xs cursor-pointer shadow-xs transition-all flex-shrink-0 ${
+                    isAiEnabled
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200'
+                  }`}
+                >
+                  <Power className="h-3.5 w-3.5" />
+                  <span>{isAiEnabled ? t('เปิดใช้งานอยู่ (คลิกเพื่อปิด)', 'Enabled (Click to Disable)') : t('ปิดใช้งานอยู่ (คลิกเพื่อเปิด)', 'Disabled (Click to Enable)')}</span>
+                </button>
+              </div>
+
+              <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px]">
+                <div className="text-slate-500 dark:text-slate-400">
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">{t('ผู้ให้บริการ:', 'Provider:')}</span> {store.systemApiConfig.provider}
+                </div>
+                <div className="text-slate-400 sm:text-right">
+                  {t('แก้ไขล่าสุดโดย:', 'Last toggled by:')} <span className="font-semibold text-slate-600 dark:text-slate-300">{store.systemApiConfig.lastToggledBy || 'Admin'}</span>
+                </div>
+              </div>
+
+              {/* Per-User Granular Authorization Status */}
+              <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]">
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                  <Bot className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+                  <span>
+                    {t(
+                      `สิทธิ์บุคลากร: อนุมัติแล้ว ${store.users.filter(u => u.role !== 'student' && u.hasAiAccess === true).length} จาก ${store.users.filter(u => u.role !== 'student').length} ท่าน`,
+                      `Faculty/QA: ${store.users.filter(u => u.role !== 'student' && u.hasAiAccess === true).length} of ${store.users.filter(u => u.role !== 'student').length} authorized`
+                    )}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin/ai-governance')}
+                  className="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                >
+                  <span>{t('จัดการระบบ AI & กำหนดสิทธิ์', 'Manage AI Governance')}</span>
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </Card>
+
+
           {/* Infrastructure Health Card */}
           <Card>
+
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />

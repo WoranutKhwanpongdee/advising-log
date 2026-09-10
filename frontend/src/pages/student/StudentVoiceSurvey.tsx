@@ -20,6 +20,7 @@ import {
   Star,
   Send,
   ArrowLeft,
+  ArrowRight,
 } from 'lucide-react'
 
 const FACTOR_OPTIONS = [
@@ -43,6 +44,7 @@ export default function StudentVoiceSurvey() {
   const [searchParams] = useSearchParams()
 
   const linkedExitCaseId = searchParams.get('caseId') || undefined
+  const returnUrl = searchParams.get('return') || undefined
   const studentExitCase = store.exitCases.find(
     e => e.studentId === currentUser?.id || (linkedExitCaseId && e.id === linkedExitCaseId)
   )
@@ -158,10 +160,22 @@ export default function StudentVoiceSurvey() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button variant="primary" onClick={() => navigate('/student')}>
-              <ArrowLeft className="h-4 w-4 mr-1.5" />
-              {t('กลับสู่หน้าหลักนักศึกษา', 'Return to Student Dashboard')}
-            </Button>
+            {returnUrl ? (
+              <>
+                <Button variant="primary" onClick={() => navigate(returnUrl)}>
+                  {t('ดำเนินการยื่นคำร้องขอเข้าพบต่อ', 'Continue to Advising Request')}
+                  <ArrowRight className="h-4 w-4 ml-1.5" />
+                </Button>
+                <Button variant="secondary" onClick={() => navigate('/student')}>
+                  {t('กลับสู่หน้าหลักนักศึกษา', 'Return to Student Dashboard')}
+                </Button>
+              </>
+            ) : (
+              <Button variant="primary" onClick={() => navigate('/student')}>
+                <ArrowLeft className="h-4 w-4 mr-1.5" />
+                {t('กลับสู่หน้าหลักนักศึกษา', 'Return to Student Dashboard')}
+              </Button>
+            )}
           </div>
         </Card>
       </div>
