@@ -349,25 +349,26 @@ export default function QualitativeExitAnalysis() {
   return (
     <div className="space-y-8 text-slate-700 dark:text-slate-200 font-sans antialiased">
       {/* Top Banner: Qualitative Diagnosis Focus */}
-      <div className="relative overflow-hidden p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-5 transition-all">
-        <div className="absolute left-0 top-0 h-full w-1 bg-sky-500 pointer-events-none" />
+      <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-sky-50/35 to-white dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20 p-4 sm:p-5 md:p-6 shadow-premium transition-all duration-200 hover:border-sky-200/90 dark:hover:border-sky-500/35 hover:shadow-premium-hover flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-5">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600 pointer-events-none" />
+        <div className="absolute left-0 top-1 bottom-0 w-1 bg-gradient-to-b from-sky-100 via-transparent to-transparent dark:from-sky-500/20 pointer-events-none" aria-hidden="true" />
         
 
-        <div className="relative z-10 flex items-start gap-3.5 sm:gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-            <Brain className="h-6 w-6" />
+        <div className="relative z-10 flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+          <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-2xl bg-white/80 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 flex items-center justify-center flex-shrink-0 shadow-sm ring-4 ring-sky-50/80 dark:ring-sky-500/10 transition-transform duration-200 group-hover:scale-[1.03]">
+            <Brain className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white tracking-tight leading-snug">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
                 {t('การวิเคราะห์ปัญหาเชิงคุณภาพ: ทำไมเด็กลาออก / พักการศึกษา?', 'Qualitative Analysis: Why Do Students Resign or Take Leave?')}
               </h3>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800">
                 <Sparkles className="h-3 w-3 text-sky-600 dark:text-sky-400" />
                 AUN-QA Criteria 6.4 & 8.3
               </span>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-300 max-w-4xl leading-7">
+            <p className="max-w-4xl text-sm sm:text-base leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
               {t(
                 'จำแนกและวิเคราะห์เจาะลึกสาเหตุรากเหง้า (Root Causes) เปรียบเทียบระหว่างกลุ่ม "ขอลาออกถาวร" (ไม่ถนัดในสาขา/เป้าหมายเปลี่ยน) กับกลุ่ม "ขอพักการศึกษาชั่วคราว" (ภาระครอบครัว/สุขภาพจิต) โดยสังเคราะห์จากคำพูดจริงของนักศึกษาและผลวินิจฉัยของอาจารย์ที่ปรึกษา',
                 'In-depth comparative root-cause diagnosis contrasting Permanent Withdrawals (foundation gaps / career redirection) against Temporary Leaves of Absence (family caregiving / burnout), synthesizing student voices with faculty advisor evaluations.'
@@ -377,7 +378,7 @@ export default function QualitativeExitAnalysis() {
         </div>
 
         <div className="relative z-10 flex items-center gap-2 flex-shrink-0 self-start xl:self-auto">
-          <Button variant="secondary" size="sm" onClick={handleExportQualitative}>
+          <Button variant="secondary" size="sm" onClick={handleExportQualitative} className="bg-white/85 dark:bg-sky-500/10 border-sky-100 dark:border-sky-500/25 text-slate-700 dark:text-slate-300 shadow-xs">
             <Download className="h-3.5 w-3.5 mr-1.5 text-slate-500" />
             {t('ส่งออกรายงานวิเคราะห์เชิงคุณภาพ', 'Export Qualitative Audit')}
           </Button>

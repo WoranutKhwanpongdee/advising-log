@@ -2,11 +2,25 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@font-face {
+  font-family: 'Advising Numerals';
+  src:
+    local('Segoe UI Variable Text'),
+    local('Segoe UI Variable'),
+    local('Segoe UI');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range:
+    U+0025, U+002B-002F, U+0030-003A, U+00B2-00B3, U+00B9,
+    U+0E50-0E59;
+}
+
 @layer base {
   :root {
-    --font-thai: 'Plus Jakarta Sans', 'IBM Plex Sans Thai', 'Noto Sans Thai', 'Sarabun', 'Leelawadee UI', Tahoma, sans-serif;
-    --font-latin: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --font-numeric: 'Plus Jakarta Sans', 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-thai: 'Advising Numerals', 'Inter', 'IBM Plex Sans Thai', 'Noto Sans Thai', 'Sarabun', 'Leelawadee UI', Tahoma, sans-serif;
+    --font-latin: 'Advising Numerals', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-numeric: 'Advising Numerals', 'Inter', 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
     --card: 0 0% 100%;
@@ -87,7 +101,7 @@ body {
   font-family: var(--font-latin);
   font-size: 17px;
   line-height: 1.65;
-  font-feature-settings: "kern" 1, "tnum" 1, "case" 1;
+  font-feature-settings: "kern" 1, "tnum" 1, "case" 1, "zero" 0;
   font-variant-numeric: tabular-nums;
   background-color: #f8fafc;
   color: #0f172a;
@@ -136,7 +150,8 @@ select,
 textarea,
 button,
 table {
-  font-feature-settings: "kern" 1, "tnum" 1, "case" 1;
+  font-family: inherit;
+  font-feature-settings: "kern" 1, "tnum" 1, "case" 1, "zero" 0;
   font-variant-numeric: tabular-nums;
 }
 

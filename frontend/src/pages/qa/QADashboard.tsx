@@ -284,35 +284,40 @@ export default function QADashboard() {
             </Card>
 
             {/* Exit Reason Distribution */}
-            <Card>
-              <div className="flex items-center justify-between mb-4">
+            <Card className="flex flex-col">
+              <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <UserX className="h-4 w-4 text-rose-600 dark:text-rose-400" /> {t('สัดส่วนสาเหตุการขอลาออกและลาพัก', 'Exit & Leave Cases by Category')}
                 </h3>
+                <span className="inline-flex items-center rounded-full border border-sky-100 dark:border-sky-900/50 bg-sky-50 dark:bg-sky-950/35 px-3 py-1 text-[11px] font-bold text-sky-700 dark:text-sky-300 whitespace-nowrap">
+                  {t(`${exitTotal} เคส`, `${exitTotal} total`)}
+                </span>
                 <button
                   type="button"
                   onClick={() => setActiveTab('exit_qualitative')}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 hover:underline cursor-pointer"
+                  className="hidden"
                 >
                   <span>{t('วิเคราะห์เจาะลึกเชิงคุณภาพ', 'Explore Qualitative')}</span>
                   <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
-              <div className="h-72">
+              <div className="flex-1">
                 {exitData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart margin={{ top: 8, right: 8, bottom: 24, left: 8 }}>
+                  <div className="flex h-full min-h-[25rem] flex-col">
+                    <div className="relative h-56 sm:h-60">
+                      <ResponsiveContainer width="100%" height="100%">
+                    <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
                       <Pie
                         data={exitData}
                         dataKey="value"
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={46}
-                        outerRadius={78}
+                        innerRadius={58}
+                        outerRadius={92}
                         paddingAngle={3}
                         stroke={isDark ? '#0f172a' : '#ffffff'}
-                        strokeWidth={3}
+                        strokeWidth={4}
                       >
                         {exitData.map((_, i) => (
                           <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -334,17 +339,57 @@ export default function QADashboard() {
                           return [`${count} (${percentage}%)`, name]
                         }}
                       />
-                      <Legend
-                        iconSize={8}
-                        wrapperStyle={{ fontSize: 10, color: chartTheme.axis, lineHeight: '18px', paddingTop: 8 }}
-                        formatter={(value: string) => (
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                            {value.length > 30 ? `${value.slice(0, 30)}...` : value}
-                          </span>
-                        )}
-                      />
                     </PieChart>
                   </ResponsiveContainer>
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-2xl font-black leading-none text-slate-950 dark:text-white">{exitTotal}</div>
+                          <div className="mt-1 text-[10px] font-bold uppercase tracking-wide text-sky-500 dark:text-sky-300">
+                            {t('เคส', 'Cases')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 border-t border-slate-100 dark:border-slate-800 pt-3">
+                      {exitData.map((item, i) => {
+                        const percentage = exitTotal > 0 ? Math.round((item.value / exitTotal) * 100) : 0
+                        return (
+                          <div
+                            key={item.name}
+                            className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-2.5"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex min-w-0 items-center gap-2">
+                                <span
+                                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                                  style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
+                                />
+                                <span className="truncate text-xs font-bold text-slate-700 dark:text-slate-200">
+                                  {item.name}
+                                </span>
+                              </div>
+                              <span className="text-xs font-black text-slate-950 dark:text-white">
+                                {item.value}
+                              </span>
+                            </div>
+                            <div className="mt-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                              {t(`${percentage}% สัดส่วน`, `${percentage}% share`)}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('exit_qualitative')}
+                      className="mt-3 inline-flex items-center justify-center gap-1 rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-100 dark:border-sky-900/50 dark:bg-sky-950/35 dark:text-sky-300 dark:hover:bg-sky-950/60 cursor-pointer"
+                    >
+                      <span>{t('วิเคราะห์เจาะลึกเชิงคุณภาพ', 'Explore Qualitative')}</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-full text-xs text-slate-400">{t('ไม่มีข้อมูลเคสขอลาออกบันทึกไว้', 'No exit case data recorded')}</div>
                 )}
@@ -393,27 +438,28 @@ export default function QADashboard() {
         /* Student Voice Tab */
         <div className="space-y-7">
           {/* Student Voice Header */}
-          <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0e1424] p-5 sm:p-6 shadow-sm">
-            <div className="absolute inset-y-0 left-0 w-1 bg-sky-500" />
+          <section className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-sky-50/35 to-white dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20 p-4 sm:p-5 md:p-6 shadow-premium transition-all duration-200 hover:border-sky-200/90 dark:hover:border-sky-500/35 hover:shadow-premium-hover">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
+            <div className="absolute left-0 top-1 bottom-0 w-1 bg-gradient-to-b from-sky-100 via-transparent to-transparent dark:from-sky-500/20" aria-hidden="true" />
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pl-1">
-              <div className="flex items-start gap-4 min-w-0">
-                <div className="h-11 w-11 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/50 text-sky-600 dark:text-sky-300 flex items-center justify-center flex-shrink-0">
-                  <MessageSquareHeart className="h-5 w-5" />
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-2xl bg-white/80 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 flex items-center justify-center flex-shrink-0 shadow-sm ring-4 ring-sky-50/80 dark:ring-sky-500/10 transition-transform duration-200 group-hover:scale-[1.03]">
+                  <MessageSquareHeart className="h-6 w-6 sm:h-7 sm:w-7" />
                 </div>
 
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                    <h2 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
                       {t('ข้อมูลเชิงคุณภาพเสียงของนักศึกษา', 'Student Voice Qualitative Analysis')}
                     </h2>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/50">
+                    <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-800">
                       <ShieldCheck className="h-3.5 w-3.5" />
                       AUN-QA Criteria 6 & 8
                     </span>
                   </div>
 
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <p className="max-w-3xl text-sm sm:text-base leading-relaxed text-slate-500 dark:text-slate-400 font-medium">
                     {t(
                       'รวบรวมข้อเสนอแนะโดยสมัครใจจากนักศึกษาที่ขอลาออกหรือลาพัก เพื่อค้นหาปัจจัยสำคัญและนำข้อมูลไปปรับปรุงหลักสูตร การเรียนการสอน และระบบช่วยเหลือนักศึกษา',
                       'Aggregated voluntary feedback from departing or on-leave students to identify key drivers and improve curriculum, teaching, and student support.'
@@ -422,7 +468,7 @@ export default function QADashboard() {
                 </div>
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/60 px-3.5 py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 self-start lg:self-auto">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-sky-100 dark:border-sky-500/25 bg-white/85 dark:bg-sky-500/10 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 self-start lg:self-auto shadow-xs">
                 <ShieldCheck className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                 <span>{t('ไม่ระบุตัวตนและเก็บข้อมูลเป็นความลับ', 'De-identified & Confidential')}</span>
               </div>
