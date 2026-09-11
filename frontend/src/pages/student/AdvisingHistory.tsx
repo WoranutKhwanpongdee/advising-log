@@ -51,7 +51,7 @@ export default function AdvisingHistory() {
           </Button>
         }
       />
-      <div className="mb-5 max-w-sm">
+      <div className="mb-5 sm:mb-6 max-w-sm">
         <SearchInput value={search} onChange={setSearch} placeholder={t('ค้นหาตามหมวดหมู่ หรือคำสำคัญ...', 'Search by category or keyword...')} />
       </div>
       <DataTable

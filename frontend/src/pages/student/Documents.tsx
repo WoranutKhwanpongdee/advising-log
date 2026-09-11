@@ -72,7 +72,17 @@ export default function Documents() {
         title={t('เอกสารประกอบการศึกษา', 'Student Documents')}
         description={t('ตรวจสอบรายการแบบฟอร์ม เอกสารที่ต้องลงนาม และสถานะการจัดส่งเอกสาร', 'View required forms, signed paperwork, and submission status.')}
       />
-      <DataTable columns={columns} data={myDocs} emptyMessage={t('ไม่มีรายการเอกสารที่ต้องส่งในขณะนี้', 'No documents assigned to your profile.')} />
+      {myDocs.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-8 sm:p-12 text-center">
+          <div className="h-16 w-16 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center mx-auto mb-4">
+            <FileText className="h-8 w-8" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">{t('ไม่มีเอกสารที่ต้องส่ง', 'No Documents Required')}</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">{t('ขณะนี้คุณไม่มีเอกสารที่ต้องจัดส่ง', 'You currently have no documents that need to be submitted.')}</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={myDocs} emptyMessage={t('ไม่มีรายการเอกสารที่ต้องส่งในขณะนี้', 'No documents assigned to your profile.')} />
+      )}
     </div>
   )
 }

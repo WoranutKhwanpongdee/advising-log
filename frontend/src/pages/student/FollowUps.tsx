@@ -64,7 +64,17 @@ export default function FollowUps() {
         title={t('งานที่ต้องดำเนินการ / ติดตามผล', 'Assigned Follow-ups')}
         description={t('ติดตามและจัดการงานมอบหมายที่อาจารย์ที่ปรึกษาให้คำแนะนำไว้', 'Track, manage, and complete action items assigned by your academic advisor.')}
       />
-      <DataTable columns={columns} data={myFollowUps} emptyMessage={t('ไม่มีงานติดตามผลที่ค้างอยู่', 'No pending follow-ups assigned to your profile.')} />
+      {myFollowUps.length === 0 ? (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-8 sm:p-12 text-center">
+          <div className="h-16 w-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">{t('ไม่มีงานค้างที่ต้องทำ', 'All Tasks Completed')}</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">{t('คุณได้ปฏิบัติตามคำแนะนำครบถ้วนแล้ว', 'You have completed all assigned follow-up tasks.')}</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={myFollowUps} emptyMessage={t('ไม่มีงานติดตามผลที่ค้างอยู่', 'No pending follow-ups assigned to your profile.')} />
+      )}
     </div>
   )
 }

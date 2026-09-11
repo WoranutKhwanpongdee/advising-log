@@ -159,24 +159,29 @@ export default function RequestAdvising() {
         description={t('กรอกรายละเอียดเพื่อนัดหมายเข้าพบอาจารย์ที่ปรึกษาทางวิชาการ', 'Schedule a meeting with your academic advisor. Fill in the required details below.')}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
         {/* Advisor banner */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-sky-600 dark:text-sky-400 flex-shrink-0">
+        <div className="bg-gradient-to-r from-sky-50/80 via-white to-white dark:from-sky-950/40 dark:via-slate-900 dark:to-slate-900 rounded-2xl border border-sky-200/70 dark:border-slate-800 p-4 sm:p-5 shadow-premium flex items-center gap-3.5 sm:gap-4">
+          <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-sky-600/20 ring-2 ring-sky-100 dark:ring-sky-900/50">
             <User className="h-5 w-5" />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{t('อาจารย์ที่ปรึกษาที่รับผิดชอบ', 'Assigned Advisor')}</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
-              {advisor ? `${advisor.name} · ${advisor.department || 'School of Applied Digital Technology (ADT)'}` : t('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา', 'No assigned advisor')}
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] sm:text-xs font-semibold text-sky-700 dark:text-sky-400 uppercase tracking-wider mb-0.5">{t('อาจารย์ที่ปรึกษาที่รับผิดชอบ', 'Assigned Advisor')}</p>
+            <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate">
+              {advisor ? `${advisor.name}` : t('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา', 'No assigned advisor')}
             </p>
+            {advisor && (
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                {advisor.department || 'School of Applied Digital Technology (ADT)'}
+              </p>
+            )}
           </div>
         </div>
 
-        <Card className="space-y-5">
+        <Card className="space-y-5 sm:space-y-6">
           {/* Category */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
               {t('หมวดหมู่คำปรึกษา', 'Advising Category')} <span className="text-rose-500">*</span>
             </label>
             <select
@@ -185,7 +190,7 @@ export default function RequestAdvising() {
                 setCategory(e.target.value as AdvisingCategory)
                 setSubCategory('')
               }}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs cursor-pointer font-medium"
+              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-xs cursor-pointer font-medium hover:border-slate-300 dark:hover:border-slate-700"
             >
               <option value="">{t('-- กรุณาเลือกหมวดหมู่ --', 'Select a category')}</option>
               {ADVISING_CATEGORIES.map(c => (
@@ -196,12 +201,12 @@ export default function RequestAdvising() {
 
           {/* When category is withdrawal_leave */}
           {category === 'withdrawal_leave' && (
-            <div className="space-y-4 pt-1">
+            <div className="space-y-4 sm:space-y-5 pt-2">
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                   {t('ประเภทคำร้อง', 'Request Type')} <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                   {[
                     { value: 'withdrawal', label: t('ขอลาออก', 'Withdrawal') },
                     { value: 'leave_of_absence', label: t('ลาพักการศึกษา', 'Leave of Absence') },
@@ -211,10 +216,10 @@ export default function RequestAdvising() {
                       key={item.value}
                       type="button"
                       onClick={() => setExitType(item.value as ExitType)}
-                      className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-colors cursor-pointer ${
+                      className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-medium border text-center transition-all cursor-pointer ${
                         exitType === item.value
-                          ? 'border-sky-600 bg-sky-50/80 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-700 font-semibold'
-                          : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          ? 'border-sky-600 bg-sky-50/80 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-700 font-semibold shadow-sm ring-1 ring-sky-500/20'
+                          : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                       }`}
                     >
                       {item.label}
@@ -298,7 +303,7 @@ export default function RequestAdvising() {
 
           {/* Details */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
               {t('รายละเอียดที่ต้องการปรึกษา', 'Details')} <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -306,37 +311,37 @@ export default function RequestAdvising() {
               onChange={e => setDetails(e.target.value)}
               rows={4}
               placeholder={t('ระบุคำถาม ปัญหาที่พบ หรือประเด็นที่ต้องการปรึกษาอาจารย์...', 'Describe your questions, topics to discuss, or issues you are experiencing...')}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs resize-none leading-relaxed"
+              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-xs resize-none leading-relaxed hover:border-slate-300 dark:hover:border-slate-700"
             />
           </div>
 
           {/* Date and Time */}
-          <div className="space-y-1.5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                   {t('วันที่ประสงค์ขอเข้าพบ', 'Requested Date')} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
                   value={preferredDate}
                   onChange={e => setPreferredDate(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
+                  className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-xs hover:border-slate-300 dark:hover:border-slate-700"
                 />
               </div>
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                   {t('เวลาที่ประสงค์ขอเข้าพบ', 'Requested Time')} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="time"
                   value={preferredTime}
                   onChange={e => setPreferredTime(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors shadow-xs"
+                  className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-xs hover:border-slate-300 dark:hover:border-slate-700"
                 />
               </div>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic">
+            <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic px-1">
               {t(
                 '* เป็นวันและเวลาที่นักศึกษาเสนอขอเข้าพบเบื้องต้น โดยอาจารย์ที่ปรึกษาสามารถปรับเปลี่ยนตามตารางเวลาที่เหมาะสมได้',
                 '* Proposed meeting slot for advisor\'s consideration. Final schedule may be adjusted by the advisor.'
@@ -346,31 +351,31 @@ export default function RequestAdvising() {
 
           {/* Attachments */}
           <div>
-            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
               {t('เอกสารประกอบ (ถ้ามี)', 'Supporting Documents')}
             </label>
-            <div className="flex flex-wrap gap-2 mb-2.5">
+            <div className="flex flex-wrap gap-2 mb-3">
               {attachments.map((f, i) => (
-                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 rounded-lg text-xs font-medium text-sky-800 dark:text-sky-300">
+                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 rounded-lg text-xs font-medium text-sky-800 dark:text-sky-300 shadow-xs">
                   <Paperclip className="h-3 w-3" />
                   {f}
                   <button
                     type="button"
                     onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-sky-400 hover:text-sky-700 dark:hover:text-sky-200 ml-0.5 cursor-pointer"
+                    className="text-sky-400 hover:text-sky-700 dark:hover:text-sky-200 ml-0.5 cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/30 rounded-md p-0.5 transition-colors"
                   >
                     &times;
                   </button>
                 </span>
               ))}
             </div>
-            <Button type="button" variant="secondary" size="sm" onClick={handleFileSimulate}>
+            <Button type="button" variant="secondary" size="sm" onClick={handleFileSimulate} className="border-dashed border-2">
               <Paperclip className="h-3.5 w-3.5 mr-1" /> {t('แนบไฟล์เอกสาร', 'Attach File')}
             </Button>
           </div>
 
           {/* PDPA Consent */}
-          <div className="p-4 bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl">
+          <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-50/90 to-sky-50/50 dark:from-slate-800/70 dark:to-sky-950/30 border border-slate-200/80 dark:border-slate-800 rounded-xl">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -378,9 +383,9 @@ export default function RequestAdvising() {
                 onChange={e => setPdpaConsent(e.target.checked)}
                 className="mt-0.5 h-4 w-4 text-sky-600 border-slate-300 dark:border-slate-600 rounded focus:ring-sky-500/30 accent-sky-600"
               />
-              <span className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                <span className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 inline" /> {t('ความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)', 'PDPA / Privacy & Advising Consent')} <span className="text-rose-500">*</span>
+              <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 mb-1">
+                  <ShieldCheck className="h-4 w-4 text-sky-600 dark:text-sky-400 inline" /> {t('ความยินยอมข้อมูลส่วนบุคคล (PDPA Consent)', 'PDPA / Privacy & Advising Consent')} <span className="text-rose-500">*</span>
                 </span>
                 {t(
                   'ข้าพเจ้ายินยอมให้อาจารย์ที่ปรึกษาและมหาวิทยาลัยเก็บรวบรวมและใช้ข้อมูลทางการศึกษาเพื่อประโยชน์ในการให้คำปรึกษาทางวิชาการตามนโยบายคุ้มครองข้อมูลส่วนบุคคล',
@@ -391,12 +396,13 @@ export default function RequestAdvising() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button variant="secondary" onClick={() => navigate(-1)} type="button">
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-2.5 sm:gap-3 pt-4 sm:pt-5 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="secondary" onClick={() => navigate(-1)} type="button" className="w-full sm:w-auto">
               {t('ยกเลิก', 'Cancel')}
             </Button>
             <Button
               type="submit"
+              className="w-full sm:w-auto"
               disabled={category === 'withdrawal_leave' && !hasVoiceResponse}
             >
               {t('ยืนยันส่งคำร้อง', 'Submit Request')}
