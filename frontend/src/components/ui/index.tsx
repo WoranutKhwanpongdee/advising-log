@@ -2,7 +2,7 @@
 // Reusable UI Components — Ultra-Clean Minimal White & Sky Blue
 // ============================================================
 
-import { type ReactNode } from 'react'
+import { type MouseEventHandler, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { X, CheckCircle2, AlertTriangle, AlertCircle, Info, ChevronLeft, ChevronRight, Search, FileText } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
@@ -426,7 +426,7 @@ export function ToastContainer() {
 // --- Button helpers ---
 
 export function Button({ children, onClick, variant = 'primary', size = 'md', disabled, className, type = 'button' }: {
-  children: ReactNode; onClick?: () => void; variant?: 'primary' | 'secondary' | 'danger' | 'ghost'; size?: 'sm' | 'md'; disabled?: boolean; className?: string; type?: 'button' | 'submit'
+  children: ReactNode; onClick?: MouseEventHandler<HTMLButtonElement>; variant?: 'primary' | 'secondary' | 'danger' | 'ghost'; size?: 'sm' | 'md'; disabled?: boolean; className?: string; type?: 'button' | 'submit'
 }) {
   const variants = {
     primary: 'bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white border-transparent shadow-xs font-semibold focus:ring-4 focus:ring-sky-500/15',
