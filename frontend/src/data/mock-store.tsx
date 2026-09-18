@@ -118,7 +118,9 @@ interface StoreActions {
 
   // Documents
   addDocument: (doc: Omit<StudentDocument, 'id'>) => StudentDocument
+  updateDocument: (id: string, updates: Partial<StudentDocument>) => void
   updateDocumentStatus: (id: string, status: StudentDocument['status']) => void
+  deleteDocument: (id: string) => void
 
   // Users
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => User
@@ -288,8 +290,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return newDoc
   }, [])
 
+  const updateDocument = useCallback((id: string, updates: Partial<StudentDocument>) => {
+    setDocuments(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d))
+  }, [])
+
   const updateDocumentStatus = useCallback((id: string, status: StudentDocument['status']) => {
     setDocuments(prev => prev.map(d => d.id === id ? { ...d, status } : d))
+  }, [])
+
+  const deleteDocument = useCallback((id: string) => {
+    setDocuments(prev => prev.filter(d => d.id !== id))
   }, [])
 
   const addUser = useCallback((user: Omit<User, 'id' | 'createdAt'>): User => {
@@ -566,7 +576,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addExitCase, updateExitCaseStatus,
     addAdvisorAssessment,
     addStudentVoiceResponse,
-    addDocument, updateDocumentStatus,
+    addDocument, updateDocument, updateDocumentStatus, deleteDocument,
     addUser, updateUser,
     addRosterEntry, updateRosterEntry, batchImportRoster,
     toggleAiApi, toggleUserAiAccess,
