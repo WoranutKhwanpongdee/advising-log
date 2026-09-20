@@ -3,7 +3,8 @@
 // Simple reactive store for prototype state management
 // ============================================================
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import api from '@/services/apiClient'
 import type {
   AdvisingRequest,
   RequestProgress,
@@ -214,21 +215,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   })
 
+  // --- Background Backend Sync on Mount ---
+  useEffect(() => {
+    let isMounted = true
+    async function syncFromBackend() {
+      const [uRes, rRes, fRes, sRes] = await Promise.all([
+        api.getUsers(),
+        api.getRequests(),
+        api.getFollowUps(),
+        api.getSessions(),
+      ])
+      if (!isMounted) return
+      if (uRes?.users && uRes.users.length > 0) setUsers(uRes.users)
+      if (rRes?.requests && rRes.requests.length > 0) setRequests(rRes.requests)
+      if (fRes?.followUps && fRes.followUps.length > 0) setFollowUps(fRes.followUps)
+      if (sRes?.sessions && sRes.sessions.length > 0) setSessions(sRes.sessions)
+    }
+    syncFromBackend()
+    return () => { isMounted = false }
+  }, [])
+
   // --- Actions ---
 
   const addRequest = useCallback((req: Omit<AdvisingRequest, 'id' | 'createdAt' | 'updatedAt'>): AdvisingRequest => {
     const newReq: AdvisingRequest = { ...req, id: nextId('REQ'), createdAt: now(), updatedAt: now() }
     setRequests(prev => [newReq, ...prev])
+    api.createRequest(newReq).catch(() => {})
     return newReq
   }, [])
 
   const updateRequestStatus = useCallback((id: string, status: AdvisingRequest['status']) => {
     setRequests(prev => prev.map(r => r.id === id ? { ...r, status, updatedAt: now() } : r))
+    api.updateRequestStatus(id, status).catch(() => {})
   }, [])
 
   const addAppointment = useCallback((apt: Omit<Appointment, 'id' | 'createdAt'>): Appointment => {
     const newApt: Appointment = { ...apt, id: nextId('APT'), createdAt: now() }
     setAppointments(prev => [newApt, ...prev])
+    api.createAppointment(newApt).catch(() => {})
     return newApt
   }, [])
 
@@ -247,27 +271,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addSession = useCallback((ses: Omit<AdvisingSession, 'id' | 'createdAt'>): AdvisingSession => {
     const newSes: AdvisingSession = { ...ses, id: nextId('SES'), createdAt: now() }
     setSessions(prev => [newSes, ...prev])
+    api.createSession(newSes).catch(() => {})
     return newSes
   }, [])
 
   const addFollowUp = useCallback((fu: Omit<FollowUp, 'id' | 'createdAt'>): FollowUp => {
     const newFu: FollowUp = { ...fu, id: nextId('FU'), createdAt: now() }
     setFollowUps(prev => [newFu, ...prev])
+    api.createFollowUp(newFu).catch(() => {})
     return newFu
   }, [])
 
   const updateFollowUpStatus = useCallback((id: string, status: FollowUp['status']) => {
     setFollowUps(prev => prev.map(f => f.id === id ? { ...f, status, ...(status === 'completed' ? { completedAt: now() } : {}) } : f))
+    api.updateFollowUpStatus(id, status).catch(() => {})
   }, [])
 
   const addFollowUpProgress = useCallback((fp: Omit<FollowUpProgress, 'id' | 'createdAt'>): FollowUpProgress => {
     const newFp: FollowUpProgress = { ...fp, id: nextId('FUP'), createdAt: now() }
     setFollowUpProgress(prev => [newFp, ...prev])
+    api.saveFollowUpProgress(newFp).catch(() => {})
     return newFp
   }, [])
 
   const updateFollowUpProgress = useCallback((id: string, progress: number, notes: string) => {
     setFollowUpProgress(prev => prev.map(fp => fp.id === id ? { ...fp, progress, notes } : fp))
+    api.saveFollowUpProgress({ id, progress, notes }).catch(() => {})
   }, [])
 
   const addRequestProgress = useCallback((rp: Omit<RequestProgress, 'id' | 'createdAt'>): RequestProgress => {

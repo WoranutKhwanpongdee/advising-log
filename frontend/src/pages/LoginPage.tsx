@@ -1,9 +1,10 @@
 // ============================================================
-// AdvisingLog — Login Page (Username + Password)
+// AdvisingLog — Login Page (Google OAuth SSO + Demo Switcher)
 // ============================================================
 
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ThemeToggle } from '@/components/ui'
@@ -18,7 +19,7 @@ const ROLE_REDIRECT: Record<string, string> = {
 }
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
   const { language, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
 
@@ -27,6 +28,32 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  function redirectForRole(role: string) {
+    if (role === 'student') navigate(ROLE_REDIRECT.student)
+    else if (role === 'advisor') navigate(ROLE_REDIRECT.advisor)
+    else if (role === 'qa_chair') navigate(ROLE_REDIRECT.qa_chair)
+    else if (role === 'admin') navigate(ROLE_REDIRECT.admin)
+    else navigate('/')
+  }
+
+  async function handleGoogleSuccess(credentialResponse: any) {
+    if (!credentialResponse?.credential) return
+    setError('')
+    setLoading(true)
+    try {
+      const user = await loginWithGoogle(credentialResponse.credential)
+      setLoading(false)
+      if (user) {
+        redirectForRole(user.role)
+      } else {
+        setError(t('ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'Failed to sign in with Google account.'))
+      }
+    } catch {
+      setLoading(false)
+      setError(t('เกิดข้อผิดพลาดในการเชื่อมต่อ Google', 'Error connecting to Google OAuth service.'))
+    }
+  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -46,9 +73,6 @@ export default function LoginPage() {
     setLoading(false)
 
     if (success) {
-      // Determine role from logged-in user — re-read from context after login
-      // We navigate based on username prefix as a quick heuristic; the
-      // AuthContext already resolved the actual user object.
       const id = username.trim().toUpperCase()
       if (id.startsWith('STU')) navigate(ROLE_REDIRECT.student)
       else if (id.startsWith('ADV')) navigate(ROLE_REDIRECT.advisor)
@@ -117,76 +141,106 @@ export default function LoginPage() {
               {t('เข้าสู่ระบบ', 'Sign In')}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {t('กรุณากรอกชื่อผู้ใช้และรหัสผ่านของคุณ', 'Enter your username and password to continue')}
+              {t('เข้าใช้งานด้วยบัญชีมหาวิทยาลัยหรือบัญชีทดสอบ', 'Sign in with your Google account or demo credentials')}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Username */}
-            <div className="space-y-1.5">
-              <label htmlFor="username" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {t('ชื่อผู้ใช้', 'Username')}
+          <div className="p-6 space-y-4">
+            {/* Google OAuth Button */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t('เข้าสู่ระบบด้วย Google Single Sign-On', 'Institutional Google SSO')}
               </label>
-              <input
-                id="username"
-                type="text"
-                autoComplete="username"
-                placeholder={t('เช่น STU001, ADV001', 'e.g. STU001, ADV001')}
-                value={username}
-                onChange={e => { setUsername(e.target.value); setError('') }}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {t('รหัสผ่าน', 'Password')}
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder={t('รหัสผ่าน (ใส่อะไรก็ได้)', 'Any value accepted for now')}
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); setError('') }}
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+              <div className="w-full flex justify-center py-1">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError(t('การยืนยันตัวตนกับ Google ล้มเหลว', 'Google Authentication Failed'))}
+                  useOneTap={false}
+                  theme="outline"
+                  shape="pill"
+                  size="large"
+                  text="signin_with"
+                  locale={language === 'th' ? 'th' : 'en'}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
             </div>
 
-            {/* Error */}
-            {error && (
-              <p className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl px-3.5 py-2.5">
-                {error}
-              </p>
-            )}
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-3">
+              <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
+              <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                {t('หรือเข้าสู่ระบบด้วยชื่อผู้ใช้', 'Or sign in with username')}
+              </span>
+              <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
+            </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-bold shadow-md shadow-sky-600/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
-            >
-              <LogIn className="h-4 w-4" />
-              {loading ? t('กำลังเข้าสู่ระบบ…', 'Signing in…') : t('เข้าสู่ระบบ', 'Sign In')}
-            </button>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Username */}
+              <div className="space-y-1.5">
+                <label htmlFor="username" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {t('ชื่อผู้ใช้', 'Username')}
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder={t('เช่น STU001, ADV001', 'e.g. STU001, ADV001')}
+                  value={username}
+                  onChange={e => { setUsername(e.target.value); setError('') }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                />
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {t('รหัสผ่าน', 'Password')}
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    placeholder={t('รหัสผ่าน (ใส่อะไรก็ได้)', 'Any value accepted for now')}
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setError('') }}
+                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <p className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl px-3.5 py-2.5">
+                  {error}
+                </p>
+              )}
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-bold shadow-md shadow-sky-600/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+              >
+                <LogIn className="h-4 w-4" />
+                {loading ? t('กำลังเข้าสู่ระบบ…', 'Signing in…') : t('เข้าสู่ระบบ', 'Sign In')}
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Hint */}
         <div className="mt-4 bg-sky-50/70 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900 rounded-2xl px-4 py-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-          <p className="font-semibold text-slate-600 dark:text-slate-300">{t('บัญชีทดสอบ', 'Demo accounts')}</p>
+          <p className="font-semibold text-slate-600 dark:text-slate-300">{t('บัญชีทดสอบด่วน', 'Quick Demo Accounts')}</p>
           <p>{t('นักศึกษา:', 'Students:')} STU001 – STU010</p>
           <p>{t('อาจารย์:', 'Advisors:')} ADV001 – ADV003</p>
           <p>{t('ประกันคุณภาพ:', 'QA Chair:')} QA001</p>
@@ -195,7 +249,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-[11px] text-slate-400 mt-4 font-medium">
-          {t('ระบบจำลองการยืนยันตัวตน · ข้อมูลความลับทางการศึกษา', 'Protected Student Information · Local Authentication Simulation')}
+          {t('ระบบยืนยันตัวตน Google SSO · ข้อมูลความลับทางการศึกษา', 'Google SSO & Protected Student Information')}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import { StoreProvider } from '@/data/mock-store'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/contexts/ToastContext'
@@ -67,58 +68,62 @@ function RootRedirect() {
   return <Navigate to="/login" replace />
 }
 
+const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || '1029384756-demo-advising-log.apps.googleusercontent.com'
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <LanguageProvider>
-          <StoreProvider>
-            <AuthProvider>
-              <ToastProvider>
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  
-                  <Route path="/" element={<AppLayout />}>
-                    <Route index element={<RootRedirect />} />
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <ThemeProvider>
+          <LanguageProvider>
+            <StoreProvider>
+              <AuthProvider>
+                <ToastProvider>
+                  <Routes>
+                    <Route path="/login" element={<LoginPage />} />
                     
-                    {/* Student Routes */}
-                    <Route path="student" element={<RequireRole allowedRoles={['student']}><StudentDashboard /></RequireRole>} />
-                    <Route path="student/request" element={<RequireRole allowedRoles={['student']}><RequestAdvising /></RequireRole>} />
-                    <Route path="student/history" element={<RequireRole allowedRoles={['student']}><AdvisingHistory /></RequireRole>} />
-                    <Route path="student/history/:id" element={<RequireRole allowedRoles={['student']}><AdvisingDetail /></RequireRole>} />
-                    <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
-                    <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
-                    <Route path="student/exit" element={<Navigate to="/student/request?category=withdrawal_leave" replace />} />
-                    <Route path="student/voice" element={<RequireRole allowedRoles={['student']}><StudentVoiceSurvey /></RequireRole>} />
+                    <Route path="/" element={<AppLayout />}>
+                      <Route index element={<RootRedirect />} />
+                      
+                      {/* Student Routes */}
+                      <Route path="student" element={<RequireRole allowedRoles={['student']}><StudentDashboard /></RequireRole>} />
+                      <Route path="student/request" element={<RequireRole allowedRoles={['student']}><RequestAdvising /></RequireRole>} />
+                      <Route path="student/history" element={<RequireRole allowedRoles={['student']}><AdvisingHistory /></RequireRole>} />
+                      <Route path="student/history/:id" element={<RequireRole allowedRoles={['student']}><AdvisingDetail /></RequireRole>} />
+                      <Route path="student/documents" element={<RequireRole allowedRoles={['student']}><Documents /></RequireRole>} />
+                      <Route path="student/followups" element={<RequireRole allowedRoles={['student']}><FollowUps /></RequireRole>} />
+                      <Route path="student/exit" element={<Navigate to="/student/request?category=withdrawal_leave" replace />} />
+                      <Route path="student/voice" element={<RequireRole allowedRoles={['student']}><StudentVoiceSurvey /></RequireRole>} />
 
-                    {/* Advisor Routes */}
-                    <Route path="advisor" element={<RequireRole allowedRoles={['advisor']}><AdvisorDashboard /></RequireRole>} />
-                    <Route path="advisor/sessions" element={<RequireRole allowedRoles={['advisor']}><AdvisingSessions /></RequireRole>} />
-                    <Route path="advisor/log" element={<RequireRole allowedRoles={['advisor']}><AdvisorLog /></RequireRole>} />
-                    <Route path="advisor/warnings" element={<RequireRole allowedRoles={['advisor']}><EarlyWarning /></RequireRole>} />
-                    <Route path="advisor/referrals" element={<RequireRole allowedRoles={['advisor']}><Referrals /></RequireRole>} />
-                    <Route path="advisor/exit-cases" element={<RequireRole allowedRoles={['advisor']}><ExitCases /></RequireRole>} />
+                      {/* Advisor Routes */}
+                      <Route path="advisor" element={<RequireRole allowedRoles={['advisor']}><AdvisorDashboard /></RequireRole>} />
+                      <Route path="advisor/sessions" element={<RequireRole allowedRoles={['advisor']}><AdvisingSessions /></RequireRole>} />
+                      <Route path="advisor/log" element={<RequireRole allowedRoles={['advisor']}><AdvisorLog /></RequireRole>} />
+                      <Route path="advisor/warnings" element={<RequireRole allowedRoles={['advisor']}><EarlyWarning /></RequireRole>} />
+                      <Route path="advisor/referrals" element={<RequireRole allowedRoles={['advisor']}><Referrals /></RequireRole>} />
+                      <Route path="advisor/exit-cases" element={<RequireRole allowedRoles={['advisor']}><ExitCases /></RequireRole>} />
 
-                    {/* QA Routes */}
-                    <Route path="qa" element={<RequireRole allowedRoles={['qa_chair']}><QADashboard /></RequireRole>} />
-                    <Route path="qa/exit-review" element={<RequireRole allowedRoles={['qa_chair']}><ExitCaseReview /></RequireRole>} />
+                      {/* QA Routes */}
+                      <Route path="qa" element={<RequireRole allowedRoles={['qa_chair']}><QADashboard /></RequireRole>} />
+                      <Route path="qa/exit-review" element={<RequireRole allowedRoles={['qa_chair']}><ExitCaseReview /></RequireRole>} />
 
-                    {/* Admin Routes */}
-                    <Route path="admin" element={<RequireRole allowedRoles={['admin']}><AdminDashboard /></RequireRole>} />
-                    <Route path="admin/users" element={<RequireRole allowedRoles={['admin']}><UserManagement /></RequireRole>} />
-                    <Route path="admin/ai-governance" element={<RequireRole allowedRoles={['admin']}><AiGovernance /></RequireRole>} />
-                    <Route path="admin/roster" element={<RequireRole allowedRoles={['admin']}><Roster /></RequireRole>} />
-                    <Route path="admin/categories" element={<RequireRole allowedRoles={['admin']}><Categories /></RequireRole>} />
-                    <Route path="admin/document-types" element={<RequireRole allowedRoles={['admin']}><DocumentTypes /></RequireRole>} />
-                    <Route path="admin/audit-logs" element={<RequireRole allowedRoles={['admin']}><AuditLogs /></RequireRole>} />
-                  </Route>
-                </Routes>
-                <ToastContainer />
-              </ToastProvider>
-            </AuthProvider>
-          </StoreProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+                      {/* Admin Routes */}
+                      <Route path="admin" element={<RequireRole allowedRoles={['admin']}><AdminDashboard /></RequireRole>} />
+                      <Route path="admin/users" element={<RequireRole allowedRoles={['admin']}><UserManagement /></RequireRole>} />
+                      <Route path="admin/ai-governance" element={<RequireRole allowedRoles={['admin']}><AiGovernance /></RequireRole>} />
+                      <Route path="admin/roster" element={<RequireRole allowedRoles={['admin']}><Roster /></RequireRole>} />
+                      <Route path="admin/categories" element={<RequireRole allowedRoles={['admin']}><Categories /></RequireRole>} />
+                      <Route path="admin/document-types" element={<RequireRole allowedRoles={['admin']}><DocumentTypes /></RequireRole>} />
+                      <Route path="admin/audit-logs" element={<RequireRole allowedRoles={['admin']}><AuditLogs /></RequireRole>} />
+                    </Route>
+                  </Routes>
+                  <ToastContainer />
+                </ToastProvider>
+              </AuthProvider>
+            </StoreProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   )
 }
