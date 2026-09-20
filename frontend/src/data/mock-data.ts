@@ -7,6 +7,7 @@ import type {
   User,
   StudentAdvisorAssignment,
   AdvisingRequest,
+  RequestProgress,
   Appointment,
   AdvisingSession,
   FollowUp,
@@ -76,6 +77,29 @@ export const mockRequests: AdvisingRequest[] = [
   { id: 'REQ007', studentId: 'STU007', advisorId: 'ADV003', category: 'financial', details: 'I am having difficulty paying tuition fees. I would like to discuss financial aid options and payment plans.', preferredDate: '2026-09-06', preferredTime: '14:00', attachments: [], pdpaConsent: true, status: 'completed', createdAt: '2026-08-22', updatedAt: '2026-09-01' },
   { id: 'REQ008', studentId: 'STU008', advisorId: 'ADV003', category: 'student_status', details: 'I need to clarify my student status. I received conflicting information about my enrollment status from different offices.', preferredDate: '2026-09-11', preferredTime: '15:00', attachments: ['enrollment_letter.pdf'], pdpaConsent: true, status: 'requested', createdAt: '2026-09-02', updatedAt: '2026-09-02' },
   { id: 'REQ009', studentId: 'STU010', advisorId: 'ADV001', category: 'academic_performance', details: 'I want to discuss strategies to improve my grades in core courses. I am struggling with the programming modules.', preferredDate: '2026-09-14', preferredTime: '11:00', attachments: [], pdpaConsent: true, status: 'requested', createdAt: '2026-09-03', updatedAt: '2026-09-03' },
+]
+
+// --- Request Progress Tracking ---
+
+export const mockRequestProgress: RequestProgress[] = [
+  {
+    id: 'RGP001',
+    requestId: 'REQ008',
+    advisorId: 'ADV003',
+    progress: 50,
+    notes: 'Contacted student affairs office to verify enrollment status. Found discrepancy in system records.',
+    status: 'in_progress',
+    createdAt: '2026-09-04',
+  },
+  {
+    id: 'RGP002',
+    requestId: 'REQ009',
+    advisorId: 'ADV001',
+    progress: 30,
+    notes: 'Reviewed student transcript. Identified weak performance in programming courses.',
+    status: 'in_progress',
+    createdAt: '2026-09-05',
+  },
 ]
 
 // --- Appointments ---

@@ -3,9 +3,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, Tabs, DataTable, StatusBadge, Button, Modal } from '@/components/ui'
-import type { AdvisingRequest } from '@/types'
-import { Calendar, CheckCircle2, Eye } from 'lucide-react'
+import { PageHeader, Tabs, DataTable, StatusBadge, Button, Modal, Card } from '@/components/ui'
+import type { AdvisingRequest, RequestProgress } from '@/types'
+import { Calendar, CheckCircle2, Eye, TrendingUp, Clock } from 'lucide-react'
 
 export default function AdvisingSessions() {
   const { currentUser } = useAuth()
@@ -19,10 +19,40 @@ export default function AdvisingSessions() {
   const [schedDate, setSchedDate] = useState('')
   const [schedTime, setSchedTime] = useState('')
   const [schedLoc, setSchedLoc] = useState('')
+  const [showProgressModal, setShowProgressModal] = useState(false)
+  const [progressValue, setProgressValue] = useState(0)
+  const [progressNotes, setProgressNotes] = useState('')
 
   if (!currentUser) return null
 
   const myRequests = store.requests.filter(r => r.advisorId === currentUser.id)
+  const myProgress = store.requestProgress.filter(rp => rp.advisorId === currentUser.id)
+
+  function handleUpdateProgress() {
+    if (!selectedReq || !currentUser) return
+    store.updateRequestProgress(
+      `${selectedReq.id}-progress`,
+      progressValue,
+      progressNotes
+    )
+    store.addAuditLog({
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userRole: 'advisor',
+      action: 'followup_completed' as any,
+      description: `Updated progress for request ${selectedReq.id}: ${progressValue}%`,
+      targetId: selectedReq.id,
+    })
+    addToast('success', t('อัปเดตความคืบหน้าแล้ว', 'Progress Updated'), t('บันทึกความคืบหน้าคำร้องเรียบร้อยแล้ว', 'Progress has been recorded successfully.'))
+    setShowProgressModal(false)
+    setSelectedReq(null)
+    setProgressValue(0)
+    setProgressNotes('')
+  }
+
+  function getProgressForRequest(requestId: string): RequestProgress | undefined {
+    return myProgress.find(rp => rp.requestId === requestId)
+  }
   const filterMap: Record<string, string[]> = {
     pending: ['requested', 'pending'],
     upcoming: ['scheduled'],
@@ -134,6 +164,25 @@ export default function AdvisingSessions() {
       render: (r: AdvisingRequest) => <StatusBadge status={r.status} />,
     },
     {
+      key: 'progress',
+      header: t('ความคืบหน้า', 'Progress'),
+      render: (r: AdvisingRequest) => {
+        const rp = getProgressForRequest(r.id)
+        if (!rp) return <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-16 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sky-500 rounded-full transition-all"
+                style={{ width: `${rp.progress}%` }}
+              />
+            </div>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{rp.progress}%</span>
+          </div>
+        )
+      },
+    },
+    {
       key: 'actions',
       header: t('การจัดการ', 'Actions'),
       render: (r: AdvisingRequest) => (
@@ -141,6 +190,15 @@ export default function AdvisingSessions() {
           <Button size="sm" variant="ghost" onClick={() => setDetailReq(r)}>
             <Eye className="h-3 w-3 mr-1" /> {t('ดูรายละเอียด', 'View')}
           </Button>
+          {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => { setSelectedReq(r); setShowProgressModal(true) }}
+            >
+              <TrendingUp className="h-3 w-3 mr-1" /> {t('อัปเดตความคืบหน้า', 'Update Progress')}
+            </Button>
+          )}
           {r.status === 'requested' && (
             <Button size="sm" variant="primary" onClick={() => handleAccept(r)}>
               {t('ตอบรับ', 'Accept')}
@@ -287,6 +345,85 @@ export default function AdvisingSessions() {
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button variant="secondary" onClick={() => setShowSchedule(false)}>{t('ยกเลิก', 'Cancel')}</Button>
             <Button variant="primary" onClick={handleSchedule}>{t('ยืนยันนัดหมาย', 'Confirm Schedule')}</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Progress History Section */}
+      {myProgress.length > 0 && (
+        <div className="mt-6 space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประวัติความคืบหน้าคำร้อง', 'Request Progress History')}
+          </h3>
+          {myProgress.map(rp => {
+            const request = myRequests.find(r => r.id === rp.requestId)
+            if (!request) return null
+            return (
+              <Card key={rp.id} className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">{getCategoryLabel(request.category)}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{store.users.find(u => u.id === request.studentId)?.name} · {rp.createdAt}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-sky-500 rounded-full"
+                        style={{ width: `${rp.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{rp.progress}%</span>
+                  </div>
+                </div>
+                {rp.notes && (
+                  <p className="text-xs text-slate-600 dark:text-slate-400 italic">{rp.notes}</p>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Progress Update Modal */}
+      <Modal isOpen={showProgressModal} onClose={() => { setShowProgressModal(false); setSelectedReq(null) }} title={t('อัปเดตความคืบหน้าคำร้อง', 'Update Request Progress')} size="md">
+        <div className="space-y-4">
+          <div className="p-3 bg-sky-50/70 dark:bg-sky-950/40 rounded-xl border border-sky-100 dark:border-sky-800">
+            <p className="text-xs font-semibold text-sky-900 dark:text-sky-200 mb-1">{t('คำร้อง', 'Request')}</p>
+            <p className="text-xs text-slate-700 dark:text-slate-300">{getCategoryLabel(selectedReq?.category || '')}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{store.users.find(u => u.id === selectedReq?.studentId)?.name}</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('ความคืบหน้า (%)', 'Progress (%)')}</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={progressValue}
+              onChange={e => setProgressValue(Number(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between mt-1">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">0%</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{progressValue}%</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">100%</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('บันทึกเพิ่มเติม', 'Notes')}</label>
+            <textarea
+              value={progressNotes}
+              onChange={e => setProgressNotes(e.target.value)}
+              rows={3}
+              placeholder={t('บันทึกสิ่งที่ทำไป หรือปัญหาที่พบ...', 'Record what you have done or any issues encountered...')}
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="secondary" onClick={() => { setShowProgressModal(false); setSelectedReq(null) }}>{t('ยกเลิก', 'Cancel')}</Button>
+            <Button variant="primary" onClick={handleUpdateProgress}>{t('บันทึก', 'Save')}</Button>
           </div>
         </div>
       </Modal>

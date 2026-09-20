@@ -6,6 +6,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import type {
   AdvisingRequest,
+  RequestProgress,
   Appointment,
   AdvisingSession,
   FollowUp,
@@ -29,6 +30,7 @@ import type {
 } from '@/types'
 import {
   mockRequests,
+  mockRequestProgress,
   mockAppointments,
   mockSessions,
   mockFollowUps,
@@ -73,6 +75,7 @@ interface StoreState {
   earlyWarnings: EarlyWarningCase[]
   earlyWarningFollowUps: EarlyWarningFollowUp[]
   followUpProgress: FollowUpProgress[]
+  requestProgress: RequestProgress[]
   exitCases: ExitCase[]
   advisorAssessments: AdvisorExitAssessment[]
   studentVoiceResponses: StudentVoiceResponse[]
@@ -102,6 +105,10 @@ interface StoreActions {
   updateFollowUpStatus: (id: string, status: FollowUp['status']) => void
   addFollowUpProgress: (fp: Omit<FollowUpProgress, 'id' | 'createdAt'>) => FollowUpProgress
   updateFollowUpProgress: (id: string, progress: number, notes: string) => void
+
+  // Request Progress
+  addRequestProgress: (rp: Omit<RequestProgress, 'id' | 'createdAt'>) => RequestProgress
+  updateRequestProgress: (id: string, progress: number, notes: string) => void
 
   // Referrals
   addReferral: (ref: Omit<Referral, 'id' | 'createdAt'>) => Referral
@@ -182,6 +189,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarningCase[]>([...mockEarlyWarnings])
   const [earlyWarningFollowUps, setEarlyWarningFollowUps] = useState<EarlyWarningFollowUp[]>([...mockEarlyWarningFollowUps])
   const [followUpProgress, setFollowUpProgress] = useState<FollowUpProgress[]>([...mockFollowUpProgress])
+  const [requestProgress, setRequestProgress] = useState<RequestProgress[]>([...mockRequestProgress])
   const [exitCases, setExitCases] = useState<ExitCase[]>([...mockExitCases])
   const [advisorAssessments, setAdvisorAssessments] = useState<AdvisorExitAssessment[]>([...mockAdvisorAssessments])
   const [studentVoiceResponses, setStudentVoiceResponses] = useState<StudentVoiceResponse[]>([...mockStudentVoiceResponses])
@@ -260,6 +268,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateFollowUpProgress = useCallback((id: string, progress: number, notes: string) => {
     setFollowUpProgress(prev => prev.map(fp => fp.id === id ? { ...fp, progress, notes } : fp))
+  }, [])
+
+  const addRequestProgress = useCallback((rp: Omit<RequestProgress, 'id' | 'createdAt'>): RequestProgress => {
+    const newRp: RequestProgress = { ...rp, id: nextId('RGP'), createdAt: now() }
+    setRequestProgress(prev => [newRp, ...prev])
+    return newRp
+  }, [])
+
+  const updateRequestProgress = useCallback((id: string, progress: number, notes: string) => {
+    setRequestProgress(prev => prev.map(rp => rp.id === id ? { ...rp, progress, notes } : rp))
   }, [])
 
   const addReferral = useCallback((ref: Omit<Referral, 'id' | 'createdAt'>): Referral => {
@@ -606,7 +624,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     users, roster, requests, appointments, sessions, followUps, referrals,
-    notifications, earlyWarnings, earlyWarningFollowUps, followUpProgress, exitCases, advisorAssessments, studentVoiceResponses, documents,
+    notifications, earlyWarnings, earlyWarningFollowUps, followUpProgress, requestProgress, exitCases, advisorAssessments, studentVoiceResponses, documents,
     categoryConfigs, documentTypes, auditLogs, systemApiConfig,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
@@ -614,6 +632,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addSession,
     addFollowUp, updateFollowUpStatus,
     addFollowUpProgress, updateFollowUpProgress,
+    addRequestProgress, updateRequestProgress,
     addReferral, updateReferralStatus,
     addNotification, markNotificationRead, markAllNotificationsRead,
     addEarlyWarning, updateEarlyWarningStatus,

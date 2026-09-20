@@ -190,6 +190,16 @@ export interface AdvisingRequest {
   updatedAt: string
 }
 
+export interface RequestProgress {
+  id: string
+  requestId: string
+  advisorId: string
+  progress: number // 0-100
+  notes: string
+  status: 'in_progress' | 'reviewed' | 'completed'
+  createdAt: string
+}
+
 export interface Appointment {
   id: string
   requestId: string
