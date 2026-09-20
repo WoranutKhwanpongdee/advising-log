@@ -32,12 +32,37 @@ export default function DocumentTypes() {
       key: 'signature',
       header: t('รูปแบบการลงนาม', 'Validation Method'),
       render: (d: DocumentType) => (
-        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-          {d.signatureMethod === 'wet_signature' ? t('ลงนามด้วยตนเอง (ส่งเอกสารฉบับจริง)', 'Wet Signature (Physical Submission)') : t('ลงนามดิจิทัล (ยืนยันผ่านระบบ)', 'E-Signature (Digital Confirmation)')}
-        </span>
+        <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-[11px] font-semibold">
+          <button
+            type="button"
+            onClick={() => store.updateDocumentType(d.id, { signatureMethod: 'wet_signature' })}
+            className={`px-3 py-1.5 transition-colors cursor-pointer ${
+              d.signatureMethod === 'wet_signature'
+                ? 'bg-amber-500 text-white'
+                : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:text-amber-700 dark:hover:text-amber-400'
+            }`}
+          >
+            ✍️ {t('ลายมือจริง', 'Wet Signature')}
+          </button>
+          <button
+            type="button"
+            onClick={() => store.updateDocumentType(d.id, { signatureMethod: 'e_signature' })}
+            className={`px-3 py-1.5 border-l border-slate-200 dark:border-slate-700 transition-colors cursor-pointer ${
+              d.signatureMethod === 'e_signature'
+                ? 'bg-sky-600 text-white'
+                : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/30 hover:text-sky-700 dark:hover:text-sky-400'
+            }`}
+          >
+            🔏 {t('ลายเซ็นดิจิทัล', 'E-Signature')}
+          </button>
+        </div>
       ),
     },
-    { key: 'status', header: t('สถานะ', 'Status'), render: (d: DocumentType) => <StatusBadge status={d.isActive ? 'active' : 'inactive'} /> },
+    {
+      key: 'status',
+      header: t('สถานะ', 'Status'),
+      render: (d: DocumentType) => <StatusBadge status={d.isActive ? 'active' : 'inactive'} />,
+    },
     {
       key: 'actions',
       header: t('การจัดการ', 'Action'),
@@ -62,4 +87,3 @@ export default function DocumentTypes() {
     </div>
   )
 }
-

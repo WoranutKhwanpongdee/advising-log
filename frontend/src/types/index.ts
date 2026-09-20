@@ -266,6 +266,7 @@ export interface StudentDocument {
   signatureMethod: SignatureMethod
   uploadedAt?: string
   signedAt?: string
+  description?: string
 }
 
 export interface Notification {
