@@ -160,6 +160,7 @@ export interface User {
   role: UserRole
   department: string
   phone?: string
+  avatar?: string
   isActive: boolean
   hasAiAccess?: boolean
   createdAt: string

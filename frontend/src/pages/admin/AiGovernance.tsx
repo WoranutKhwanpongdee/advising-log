@@ -17,7 +17,7 @@ import {
   ScrollText,
   Zap,
 } from 'lucide-react'
-import { PageHeader, Button, DataTable, StatusBadge } from '@/components/ui'
+import { PageHeader, Button, DataTable, StatusBadge, UserAvatar } from '@/components/ui'
 import { useStore } from '@/data/mock-store'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
@@ -544,9 +544,7 @@ export default function AiGovernance() {
                   header: t('อาจารย์ / บุคลากร', 'Faculty & Staff'),
                   render: (u: User) => (
                     <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                        {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </div>
+                      <UserAvatar name={u.name} avatar={u.avatar} size="sm" />
                       <div>
                         <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{u.name}</p>
                         <p className="text-[11px] text-slate-400 dark:text-slate-400 font-mono">

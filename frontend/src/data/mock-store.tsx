@@ -3,7 +3,8 @@
 // Simple reactive store for prototype state management
 // ============================================================
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import api from '@/services/apiClient'
 import type {
   AdvisingRequest,
   RequestProgress,
@@ -214,21 +215,54 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   })
 
+  // --- Background Backend Sync on Mount (Real Data from Cloudflare D1) ---
+  useEffect(() => {
+    let isMounted = true
+    async function syncFromBackend() {
+      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes] = await Promise.all([
+        api.getUsers(),
+        api.getRoster(),
+        api.getRequests(),
+        api.getAppointments(),
+        api.getFollowUps(),
+        api.getSessions(),
+        api.getExitCases(),
+        api.getStudentVoice(),
+        api.getAuditLogs(),
+      ])
+      if (!isMounted) return
+      if (uRes && Array.isArray(uRes.users)) setUsers(uRes.users)
+      if (rosRes && Array.isArray(rosRes.roster)) setRoster(rosRes.roster)
+      if (rRes && Array.isArray(rRes.requests)) setRequests(rRes.requests)
+      if (aptRes && Array.isArray(aptRes.appointments)) setAppointments(aptRes.appointments)
+      if (fRes && Array.isArray(fRes.followUps)) setFollowUps(fRes.followUps)
+      if (sRes && Array.isArray(sRes.sessions)) setSessions(sRes.sessions)
+      if (eRes && Array.isArray(eRes.exitCases)) setExitCases(eRes.exitCases)
+      if (vRes && Array.isArray(vRes.surveys)) setStudentVoiceResponses(vRes.surveys)
+      if (aRes && Array.isArray(aRes.logs)) setAuditLogs(aRes.logs)
+    }
+    syncFromBackend()
+    return () => { isMounted = false }
+  }, [])
+
   // --- Actions ---
 
   const addRequest = useCallback((req: Omit<AdvisingRequest, 'id' | 'createdAt' | 'updatedAt'>): AdvisingRequest => {
     const newReq: AdvisingRequest = { ...req, id: nextId('REQ'), createdAt: now(), updatedAt: now() }
     setRequests(prev => [newReq, ...prev])
+    api.createRequest(newReq).catch(() => {})
     return newReq
   }, [])
 
   const updateRequestStatus = useCallback((id: string, status: AdvisingRequest['status']) => {
     setRequests(prev => prev.map(r => r.id === id ? { ...r, status, updatedAt: now() } : r))
+    api.updateRequestStatus(id, status).catch(() => {})
   }, [])
 
   const addAppointment = useCallback((apt: Omit<Appointment, 'id' | 'createdAt'>): Appointment => {
     const newApt: Appointment = { ...apt, id: nextId('APT'), createdAt: now() }
     setAppointments(prev => [newApt, ...prev])
+    api.createAppointment(newApt).catch(() => {})
     return newApt
   }, [])
 
@@ -247,27 +281,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addSession = useCallback((ses: Omit<AdvisingSession, 'id' | 'createdAt'>): AdvisingSession => {
     const newSes: AdvisingSession = { ...ses, id: nextId('SES'), createdAt: now() }
     setSessions(prev => [newSes, ...prev])
+    api.createSession(newSes).catch(() => {})
     return newSes
   }, [])
 
   const addFollowUp = useCallback((fu: Omit<FollowUp, 'id' | 'createdAt'>): FollowUp => {
     const newFu: FollowUp = { ...fu, id: nextId('FU'), createdAt: now() }
     setFollowUps(prev => [newFu, ...prev])
+    api.createFollowUp(newFu).catch(() => {})
     return newFu
   }, [])
 
   const updateFollowUpStatus = useCallback((id: string, status: FollowUp['status']) => {
     setFollowUps(prev => prev.map(f => f.id === id ? { ...f, status, ...(status === 'completed' ? { completedAt: now() } : {}) } : f))
+    api.updateFollowUpStatus(id, status).catch(() => {})
   }, [])
 
   const addFollowUpProgress = useCallback((fp: Omit<FollowUpProgress, 'id' | 'createdAt'>): FollowUpProgress => {
     const newFp: FollowUpProgress = { ...fp, id: nextId('FUP'), createdAt: now() }
     setFollowUpProgress(prev => [newFp, ...prev])
+    api.saveFollowUpProgress(newFp).catch(() => {})
     return newFp
   }, [])
 
   const updateFollowUpProgress = useCallback((id: string, progress: number, notes: string) => {
     setFollowUpProgress(prev => prev.map(fp => fp.id === id ? { ...fp, progress, notes } : fp))
+    api.saveFollowUpProgress({ id, progress, notes }).catch(() => {})
   }, [])
 
   const addRequestProgress = useCallback((rp: Omit<RequestProgress, 'id' | 'createdAt'>): RequestProgress => {

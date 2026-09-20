@@ -1,15 +1,24 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { getDb } from './db'
+import * as schema from './db/schema'
+import { eq, desc, and, or } from 'drizzle-orm'
 
-type Bindings = {
+export type Bindings = {
   DB?: D1Database
   GEMINI_API_KEY?: string
+  SUPER_ADMIN_EMAIL?: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.use('*', cors())
+app.use('*', cors({
+  origin: '*',
+  allowHeaders: ['Content-Type', 'Authorization', 'x-gemini-key'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+}))
 
+// --- Health & Info Endpoints ---
 app.get('/', (c) => {
   return c.json({
     service: 'AdvisingLog API',
@@ -41,7 +50,637 @@ app.get('/api/info', (c) => {
   })
 })
 
-// --- POST /api/qa/ai-analyze: LLM Qualitative Retention Analysis ---
+// --- Helper to safely get Drizzle DB ---
+function db(c: any) {
+  if (!c.env?.DB) return null
+  return getDb(c.env.DB)
+}
+
+// ============================================================
+// 0. Google OAuth Authentication & SSO
+// ============================================================
+// 0. Google OAuth Authentication & SSO (MFU Domain & Advisee Guard)
+// ============================================================
+app.post('/api/auth/google', async (c) => {
+  try {
+    const { credential } = await c.req.json<{ credential?: string }>()
+    if (!credential) {
+      return c.json({ success: false, error: 'Missing Google credential token' }, 400)
+    }
+
+    // Decode JWT Payload without external dependencies
+    const parts = credential.split('.')
+    if (parts.length < 2) {
+      return c.json({ success: false, error: 'Invalid Google credential token format' }, 400)
+    }
+
+    const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = JSON.parse(atob(payloadBase64))
+    const { email, name, picture, sub: googleId } = decoded
+
+    if (!email) {
+      return c.json({ success: false, error: 'Google account has no email address' }, 400)
+    }
+
+    const lowerEmail = email.toLowerCase()
+    const codePrefix = lowerEmail.split('@')[0].toUpperCase()
+    const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+    const isAuthorizedSuperAdmin = lowerEmail === superAdminEmail
+
+    const isMfuDomain =
+      lowerEmail.endsWith('@mfu.ac.th') ||
+      lowerEmail.endsWith('@student.mfu.ac.th') ||
+      lowerEmail.endsWith('@lamduan.mfu.ac.th') ||
+      lowerEmail.endsWith('@lamduan.ac.th')
+
+    const database = db(c)
+
+    // Offline / Mock Fallback (when DB binding is absent)
+    if (!database) {
+      if (isAuthorizedSuperAdmin) {
+        const adminUser = {
+          id: 'ADM_SE_GOOGLE',
+          code: 'ADM-SUPER',
+          name: 'System Admin (SE AdvisingLog)',
+          email: lowerEmail,
+          role: 'admin' as const,
+          department: 'Academic & System Affairs',
+          isActive: true,
+          hasAiAccess: true,
+          avatar: picture || null,
+          createdAt: new Date().toISOString().split('T')[0],
+        }
+        return c.json({ success: true, user: adminUser, source: 'offline_fallback' })
+      }
+
+      // Check if user is known in pre-registered list
+      const isKnownUser = lowerEmail.startsWith('6631503') || lowerEmail.startsWith('prasit') || lowerEmail.startsWith('nittaya') || lowerEmail.startsWith('worasak') || lowerEmail.startsWith('admin')
+
+      if (!isKnownUser) {
+        if (!isMfuDomain) {
+          return c.json({
+            success: false,
+            error: 'DOMAIN_RESTRICTED',
+            message: 'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือบัญชีที่ได้รับการลงทะเบียนโดยผู้ดูแลระบบ',
+          }, 403)
+        }
+        return c.json({
+          success: false,
+          error: 'USER_NOT_REGISTERED',
+          message: `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ (${lowerEmail}) ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อเพิ่มรายชื่อเข้าสู่ระบบ`,
+        }, 403)
+      }
+
+      let role: 'student' | 'advisor' | 'qa_chair' | 'admin' = 'advisor'
+      if (/^\d/.test(codePrefix) || lowerEmail.includes('student') || lowerEmail.includes('lamduan')) {
+        role = 'student'
+      }
+
+      const fallbackUser = {
+        id: `GOOGLE_${googleId.substring(0, 8)}`,
+        code: codePrefix,
+        name: name || 'Google User',
+        email: lowerEmail,
+        role,
+        department: 'School of Applied Digital Technology (ADT)',
+        isActive: true,
+        hasAiAccess: role !== 'student',
+        avatar: picture || null,
+        createdAt: new Date().toISOString().split('T')[0],
+      }
+      return c.json({ success: true, user: fallbackUser, source: 'offline_fallback' })
+    }
+
+    // 1. Search User in Cloudflare D1 (Check if registered by Admin)
+    let user = await database.select().from(schema.users)
+      .where(
+        or(
+          eq(schema.users.email, lowerEmail),
+          eq(schema.users.code, codePrefix),
+        )
+      ).get()
+
+    // If Super Admin account, auto-provision if not exists or update code
+    if (!user && isAuthorizedSuperAdmin) {
+      const newAdmin = {
+        id: 'ADM_SE_GOOGLE',
+        code: 'ADM-SUPER',
+        name: 'System Admin (SE AdvisingLog)',
+        email: lowerEmail,
+        role: 'admin' as const,
+        department: 'Academic & System Affairs',
+        phone: null,
+        isActive: true,
+        hasAiAccess: true,
+        createdAt: new Date().toISOString().split('T')[0],
+      }
+      await database.insert(schema.users).values(newAdmin)
+      user = newAdmin
+    } else if (user && isAuthorizedSuperAdmin && user.code !== 'ADM-SUPER') {
+      await database.update(schema.users).set({ code: 'ADM-SUPER' }).where(eq(schema.users.id, user.id))
+      user = { ...user, code: 'ADM-SUPER' }
+    }
+
+    // If not found in database (not registered by Admin)
+    if (!user) {
+      if (!isMfuDomain) {
+        return c.json({
+          success: false,
+          error: 'DOMAIN_RESTRICTED',
+          message: 'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือให้อาจารย์/ผู้ดูแลระบบลงทะเบียนอีเมลภายนอกของคุณเข้าสู่ระบบก่อน',
+        }, 403)
+      }
+
+      return c.json({
+        success: false,
+        error: 'USER_NOT_REGISTERED',
+        message: `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ (${lowerEmail}) ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อลงทะเบียนเข้าสู่ระบบก่อน`,
+        email: lowerEmail,
+      }, 403)
+    }
+
+    // Check if account is active
+    if (!user.isActive) {
+      return c.json({
+        success: false,
+        error: 'ACCOUNT_DEACTIVATED',
+        message: 'บัญชีผู้ใช้งานนี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ',
+      }, 403)
+    }
+
+    // 4. Student Advisee Check: Student MUST be assigned to an advisor by Admin or Advisor
+    let assignedAdvisor = null
+    if (user.role === 'student') {
+      const assignment = await database.select().from(schema.studentAdvisorAssignments)
+        .where(
+          and(
+            eq(schema.studentAdvisorAssignments.studentId, user.id),
+            eq(schema.studentAdvisorAssignments.isActive, true),
+          )
+        ).get()
+
+      if (!assignment) {
+        return c.json({
+          success: false,
+          error: 'STUDENT_NOT_ASSIGNED',
+          message: 'ไม่สามารถเข้าสู่ระบบได้: บัญชีนักศึกษาของคุณยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา กรุณาติดต่ออาจารย์ที่ปรึกษาหรือสำนักวิชาเพื่อดำเนินการเพิ่มรายชื่อ',
+          studentInfo: {
+            name: user.name,
+            code: user.code,
+            email: user.email,
+          },
+        }, 403)
+      }
+
+      // Fetch advisor details
+      const activeAdvisorId = assignment.advisorId
+      if (activeAdvisorId) {
+        assignedAdvisor = await database.select().from(schema.users).where(eq(schema.users.id, activeAdvisorId)).get()
+      }
+    }
+
+    return c.json({
+      success: true,
+      user: {
+        ...user,
+        avatar: picture || null,
+        advisor: assignedAdvisor,
+      },
+      token: `session_${Date.now()}_${googleId.substring(0, 6)}`,
+    })
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message || 'Failed to authenticate with Google' }, 500)
+  }
+})
+
+// ============================================================
+// 1. Users & Roster Management
+// ============================================================
+app.get('/api/users', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ users: [] })
+  
+  const role = c.req.query('role')
+  if (role) {
+    const list = await database.select().from(schema.users).where(eq(schema.users.role, role as any))
+    return c.json({ users: list })
+  }
+  const allUsers = await database.select().from(schema.users)
+  return c.json({ users: allUsers })
+})
+
+app.get('/api/users/:id', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+  
+  const id = c.req.param('id')
+  const user = await database.select().from(schema.users).where(eq(schema.users.id, id)).get()
+  if (!user) return c.json({ error: 'User not found' }, 404)
+  return c.json({ user })
+})
+
+app.post('/api/users', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+  const assignedRole = body.role === 'admin' && body.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : body.role
+
+  const newUser = {
+    id: body.id || `USER_${Date.now()}`,
+    code: body.code,
+    name: body.name,
+    email: body.email,
+    role: assignedRole,
+    department: body.department || 'School of Applied Digital Technology (ADT)',
+    phone: body.phone || null,
+    isActive: body.isActive !== undefined ? body.isActive : true,
+    hasAiAccess: body.hasAiAccess !== undefined ? body.hasAiAccess : false,
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.users).values(newUser).onConflictDoUpdate({
+    target: schema.users.id,
+    set: newUser,
+  })
+  return c.json({ success: true, user: newUser })
+})
+
+app.patch('/api/users/:id', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  const body = await c.req.json()
+
+  // Protect Super Admin from being deactivated
+  const targetUser = await database.select().from(schema.users).where(eq(schema.users.id, id)).get()
+  const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+  if (
+    targetUser &&
+    body.isActive === false &&
+    (targetUser.id === 'ADM_SE_GOOGLE' || targetUser.code === 'ADM-SUPER' || targetUser.email?.toLowerCase().trim() === superAdminEmail)
+  ) {
+    return c.json({ success: false, error: 'Cannot deactivate Master Super Admin account' }, 400)
+  }
+
+  await database.update(schema.users).set(body).where(eq(schema.users.id, id))
+  return c.json({ success: true })
+})
+
+app.get('/api/roster', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ roster: [] })
+  const list = await database.select().from(schema.studentAdvisorAssignments)
+  return c.json({ roster: list })
+})
+
+app.post('/api/roster', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const assignment = {
+    id: body.id || `R_${Date.now()}`,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    assignedAt: body.assignedAt || new Date().toISOString().split('T')[0],
+    isActive: body.isActive !== undefined ? body.isActive : true,
+  }
+
+  await database.insert(schema.studentAdvisorAssignments).values(assignment).onConflictDoUpdate({
+    target: schema.studentAdvisorAssignments.id,
+    set: assignment,
+  })
+  return c.json({ success: true, assignment })
+})
+
+// ============================================================
+// 2. Advising Requests
+// ============================================================
+app.get('/api/requests', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ requests: [] })
+
+  const studentId = c.req.query('studentId')
+  const advisorId = c.req.query('advisorId')
+
+  let query = database.select().from(schema.advisingRequests)
+  if (studentId) {
+    const list = await query.where(eq(schema.advisingRequests.studentId, studentId))
+    return c.json({ requests: list })
+  } else if (advisorId) {
+    const list = await query.where(eq(schema.advisingRequests.advisorId, advisorId))
+    return c.json({ requests: list })
+  }
+
+  const allRequests = await query.orderBy(desc(schema.advisingRequests.createdAt))
+  return c.json({ requests: allRequests })
+})
+
+app.post('/api/requests', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const newReq = {
+    id: body.id || `REQ${Date.now()}`,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    category: body.category,
+    subCategory: body.subCategory || null,
+    details: body.details,
+    preferredDate: body.preferredDate,
+    preferredTime: body.preferredTime,
+    attachments: typeof body.attachments === 'string' ? body.attachments : JSON.stringify(body.attachments || []),
+    pdpaConsent: body.pdpaConsent !== undefined ? body.pdpaConsent : true,
+    status: body.status || 'requested',
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+    updatedAt: new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.advisingRequests).values(newReq)
+  return c.json({ success: true, request: newReq }, 201)
+})
+
+app.patch('/api/requests/:id/status', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  const body = await c.req.json()
+  await database.update(schema.advisingRequests)
+    .set({ status: body.status, updatedAt: new Date().toISOString().split('T')[0] })
+    .where(eq(schema.advisingRequests.id, id))
+  return c.json({ success: true })
+})
+
+// ============================================================
+// 3. Appointments & Advising Sessions
+// ============================================================
+app.get('/api/appointments', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ appointments: [] })
+  const list = await database.select().from(schema.appointments).orderBy(desc(schema.appointments.scheduledDate))
+  return c.json({ appointments: list })
+})
+
+app.post('/api/appointments', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const newApt = {
+    id: body.id || `APT${Date.now()}`,
+    requestId: body.requestId,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    scheduledDate: body.scheduledDate,
+    scheduledTime: body.scheduledTime,
+    location: body.location,
+    status: body.status || 'scheduled',
+    studentConfirmed: body.studentConfirmed || false,
+    studentDeclined: body.studentDeclined || false,
+    studentDeclineReason: body.studentDeclineReason || null,
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.appointments).values(newApt)
+  return c.json({ success: true, appointment: newApt }, 201)
+})
+
+app.get('/api/sessions', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ sessions: [] })
+  const list = await database.select().from(schema.advisingSessions).orderBy(desc(schema.advisingSessions.sessionDate))
+  return c.json({ sessions: list })
+})
+
+app.post('/api/sessions', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const newSession = {
+    id: body.id || `SES${Date.now()}`,
+    requestId: body.requestId,
+    appointmentId: body.appointmentId || null,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    sessionDate: body.sessionDate || new Date().toISOString().split('T')[0],
+    summary: body.summary,
+    problem: body.problem,
+    advice: body.advice,
+    actionsTaken: body.actionsTaken,
+    outcome: body.outcome,
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.advisingSessions).values(newSession)
+  return c.json({ success: true, session: newSession }, 201)
+})
+
+// ============================================================
+// 4. Follow-ups & Student Progress Tracking
+// ============================================================
+app.get('/api/follow-ups', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ followUps: [] })
+
+  const studentId = c.req.query('studentId')
+  if (studentId) {
+    const list = await database.select().from(schema.followUps).where(eq(schema.followUps.studentId, studentId))
+    return c.json({ followUps: list })
+  }
+  const allFollowUps = await database.select().from(schema.followUps).orderBy(desc(schema.followUps.createdAt))
+  return c.json({ followUps: allFollowUps })
+})
+
+app.post('/api/follow-ups', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const newFollowUp = {
+    id: body.id || `FOL${Date.now()}`,
+    sessionId: body.sessionId || null,
+    requestId: body.requestId || null,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    task: body.task,
+    dueDate: body.dueDate,
+    status: body.status || 'pending',
+    completedAt: body.completedAt || null,
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.followUps).values(newFollowUp)
+  return c.json({ success: true, followUp: newFollowUp }, 201)
+})
+
+app.patch('/api/follow-ups/:id/status', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  const body = await c.req.json()
+  await database.update(schema.followUps)
+    .set({
+      status: body.status,
+      completedAt: body.status === 'completed' ? new Date().toISOString().split('T')[0] : null,
+    })
+    .where(eq(schema.followUps.id, id))
+  return c.json({ success: true })
+})
+
+app.get('/api/follow-up-progress', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ progress: [] })
+  const list = await database.select().from(schema.followUpProgress)
+  return c.json({ progress: list })
+})
+
+app.post('/api/follow-up-progress', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const progressRecord = {
+    id: body.id || `FUP${Date.now()}`,
+    followUpId: body.followUpId,
+    studentId: body.studentId,
+    progress: body.progress || 0,
+    notes: body.notes || '',
+    status: body.status || 'in_progress',
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.followUpProgress).values(progressRecord).onConflictDoUpdate({
+    target: schema.followUpProgress.id,
+    set: progressRecord,
+  })
+  return c.json({ success: true, progress: progressRecord })
+})
+
+// ============================================================
+// 5. Exit Cases & Student Voice Survey (AUN-QA Criteria 6 & 8)
+// ============================================================
+app.get('/api/exit-cases', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ exitCases: [] })
+  const list = await database.select().from(schema.exitCases).orderBy(desc(schema.exitCases.createdAt))
+  return c.json({ exitCases: list })
+})
+
+app.post('/api/exit-cases', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const newExitCase = {
+    id: body.id || `EXT${Date.now()}`,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    exitType: body.exitType,
+    reasonCode: body.reasonCode,
+    reasonCategory: body.reasonCategory,
+    details: body.details,
+    documents: typeof body.documents === 'string' ? body.documents : JSON.stringify(body.documents || []),
+    advisorAssessment: body.advisorAssessment || null,
+    status: body.status || 'submitted',
+    pdpaConsent: body.pdpaConsent !== undefined ? body.pdpaConsent : true,
+    voiceSurveyCompleted: body.voiceSurveyCompleted || false,
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+    updatedAt: new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.exitCases).values(newExitCase)
+  return c.json({ success: true, exitCase: newExitCase }, 201)
+})
+
+app.patch('/api/exit-cases/:id', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  const body = await c.req.json()
+  await database.update(schema.exitCases)
+    .set({ ...body, updatedAt: new Date().toISOString().split('T')[0] })
+    .where(eq(schema.exitCases.id, id))
+  return c.json({ success: true })
+})
+
+app.get('/api/student-voice', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ surveys: [] })
+  const list = await database.select().from(schema.studentVoiceResponses).orderBy(desc(schema.studentVoiceResponses.createdAt))
+  return c.json({ surveys: list })
+})
+
+app.post('/api/student-voice', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const survey = {
+    id: body.id || `SVR${Date.now()}`,
+    exitCaseId: body.exitCaseId || null,
+    studentId: body.isAnonymous ? null : body.studentId,
+    isAnonymous: body.isAnonymous !== undefined ? body.isAnonymous : false,
+    exitType: body.exitType,
+    academicYear: body.academicYear || '2026',
+    primaryFactors: typeof body.primaryFactors === 'string' ? body.primaryFactors : JSON.stringify(body.primaryFactors || []),
+    curriculumRating: body.curriculumRating || 3,
+    teachingRating: body.teachingRating || 3,
+    advisorRating: body.advisorRating || 3,
+    servicesRating: body.servicesRating || 3,
+    overallRating: body.overallRating || 3,
+    whatCouldUniversityDoBetter: body.whatCouldUniversityDoBetter || null,
+    curriculumImprovementSuggestions: body.curriculumImprovementSuggestions || null,
+    adviceForFutureStudents: body.adviceForFutureStudents || null,
+    shareWithAdvisor: body.shareWithAdvisor !== undefined ? body.shareWithAdvisor : true,
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.studentVoiceResponses).values(survey)
+  return c.json({ success: true, survey }, 201)
+})
+
+// ============================================================
+// 6. Audit Logs & Referrals
+// ============================================================
+app.get('/api/audit-logs', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ logs: [] })
+  const list = await database.select().from(schema.auditLogs).orderBy(desc(schema.auditLogs.timestamp)).limit(100)
+  return c.json({ logs: list })
+})
+
+app.post('/api/audit-logs', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const log = {
+    id: body.id || `LOG${Date.now()}`,
+    userId: body.userId,
+    userName: body.userName,
+    userRole: body.userRole,
+    action: body.action,
+    description: body.description,
+    targetId: body.targetId || null,
+    timestamp: body.timestamp || new Date().toISOString().replace('T', ' ').substring(0, 19),
+    ipAddress: body.ipAddress || '127.0.0.1',
+  }
+
+  await database.insert(schema.auditLogs).values(log)
+  return c.json({ success: true, log }, 201)
+})
+
+// ============================================================
+// 7. POST /api/qa/ai-analyze: LLM Qualitative Retention Analysis
+// ============================================================
 app.post('/api/qa/ai-analyze', async (c) => {
   try {
     const body = await c.req.json<{
@@ -67,8 +706,6 @@ app.post('/api/qa/ai-analyze', async (c) => {
     const lang = body.language || 'th'
     const apiKey = body.apiKey || c.req.header('x-gemini-key') || c.env?.GEMINI_API_KEY
 
-    console.log('[AI] Received request:', { mode, casesCount: cases.length, hasApiKey: !!apiKey, apiKeyLength: apiKey?.length })
-
     // De-identify: Only pass sanitized academic context
     const sanitizedDataSummary = cases.map((item, idx) => {
       return `Case #${idx + 1} [ID: ${item.studentCode || item.id} | Year: ${item.academicYear || 'N/A'} | Type: ${item.exitType} | Reason: ${item.reasonCode}]
@@ -78,9 +715,7 @@ app.post('/api/qa/ai-analyze', async (c) => {
     }).join('\n\n')
 
     // If Gemini API Key is available, call Google Gemini 1.5 Flash
-    console.log('[AI] API Key check:', { hasKey: !!apiKey, length: apiKey?.length, trimLength: apiKey?.trim().length })
     if (apiKey && apiKey.trim().length > 10) {
-      console.log('[AI] Using Gemini API (Live)')
       const systemInstruction = `You are an expert Higher Education Quality Assurance (QA) Analyst and Academic Retention Specialist advising the Program Chair and Dean under AUN-QA Criterion 6 (Student Support Services) and Criterion 8 (Retention & Dropout Rates).
 All personal names have been stripped for PDPA compliance. Analyze the qualitative data deeply.
 Respond in ${lang === 'th' ? 'Thai with professional academic tone and clear markdown bullet points' : 'English with professional academic tone and clear markdown bullet points'}.`
@@ -129,13 +764,6 @@ Provide a direct, evidence-backed qualitative answer with actionable recommendat
         }),
       })
 
-      console.log('[AI] Gemini API Response Status:', geminiResponse.status)
-
-      if (!geminiResponse.ok) {
-        const errorText = await geminiResponse.text()
-        console.log('[AI] Gemini API Error:', errorText)
-      }
-
       if (geminiResponse.ok) {
         const data = await geminiResponse.json() as any
         const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text
@@ -152,12 +780,8 @@ Provide a direct, evidence-backed qualitative answer with actionable recommendat
     }
 
     // High-Fidelity Intelligent Fallback (Offline Qualitative Engine)
-    console.log('[AI] Using Offline Fallback Mode')
     const withdrawalCount = cases.filter(c => c.exitType === 'withdrawal' || c.exitType === 'dropout').length
     const leaveCount = cases.filter(c => c.exitType === 'leave_of_absence').length
-    const academicCases = cases.filter(c => c.reasonCode === 'academic')
-    const mentalCases = cases.filter(c => c.reasonCode === 'mental_health')
-    const familyCases = cases.filter(c => c.reasonCode === 'personal_family')
 
     let fallbackText = ''
 
@@ -267,4 +891,3 @@ Synthesizing across ${cases.length} departure cases reveals sharp divergences:
 })
 
 export default app
-

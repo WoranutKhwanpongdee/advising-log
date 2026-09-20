@@ -1,51 +1,142 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 
-// Users table (Student, Advisor, Chair, Admin)
+// 1. Users Table (Student, Advisor, QA Chair, Admin)
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
-  code: text('code').notNull().unique(), // Student or Employee Code
+  code: text('code').notNull().unique(), // Student ID or Employee Code
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   role: text('role', { enum: ['student', 'advisor', 'qa_chair', 'admin'] }).notNull(),
-  department: text('department'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  department: text('department').notNull().default('School of Applied Digital Technology (ADT)'),
+  phone: text('phone'),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  hasAiAccess: integer('has_ai_access', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull(),
 })
 
-// Advising Records table
-export const advisingRecords = sqliteTable('advising_records', {
+// 2. Student-Advisor Assignments
+export const studentAdvisorAssignments = sqliteTable('student_advisor_assignments', {
   id: text('id').primaryKey(),
   studentId: text('student_id').notNull().references(() => users.id),
   advisorId: text('advisor_id').notNull().references(() => users.id),
-  title: text('title').notNull(),
-  category: text('category', { enum: ['academic', 'personal', 'career', 'leave_dropout', 'other'] }).notNull(),
-  summary: text('summary').notNull(),
-  status: text('status', { enum: ['open', 'in_progress', 'resolved', 'closed'] }).notNull().default('open'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  assignedAt: text('assigned_at').notNull(),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 })
 
-// Meetings table
-export const meetings = sqliteTable('meetings', {
+// 3. Advising Requests
+export const advisingRequests = sqliteTable('advising_requests', {
   id: text('id').primaryKey(),
-  recordId: text('record_id').references(() => advisingRecords.id),
   studentId: text('student_id').notNull().references(() => users.id),
   advisorId: text('advisor_id').notNull().references(() => users.id),
-  scheduledAt: integer('scheduled_at', { mode: 'timestamp' }).notNull(),
-  location: text('location'),
-  notes: text('notes'),
+  category: text('category').notNull(),
+  subCategory: text('sub_category'),
+  details: text('details').notNull(),
+  preferredDate: text('preferred_date').notNull(),
+  preferredTime: text('preferred_time').notNull(),
+  attachments: text('attachments').notNull().default('[]'), // JSON array of file public_ids/names
+  pdpaConsent: integer('pdpa_consent', { mode: 'boolean' }).notNull().default(true),
+  status: text('status', { enum: ['requested', 'pending', 'scheduled', 'completed', 'cancelled', 'closed'] }).notNull().default('requested'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+})
+
+// 4. Appointments
+export const appointments = sqliteTable('appointments', {
+  id: text('id').primaryKey(),
+  requestId: text('request_id').notNull().references(() => advisingRequests.id),
+  studentId: text('student_id').notNull().references(() => users.id),
+  advisorId: text('advisor_id').notNull().references(() => users.id),
+  scheduledDate: text('scheduled_date').notNull(),
+  scheduledTime: text('scheduled_time').notNull(),
+  location: text('location').notNull(),
   status: text('status', { enum: ['scheduled', 'completed', 'cancelled'] }).notNull().default('scheduled'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  studentConfirmed: integer('student_confirmed', { mode: 'boolean' }).default(false),
+  studentDeclined: integer('student_declined', { mode: 'boolean' }).default(false),
+  studentDeclineReason: text('student_decline_reason'),
+  createdAt: text('created_at').notNull(),
 })
 
-// Student Voice Responses table (Voluntary Exit / Leave Survey)
+// 5. Advising Sessions (Completed Records)
+export const advisingSessions = sqliteTable('advising_sessions', {
+  id: text('id').primaryKey(),
+  requestId: text('request_id').notNull().references(() => advisingRequests.id),
+  appointmentId: text('appointment_id').references(() => appointments.id),
+  studentId: text('student_id').notNull().references(() => users.id),
+  advisorId: text('advisor_id').notNull().references(() => users.id),
+  sessionDate: text('session_date').notNull(),
+  summary: text('summary').notNull(),
+  problem: text('problem').notNull(),
+  advice: text('advice').notNull(),
+  actionsTaken: text('actions_taken').notNull(),
+  outcome: text('outcome').notNull(),
+  createdAt: text('created_at').notNull(),
+})
+
+// 6. Follow-up Tasks
+export const followUps = sqliteTable('follow_ups', {
+  id: text('id').primaryKey(),
+  sessionId: text('session_id').references(() => advisingSessions.id),
+  requestId: text('request_id').references(() => advisingRequests.id),
+  studentId: text('student_id').notNull().references(() => users.id),
+  advisorId: text('advisor_id').notNull().references(() => users.id),
+  task: text('task').notNull(),
+  dueDate: text('due_date').notNull(),
+  status: text('status', { enum: ['pending', 'in_progress', 'completed', 'overdue'] }).notNull().default('pending'),
+  completedAt: text('completed_at'),
+  createdAt: text('created_at').notNull(),
+})
+
+// 7. Follow-up Progress Updates
+export const followUpProgress = sqliteTable('follow_up_progress', {
+  id: text('id').primaryKey(),
+  followUpId: text('follow_up_id').notNull().references(() => followUps.id),
+  studentId: text('student_id').notNull().references(() => users.id),
+  progress: integer('progress').notNull().default(0), // 0 to 100
+  notes: text('notes').notNull().default(''),
+  status: text('status', { enum: ['in_progress', 'submitted', 'reviewed'] }).notNull().default('in_progress'),
+  createdAt: text('created_at').notNull(),
+})
+
+// 8. Referrals to Specialized University Units
+export const referrals = sqliteTable('referrals', {
+  id: text('id').primaryKey(),
+  sessionId: text('session_id').references(() => advisingSessions.id),
+  studentId: text('student_id').notNull().references(() => users.id),
+  advisorId: text('advisor_id').notNull().references(() => users.id),
+  targetUnit: text('target_unit').notNull(),
+  reason: text('reason').notNull(),
+  notes: text('notes'),
+  status: text('status', { enum: ['pending', 'accepted', 'completed', 'cancelled'] }).notNull().default('pending'),
+  createdAt: text('created_at').notNull(),
+})
+
+// 9. Exit Cases (Withdrawal & Leave of Absence)
+export const exitCases = sqliteTable('exit_cases', {
+  id: text('id').primaryKey(),
+  studentId: text('student_id').notNull().references(() => users.id),
+  advisorId: text('advisor_id').notNull().references(() => users.id),
+  exitType: text('exit_type', { enum: ['withdrawal', 'leave_of_absence', 'transfer', 'dropout'] }).notNull(),
+  reasonCode: text('reason_code').notNull(),
+  reasonCategory: text('reason_category').notNull(),
+  details: text('details').notNull(),
+  documents: text('documents').notNull().default('[]'), // JSON array of public_ids
+  advisorAssessment: text('advisor_assessment'),
+  status: text('status', { enum: ['submitted', 'advisor_reviewed', 'chair_approved', 'completed', 'cancelled'] }).notNull().default('submitted'),
+  pdpaConsent: integer('pdpa_consent', { mode: 'boolean' }).notNull().default(true),
+  voiceSurveyCompleted: integer('voice_survey_completed', { mode: 'boolean' }).notNull().default(false),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+})
+
+// 10. Student Voice Survey (Voluntary & Anonymous Departure Feedback)
 export const studentVoiceResponses = sqliteTable('student_voice_responses', {
   id: text('id').primaryKey(),
-  exitCaseId: text('exit_case_id'),
+  exitCaseId: text('exit_case_id').references(() => exitCases.id),
   studentId: text('student_id').references(() => users.id),
   isAnonymous: integer('is_anonymous', { mode: 'boolean' }).notNull().default(false),
   exitType: text('exit_type', { enum: ['withdrawal', 'leave_of_absence', 'transfer', 'dropout'] }).notNull(),
   academicYear: text('academic_year').notNull(),
-  primaryFactors: text('primary_factors').notNull(), // JSON string array
+  primaryFactors: text('primary_factors').notNull(), // JSON array
   curriculumRating: integer('curriculum_rating').notNull(),
   teachingRating: integer('teaching_rating').notNull(),
   advisorRating: integer('advisor_rating').notNull(),
@@ -55,6 +146,41 @@ export const studentVoiceResponses = sqliteTable('student_voice_responses', {
   curriculumImprovementSuggestions: text('curriculum_improvement_suggestions'),
   adviceForFutureStudents: text('advice_for_future_students'),
   shareWithAdvisor: integer('share_with_advisor', { mode: 'boolean' }).notNull().default(true),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  createdAt: text('created_at').notNull(),
 })
 
+// 11. Documents & Media Attachments (Cloudinary references)
+export const documents = sqliteTable('documents', {
+  id: text('id').primaryKey(),
+  studentId: text('student_id').notNull().references(() => users.id),
+  title: text('title').notNull(),
+  type: text('type').notNull(),
+  status: text('status', { enum: ['pending', 'approved', 'rejected'] }).notNull().default('pending'),
+  publicId: text('public_id').notNull(),
+  url: text('url').notNull(),
+  createdAt: text('created_at').notNull(),
+})
+
+// 12. Early Warning Indicators
+export const earlyWarnings = sqliteTable('early_warnings', {
+  id: text('id').primaryKey(),
+  studentId: text('student_id').notNull().references(() => users.id),
+  riskLevel: text('risk_level', { enum: ['low', 'medium', 'high', 'critical'] }).notNull(),
+  indicators: text('indicators').notNull(), // JSON array
+  status: text('status', { enum: ['active', 'monitoring', 'resolved'] }).notNull().default('active'),
+  notes: text('notes'),
+  createdAt: text('created_at').notNull(),
+})
+
+// 13. PDPA & Security Audit Logs
+export const auditLogs = sqliteTable('audit_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  userName: text('user_name').notNull(),
+  userRole: text('user_role').notNull(),
+  action: text('action').notNull(),
+  description: text('description').notNull(),
+  targetId: text('target_id'),
+  timestamp: text('timestamp').notNull(),
+  ipAddress: text('ip_address'),
+})
