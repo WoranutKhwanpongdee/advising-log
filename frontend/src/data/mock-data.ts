@@ -16,6 +16,7 @@ import type {
   StudentDocument,
   Notification,
   EarlyWarningCase,
+  EarlyWarningFollowUp,
   ExitCase,
   AdvisorExitAssessment,
   StudentVoiceResponse,
@@ -169,6 +170,22 @@ export const mockNotifications: Notification[] = [
 export const mockEarlyWarnings: EarlyWarningCase[] = [
   { id: 'EW001', studentId: 'STU001', advisorId: 'ADV001', warningType: 'academic_risk', severity: 'high', description: 'Student GPA dropped below 2.00. Received academic warning letter. At risk of probation if GPA does not improve next semester.', dateDetected: '2026-08-25', recommendedAction: 'Schedule advising session to create GPA recovery plan. Consider reduced course load.', followUpDate: '2026-09-15', status: 'active', createdAt: '2026-08-25' },
   { id: 'EW002', studentId: 'STU009', advisorId: 'ADV003', warningType: 'attendance', severity: 'medium', description: 'Student has missed more than 20% of classes in two courses. Pattern started 3 weeks ago.', dateDetected: '2026-08-30', recommendedAction: 'Contact student to check welfare. Schedule meeting to discuss attendance issues.', followUpDate: '2026-09-10', status: 'active', createdAt: '2026-08-30' },
+]
+
+// --- Early Warning Follow-Ups ---
+
+export const mockEarlyWarningFollowUps: EarlyWarningFollowUp[] = [
+  {
+    id: 'EWF001',
+    warningId: 'EW001',
+    advisorId: 'ADV001',
+    notes: 'Met with student to discuss GPA recovery plan. Student agreed to take reduced course load next semester.',
+    actionsTaken: 'Created recovery plan with 12 credits instead of 15. Recommended tutoring center for programming course.',
+    outcome: 'Student scheduled meeting with academic support center. Will monitor attendance and mid-term grades.',
+    followUpDate: '2026-09-15',
+    status: 'in_progress',
+    createdAt: '2026-09-05',
+  },
 ]
 
 // --- Exit Cases ---

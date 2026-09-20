@@ -140,6 +140,7 @@ export type AuditAction =
   | 'exit_case_updated'
   | 'student_voice_submitted'
   | 'warning_created'
+  | 'warning_followup_added'
   | 'qa_viewed_case'
   | 'qa_exported_data'
   | 'user_role_changed'
@@ -294,6 +295,18 @@ export interface EarlyWarningCase {
   recommendedAction: string
   followUpDate: string
   status: 'active' | 'monitoring' | 'resolved'
+  createdAt: string
+}
+
+export interface EarlyWarningFollowUp {
+  id: string
+  warningId: string
+  advisorId: string
+  notes: string
+  actionsTaken: string
+  outcome: string
+  followUpDate: string
+  status: 'in_progress' | 'completed' | 'pending'
   createdAt: string
 }
 

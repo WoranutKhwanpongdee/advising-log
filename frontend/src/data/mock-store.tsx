@@ -12,6 +12,7 @@ import type {
   Referral,
   Notification,
   EarlyWarningCase,
+  EarlyWarningFollowUp,
   ExitCase,
   AdvisorExitAssessment,
   StudentVoiceResponse,
@@ -33,6 +34,7 @@ import {
   mockReferrals,
   mockNotifications,
   mockEarlyWarnings,
+  mockEarlyWarningFollowUps,
   mockExitCases,
   mockAdvisorAssessments,
   mockStudentVoiceResponses,
@@ -67,6 +69,7 @@ interface StoreState {
   referrals: Referral[]
   notifications: Notification[]
   earlyWarnings: EarlyWarningCase[]
+  earlyWarningFollowUps: EarlyWarningFollowUp[]
   exitCases: ExitCase[]
   advisorAssessments: AdvisorExitAssessment[]
   studentVoiceResponses: StudentVoiceResponse[]
@@ -107,6 +110,8 @@ interface StoreActions {
   // Early Warnings
   addEarlyWarning: (ew: Omit<EarlyWarningCase, 'id' | 'createdAt'>) => EarlyWarningCase
   updateEarlyWarningStatus: (id: string, status: EarlyWarningCase['status']) => void
+  addEarlyWarningFollowUp: (fw: Omit<EarlyWarningFollowUp, 'id' | 'createdAt'>) => EarlyWarningFollowUp
+  updateEarlyWarningFollowUpStatus: (id: string, status: EarlyWarningFollowUp['status']) => void
 
   // Exit Cases
   addExitCase: (ec: Omit<ExitCase, 'id' | 'createdAt' | 'updatedAt'>) => ExitCase
@@ -170,6 +175,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [referrals, setReferrals] = useState<Referral[]>([...mockReferrals])
   const [notifications, setNotifications] = useState<Notification[]>([...mockNotifications])
   const [earlyWarnings, setEarlyWarnings] = useState<EarlyWarningCase[]>([...mockEarlyWarnings])
+  const [earlyWarningFollowUps, setEarlyWarningFollowUps] = useState<EarlyWarningFollowUp[]>([...mockEarlyWarningFollowUps])
   const [exitCases, setExitCases] = useState<ExitCase[]>([...mockExitCases])
   const [advisorAssessments, setAdvisorAssessments] = useState<AdvisorExitAssessment[]>([...mockAdvisorAssessments])
   const [studentVoiceResponses, setStudentVoiceResponses] = useState<StudentVoiceResponse[]>([...mockStudentVoiceResponses])
@@ -270,6 +276,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateEarlyWarningStatus = useCallback((id: string, status: EarlyWarningCase['status']) => {
     setEarlyWarnings(prev => prev.map(e => e.id === id ? { ...e, status } : e))
+  }, [])
+
+  const addEarlyWarningFollowUp = useCallback((fw: Omit<EarlyWarningFollowUp, 'id' | 'createdAt'>): EarlyWarningFollowUp => {
+    const newFw: EarlyWarningFollowUp = { ...fw, id: nextId('EWF'), createdAt: now() }
+    setEarlyWarningFollowUps(prev => [newFw, ...prev])
+    return newFw
+  }, [])
+
+  const updateEarlyWarningFollowUpStatus = useCallback((id: string, status: EarlyWarningFollowUp['status']) => {
+    setEarlyWarningFollowUps(prev => prev.map(f => f.id === id ? { ...f, status } : f))
   }, [])
 
   const addExitCase = useCallback((ec: Omit<ExitCase, 'id' | 'createdAt' | 'updatedAt'>): ExitCase => {
@@ -574,7 +590,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     users, roster, requests, appointments, sessions, followUps, referrals,
-    notifications, earlyWarnings, exitCases, advisorAssessments, studentVoiceResponses, documents,
+    notifications, earlyWarnings, earlyWarningFollowUps, exitCases, advisorAssessments, studentVoiceResponses, documents,
     categoryConfigs, documentTypes, auditLogs, systemApiConfig,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
@@ -584,6 +600,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addReferral, updateReferralStatus,
     addNotification, markNotificationRead, markAllNotificationsRead,
     addEarlyWarning, updateEarlyWarningStatus,
+    addEarlyWarningFollowUp, updateEarlyWarningFollowUpStatus,
     addExitCase, updateExitCaseStatus,
     addAdvisorAssessment,
     addStudentVoiceResponse,

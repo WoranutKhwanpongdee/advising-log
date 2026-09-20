@@ -67,6 +67,8 @@ app.post('/api/qa/ai-analyze', async (c) => {
     const lang = body.language || 'th'
     const apiKey = body.apiKey || c.req.header('x-gemini-key') || c.env?.GEMINI_API_KEY
 
+    console.log('[AI] Received request:', { mode, casesCount: cases.length, hasApiKey: !!apiKey, apiKeyLength: apiKey?.length })
+
     // De-identify: Only pass sanitized academic context
     const sanitizedDataSummary = cases.map((item, idx) => {
       return `Case #${idx + 1} [ID: ${item.studentCode || item.id} | Year: ${item.academicYear || 'N/A'} | Type: ${item.exitType} | Reason: ${item.reasonCode}]
@@ -76,7 +78,9 @@ app.post('/api/qa/ai-analyze', async (c) => {
     }).join('\n\n')
 
     // If Gemini API Key is available, call Google Gemini 1.5 Flash
+    console.log('[AI] API Key check:', { hasKey: !!apiKey, length: apiKey?.length, trimLength: apiKey?.trim().length })
     if (apiKey && apiKey.trim().length > 10) {
+      console.log('[AI] Using Gemini API (Live)')
       const systemInstruction = `You are an expert Higher Education Quality Assurance (QA) Analyst and Academic Retention Specialist advising the Program Chair and Dean under AUN-QA Criterion 6 (Student Support Services) and Criterion 8 (Retention & Dropout Rates).
 All personal names have been stripped for PDPA compliance. Analyze the qualitative data deeply.
 Respond in ${lang === 'th' ? 'Thai with professional academic tone and clear markdown bullet points' : 'English with professional academic tone and clear markdown bullet points'}.`
@@ -125,6 +129,13 @@ Provide a direct, evidence-backed qualitative answer with actionable recommendat
         }),
       })
 
+      console.log('[AI] Gemini API Response Status:', geminiResponse.status)
+
+      if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text()
+        console.log('[AI] Gemini API Error:', errorText)
+      }
+
       if (geminiResponse.ok) {
         const data = await geminiResponse.json() as any
         const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text
@@ -141,6 +152,7 @@ Provide a direct, evidence-backed qualitative answer with actionable recommendat
     }
 
     // High-Fidelity Intelligent Fallback (Offline Qualitative Engine)
+    console.log('[AI] Using Offline Fallback Mode')
     const withdrawalCount = cases.filter(c => c.exitType === 'withdrawal' || c.exitType === 'dropout').length
     const leaveCount = cases.filter(c => c.exitType === 'leave_of_absence').length
     const academicCases = cases.filter(c => c.reasonCode === 'academic')
