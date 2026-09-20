@@ -7,6 +7,7 @@ import { eq, desc, and, or } from 'drizzle-orm'
 export type Bindings = {
   DB?: D1Database
   GEMINI_API_KEY?: string
+  SUPER_ADMIN_EMAIL?: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -83,7 +84,8 @@ app.post('/api/auth/google', async (c) => {
 
     const lowerEmail = email.toLowerCase()
     const codePrefix = lowerEmail.split('@')[0].toUpperCase()
-    const isAuthorizedSuperAdmin = lowerEmail === 'se.advisinglog@gmail.com'
+    const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+    const isAuthorizedSuperAdmin = lowerEmail === superAdminEmail
 
     const isMfuDomain =
       lowerEmail.endsWith('@mfu.ac.th') ||
@@ -282,12 +284,15 @@ app.post('/api/users', async (c) => {
   if (!database) return c.json({ error: 'Database unavailable' }, 503)
 
   const body = await c.req.json()
+  const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+  const assignedRole = body.role === 'admin' && body.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : body.role
+
   const newUser = {
     id: body.id || `USER_${Date.now()}`,
     code: body.code,
     name: body.name,
     email: body.email,
-    role: body.role,
+    role: assignedRole,
     department: body.department || 'School of Applied Digital Technology (ADT)',
     phone: body.phone || null,
     isActive: body.isActive !== undefined ? body.isActive : true,
@@ -310,7 +315,13 @@ app.patch('/api/users/:id', async (c) => {
   const body = await c.req.json()
 
   // Protect Super Admin from being deactivated
-  if (id === 'ADM_SE_GOOGLE' && body.isActive === false) {
+  const targetUser = await database.select().from(schema.users).where(eq(schema.users.id, id)).get()
+  const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+  if (
+    targetUser &&
+    body.isActive === false &&
+    (targetUser.id === 'ADM_SE_GOOGLE' || targetUser.code === 'ADM-SUPER' || targetUser.email?.toLowerCase().trim() === superAdminEmail)
+  ) {
     return c.json({ success: false, error: 'Cannot deactivate Master Super Admin account' }, 400)
   }
 

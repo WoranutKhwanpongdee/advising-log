@@ -1,0 +1,3 @@
+# Backend Local Environment Variables Template (.dev.vars)
+SUPER_ADMIN_EMAIL=your-super-admin@example.com
+GEMINI_API_KEY=your-optional-gemini-api-key

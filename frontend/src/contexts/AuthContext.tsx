@@ -79,8 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (parts.length >= 2) {
         const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
         const decoded = JSON.parse(atob(payloadBase64))
-        const email = (decoded.email || '').toLowerCase()
-        const isAuthorizedAdmin = email === 'se.advisinglog@gmail.com'
+        const email = (decoded.email || '').toLowerCase().trim()
+        const superAdminEmail = ((import.meta.env.VITE_SUPER_ADMIN_EMAIL as string) || 'se.advisinglog@gmail.com').toLowerCase().trim()
+        const isAuthorizedAdmin = email === superAdminEmail
         const name = decoded.name || 'Google User'
         const googleId = decoded.sub || `${Date.now()}`
         const picture = decoded.picture || null

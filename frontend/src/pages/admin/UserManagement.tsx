@@ -242,7 +242,8 @@ export default function UserManagement() {
       key: 'actions',
       header: t('การจัดการ', 'Actions'),
       render: (u: User) => {
-        const isSuperAdmin = u.email === 'se.advisinglog@gmail.com' || u.code === 'ADM-SUPER' || u.id === 'ADM_SE_GOOGLE'
+        const superAdminEmail = ((import.meta.env.VITE_SUPER_ADMIN_EMAIL as string) || 'se.advisinglog@gmail.com').toLowerCase().trim()
+        const isSuperAdmin = u.email?.toLowerCase().trim() === superAdminEmail || u.code === 'ADM-SUPER' || u.id === 'ADM_SE_GOOGLE'
         if (isSuperAdmin) {
           return (
             <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 dark:text-slate-400 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
@@ -472,7 +473,6 @@ export default function UserManagement() {
                 >
                   <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>
                   <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA)', 'QA Chair')}</option>
-                  <option value="admin">{t('ผู้ดูแลระบบ (Admin)', 'Admin')}</option>
                 </select>
               )}
             </div>
