@@ -166,6 +166,10 @@ class ApiClient {
     })
   }
 
+  async getStudentVoice() {
+    return this.request<{ surveys: StudentVoiceResponse[] }>('/api/student-voice')
+  }
+
   async submitStudentVoice(survey: Partial<StudentVoiceResponse>) {
     return this.request<{ success: boolean; survey: StudentVoiceResponse }>('/api/student-voice', {
       method: 'POST',

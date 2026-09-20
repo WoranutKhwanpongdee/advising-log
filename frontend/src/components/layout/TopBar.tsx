@@ -164,14 +164,22 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           )}
         </div>
 
-        {/* User info chip */}
+        {/* User info chip with Google Avatar */}
         <div className="flex items-center gap-3 pl-3 border-l border-slate-200/70 dark:border-slate-800">
-          <div className="h-9 w-9 rounded-xl bg-sky-50 dark:bg-sky-950/70 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-xs font-bold text-sky-700 dark:text-sky-400 flex-shrink-0 shadow-2xs">
-            {initials}
-          </div>
+          {currentUser.avatar ? (
+            <img
+              src={currentUser.avatar}
+              alt={currentUser.name}
+              className="h-9 w-9 rounded-xl object-cover ring-2 ring-sky-500/30 flex-shrink-0 shadow-2xs"
+            />
+          ) : (
+            <div className="h-9 w-9 rounded-xl bg-sky-50 dark:bg-sky-950/70 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-xs font-bold text-sky-700 dark:text-sky-400 flex-shrink-0 shadow-2xs">
+              {initials}
+            </div>
+          )}
           <div className="hidden sm:block">
             <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">{currentUser.name}</p>
-            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">{currentUser.code}</p>
+            <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 font-mono mt-0.5">{currentUser.code}</p>
           </div>
           <button
             onClick={() => { logout(); navigate('/login') }}

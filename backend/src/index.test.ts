@@ -25,8 +25,7 @@ describe('Backend Hono API', () => {
     expect(body.roles).toEqual(['student', 'advisor', 'qa_chair', 'admin'])
   })
 
-  it('POST /api/auth/google decodes JWT credential and authenticates student user', async () => {
-    // Construct valid sample base64 JWT payload
+  it('POST /api/auth/google decodes JWT credential and authenticates student user from @student.mfu.ac.th', async () => {
     const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
     const payload = btoa(JSON.stringify({
       email: '6631503001@student.mfu.ac.th',
@@ -47,6 +46,71 @@ describe('Backend Hono API', () => {
     expect(data.success).toBe(true)
     expect(data.user.email).toBe('6631503001@student.mfu.ac.th')
     expect(data.user.role).toBe('student')
+  })
+
+  it('POST /api/auth/google allows se.advisinglog@gmail.com as Admin', async () => {
+    const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+    const payload = btoa(JSON.stringify({
+      email: 'se.advisinglog@gmail.com',
+      name: 'SE AdvisingLog Admin',
+      sub: 'google_999999',
+    }))
+    const dummyJwt = `${header}.${payload}.signature`
+
+    const res = await app.request('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: dummyJwt }),
+    })
+
+    expect(res.status).toBe(200)
+    const data = await res.json() as any
+    expect(data.success).toBe(true)
+    expect(data.user.email).toBe('se.advisinglog@gmail.com')
+    expect(data.user.role).toBe('admin')
+  })
+
+  it('POST /api/auth/google rejects non-MFU unauthorized outside emails', async () => {
+    const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+    const payload = btoa(JSON.stringify({
+      email: 'unauthorized.user@yahoo.com',
+      name: 'Unauthorized Stranger',
+      sub: 'google_000000',
+    }))
+    const dummyJwt = `${header}.${payload}.signature`
+
+    const res = await app.request('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: dummyJwt }),
+    })
+
+    expect(res.status).toBe(403)
+    const data = await res.json() as any
+    expect(data.success).toBe(false)
+    expect(data.error).toBe('DOMAIN_RESTRICTED')
+  })
+
+  it('POST /api/auth/google rejects MFU email if account is NOT pre-registered by Admin', async () => {
+    const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
+    const payload = btoa(JSON.stringify({
+      email: 'unregistered.student999@student.mfu.ac.th',
+      name: 'Unregistered Student',
+      sub: 'google_888888',
+    }))
+    const dummyJwt = `${header}.${payload}.signature`
+
+    const res = await app.request('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: dummyJwt }),
+    })
+
+    expect(res.status).toBe(403)
+    const data = await res.json() as any
+    expect(data.success).toBe(false)
+    expect(data.error).toBe('USER_NOT_REGISTERED')
+    expect(data.message).toContain('ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ')
   })
 
   it('POST /api/qa/ai-analyze generates qualitative retention analysis', async () => {

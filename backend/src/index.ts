@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { getDb } from './db'
 import * as schema from './db/schema'
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, desc, and, or } from 'drizzle-orm'
 
 export type Bindings = {
   DB?: D1Database
@@ -58,6 +58,8 @@ function db(c: any) {
 // ============================================================
 // 0. Google OAuth Authentication & SSO
 // ============================================================
+// 0. Google OAuth Authentication & SSO (MFU Domain & Advisee Guard)
+// ============================================================
 app.post('/api/auth/google', async (c) => {
   try {
     const { credential } = await c.req.json<{ credential?: string }>()
@@ -79,55 +81,157 @@ app.post('/api/auth/google', async (c) => {
       return c.json({ success: false, error: 'Google account has no email address' }, 400)
     }
 
+    const lowerEmail = email.toLowerCase()
+    const codePrefix = lowerEmail.split('@')[0].toUpperCase()
+    const isAuthorizedSuperAdmin = lowerEmail === 'se.advisinglog@gmail.com'
+
+    const isMfuDomain =
+      lowerEmail.endsWith('@mfu.ac.th') ||
+      lowerEmail.endsWith('@student.mfu.ac.th') ||
+      lowerEmail.endsWith('@lamduan.mfu.ac.th') ||
+      lowerEmail.endsWith('@lamduan.ac.th')
+
     const database = db(c)
+
+    // Offline / Mock Fallback (when DB binding is absent)
     if (!database) {
-      // Offline/demo fallback
-      const role = email.includes('student') || /^\d/.test(email) ? 'student' : 'advisor'
+      if (isAuthorizedSuperAdmin) {
+        const adminUser = {
+          id: 'ADM_SE_GOOGLE',
+          code: 'ADM-9999',
+          name: 'System Admin (SE AdvisingLog)',
+          email: lowerEmail,
+          role: 'admin' as const,
+          department: 'Academic & System Affairs',
+          isActive: true,
+          hasAiAccess: true,
+          avatar: picture || null,
+          createdAt: new Date().toISOString().split('T')[0],
+        }
+        return c.json({ success: true, user: adminUser, source: 'offline_fallback' })
+      }
+
+      // Check if user is known in pre-registered list
+      const isKnownUser = lowerEmail.startsWith('6631503') || lowerEmail.startsWith('prasit') || lowerEmail.startsWith('nittaya') || lowerEmail.startsWith('worasak') || lowerEmail.startsWith('admin')
+
+      if (!isKnownUser) {
+        if (!isMfuDomain) {
+          return c.json({
+            success: false,
+            error: 'DOMAIN_RESTRICTED',
+            message: 'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือบัญชีที่ได้รับการลงทะเบียนโดยผู้ดูแลระบบ',
+          }, 403)
+        }
+        return c.json({
+          success: false,
+          error: 'USER_NOT_REGISTERED',
+          message: `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ (${lowerEmail}) ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อเพิ่มรายชื่อเข้าสู่ระบบ`,
+        }, 403)
+      }
+
+      let role: 'student' | 'advisor' | 'qa_chair' | 'admin' = 'advisor'
+      if (/^\d/.test(codePrefix) || lowerEmail.includes('student') || lowerEmail.includes('lamduan')) {
+        role = 'student'
+      }
+
       const fallbackUser = {
         id: `GOOGLE_${googleId.substring(0, 8)}`,
-        code: email.split('@')[0],
+        code: codePrefix,
         name: name || 'Google User',
-        email,
+        email: lowerEmail,
         role,
         department: 'School of Applied Digital Technology (ADT)',
         isActive: true,
-        hasAiAccess: role === 'advisor' || role === 'qa_chair',
+        hasAiAccess: role !== 'student',
         avatar: picture || null,
         createdAt: new Date().toISOString().split('T')[0],
       }
       return c.json({ success: true, user: fallbackUser, source: 'offline_fallback' })
     }
 
-    // Search user by email in Cloudflare D1
-    let user = await database.select().from(schema.users).where(eq(schema.users.email, email)).get()
+    // 1. Search User in Cloudflare D1 (Check if registered by Admin)
+    let user = await database.select().from(schema.users)
+      .where(
+        or(
+          eq(schema.users.email, lowerEmail),
+          eq(schema.users.code, codePrefix),
+        )
+      ).get()
 
-    if (!user) {
-      // Auto-detect role from institutional email structure
-      let role: 'student' | 'advisor' | 'qa_chair' | 'admin' = 'advisor'
-      if (email.includes('student') || /^\d/.test(email)) {
-        role = 'student'
-      } else if (email.includes('admin') || email.includes('affairs')) {
-        role = 'admin'
-      } else if (email.includes('qa') || email.includes('chair') || email.includes('dean')) {
-        role = 'qa_chair'
-      }
-
-      const generatedCode = email.split('@')[0].toUpperCase()
-      const newUser = {
-        id: `${role === 'student' ? 'STU' : role === 'admin' ? 'ADM' : role === 'qa_chair' ? 'QA' : 'ADV'}_${googleId.substring(0, 6)}`,
-        code: generatedCode,
-        name: name || 'Google User',
-        email,
-        role,
-        department: 'School of Applied Digital Technology (ADT)',
+    // If Super Admin account, auto-provision if not exists
+    if (!user && isAuthorizedSuperAdmin) {
+      const newAdmin = {
+        id: 'ADM_SE_GOOGLE',
+        code: 'ADM-9999',
+        name: 'System Admin (SE AdvisingLog)',
+        email: lowerEmail,
+        role: 'admin' as const,
+        department: 'Academic & System Affairs',
         phone: null,
         isActive: true,
-        hasAiAccess: role === 'advisor' || role === 'qa_chair' || role === 'admin',
+        hasAiAccess: true,
         createdAt: new Date().toISOString().split('T')[0],
       }
+      await database.insert(schema.users).values(newAdmin)
+      user = newAdmin
+    }
 
-      await database.insert(schema.users).values(newUser)
-      user = newUser
+    // If not found in database (not registered by Admin)
+    if (!user) {
+      if (!isMfuDomain) {
+        return c.json({
+          success: false,
+          error: 'DOMAIN_RESTRICTED',
+          message: 'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือให้อาจารย์/ผู้ดูแลระบบลงทะเบียนอีเมลภายนอกของคุณเข้าสู่ระบบก่อน',
+        }, 403)
+      }
+
+      return c.json({
+        success: false,
+        error: 'USER_NOT_REGISTERED',
+        message: `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ (${lowerEmail}) ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อลงทะเบียนเข้าสู่ระบบก่อน`,
+        email: lowerEmail,
+      }, 403)
+    }
+
+    // Check if account is active
+    if (!user.isActive) {
+      return c.json({
+        success: false,
+        error: 'ACCOUNT_DEACTIVATED',
+        message: 'บัญชีผู้ใช้งานนี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ',
+      }, 403)
+    }
+
+    // 4. Student Advisee Check: Student MUST be assigned to an advisor by Admin or Advisor
+    let assignedAdvisor = null
+    if (user.role === 'student') {
+      const assignment = await database.select().from(schema.studentAdvisorAssignments)
+        .where(
+          and(
+            eq(schema.studentAdvisorAssignments.studentId, user.id),
+            eq(schema.studentAdvisorAssignments.isActive, true),
+          )
+        ).get()
+
+      if (!assignment) {
+        return c.json({
+          success: false,
+          error: 'STUDENT_NOT_ASSIGNED',
+          message: 'ไม่สามารถเข้าสู่ระบบได้: บัญชีนักศึกษาของคุณยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา กรุณาติดต่ออาจารย์ที่ปรึกษาหรือสำนักวิชาเพื่อดำเนินการเพิ่มรายชื่อ',
+          studentInfo: {
+            name: user.name,
+            code: user.code,
+            email: user.email,
+          },
+        }, 403)
+      }
+
+      // Fetch advisor details
+      const activeAdvisorId = assignment.advisorId
+      if (activeAdvisorId) {
+        assignedAdvisor = await database.select().from(schema.users).where(eq(schema.users.id, activeAdvisorId)).get()
+      }
     }
 
     return c.json({
@@ -135,6 +239,7 @@ app.post('/api/auth/google', async (c) => {
       user: {
         ...user,
         avatar: picture || null,
+        advisor: assignedAdvisor,
       },
       token: `session_${Date.now()}_${googleId.substring(0, 6)}`,
     })

@@ -42,12 +42,12 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      const user = await loginWithGoogle(credentialResponse.credential)
+      const result = await loginWithGoogle(credentialResponse.credential)
       setLoading(false)
-      if (user) {
-        redirectForRole(user.role)
+      if (result.success && result.user) {
+        redirectForRole(result.user.role)
       } else {
-        setError(t('ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'Failed to sign in with Google account.'))
+        setError(result.message || t('ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'Failed to sign in with Google account.'))
       }
     } catch {
       setLoading(false)

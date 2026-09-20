@@ -215,21 +215,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   })
 
-  // --- Background Backend Sync on Mount ---
+  // --- Background Backend Sync on Mount (Real Data from Cloudflare D1) ---
   useEffect(() => {
     let isMounted = true
     async function syncFromBackend() {
-      const [uRes, rRes, fRes, sRes] = await Promise.all([
+      const [uRes, rRes, fRes, sRes, eRes, vRes, aRes] = await Promise.all([
         api.getUsers(),
         api.getRequests(),
         api.getFollowUps(),
         api.getSessions(),
+        api.getExitCases(),
+        api.getStudentVoice(),
+        api.getAuditLogs(),
       ])
       if (!isMounted) return
       if (uRes?.users && uRes.users.length > 0) setUsers(uRes.users)
       if (rRes?.requests && rRes.requests.length > 0) setRequests(rRes.requests)
       if (fRes?.followUps && fRes.followUps.length > 0) setFollowUps(fRes.followUps)
       if (sRes?.sessions && sRes.sessions.length > 0) setSessions(sRes.sessions)
+      if (eRes?.exitCases && eRes.exitCases.length > 0) setExitCases(eRes.exitCases)
+      if (vRes?.surveys && vRes.surveys.length > 0) setStudentVoiceResponses(vRes.surveys)
+      if (aRes?.logs && aRes.logs.length > 0) setAuditLogs(aRes.logs)
     }
     syncFromBackend()
     return () => { isMounted = false }

@@ -17,9 +17,11 @@ export default function StudentDashboard() {
 
   if (!currentUser) return null
 
-  // Find advisor
+  // Find advisor (auto-assigned to Dr. Prasit if new student)
   const rosterEntry = store.roster.find(r => r.studentId === currentUser.id && r.isActive)
-  const advisor = rosterEntry ? store.users.find(u => u.id === rosterEntry.advisorId) : null
+  const advisor = rosterEntry
+    ? store.users.find(u => u.id === rosterEntry.advisorId)
+    : store.users.find(u => u.id === 'ADV001' || u.role === 'advisor')
 
   // My data
   const myRequests = store.requests.filter(r => r.studentId === currentUser.id)
