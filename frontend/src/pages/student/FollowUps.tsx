@@ -1,19 +1,52 @@
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, DataTable, StatusBadge, Button } from '@/components/ui'
-import type { FollowUp } from '@/types'
-import { CheckCircle2, ListChecks } from 'lucide-react'
+import { PageHeader, DataTable, StatusBadge, Button, Modal, Card } from '@/components/ui'
+import type { FollowUp, FollowUpProgress } from '@/types'
+import { CheckCircle2, ListChecks, TrendingUp, Clock } from 'lucide-react'
 
 export default function FollowUps() {
   const { currentUser } = useAuth()
   const store = useStore()
   const { addToast } = useToast()
   const { t } = useLanguage()
+  const [showProgressModal, setShowProgressModal] = useState(false)
+  const [selectedFollowUp, setSelectedFollowUp] = useState<FollowUp | null>(null)
+  const [progressValue, setProgressValue] = useState(0)
+  const [progressNotes, setProgressNotes] = useState('')
+
   if (!currentUser) return null
 
   const myFollowUps = store.followUps.filter(f => f.studentId === currentUser.id)
+  const myProgress = store.followUpProgress.filter(fp => fp.studentId === currentUser.id)
+
+  function handleUpdateProgress() {
+    if (!selectedFollowUp || !currentUser) return
+    store.updateFollowUpProgress(
+      `${selectedFollowUp.id}-progress`,
+      progressValue,
+      progressNotes
+    )
+    store.addAuditLog({
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userRole: 'student',
+      action: 'followup_completed' as any,
+      description: `Updated progress for ${selectedFollowUp.task}: ${progressValue}%`,
+      targetId: selectedFollowUp.id,
+    })
+    addToast('success', t('อัปเดตความคืบหน้าแล้ว', 'Progress Updated'), t('บันทึกความคืบหน้างานเรียบร้อยแล้ว', 'Progress has been recorded successfully.'))
+    setShowProgressModal(false)
+    setSelectedFollowUp(null)
+    setProgressValue(0)
+    setProgressNotes('')
+  }
+
+  function getProgressForFollowUp(followUpId: string): FollowUpProgress | undefined {
+    return myProgress.find(fp => fp.followUpId === followUpId)
+  }
 
   const columns = [
     {
@@ -38,22 +71,50 @@ export default function FollowUps() {
       },
     },
     { key: 'due', header: t('กำหนดส่ง', 'Due Date'), render: (f: FollowUp) => <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{f.dueDate}</span> },
+    {
+      key: 'progress',
+      header: t('ความคืบหน้า', 'Progress'),
+      render: (f: FollowUp) => {
+        const fp = getProgressForFollowUp(f.id)
+        if (!fp) return <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-16 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sky-500 rounded-full transition-all"
+                style={{ width: `${fp.progress}%` }}
+              />
+            </div>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{fp.progress}%</span>
+          </div>
+        )
+      },
+    },
     { key: 'status', header: t('สถานะ', 'Status'), render: (f: FollowUp) => <StatusBadge status={f.status} /> },
     {
       key: 'actions',
       header: '',
       render: (f: FollowUp) => f.status !== 'completed' ? (
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={() => {
-            store.updateFollowUpStatus(f.id, 'completed')
-            store.addAuditLog({ userId: currentUser.id, userName: currentUser.name, userRole: 'student', action: 'followup_completed', description: `Completed follow-up: ${f.task}`, targetId: f.id })
-            addToast('success', t('ดำเนินการเสร็จสิ้น', 'Follow-up Completed'), f.task)
-          }}
-        >
-          <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {t('ทำเสร็จแล้ว', 'Mark Complete')}
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => { setSelectedFollowUp(f); setShowProgressModal(true) }}
+          >
+            <TrendingUp className="h-3.5 w-3.5 mr-1" /> {t('อัปเดตความคืบหน้า', 'Update Progress')}
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => {
+              store.updateFollowUpStatus(f.id, 'completed')
+              store.addAuditLog({ userId: currentUser.id, userName: currentUser.name, userRole: 'student', action: 'followup_completed', description: `Completed follow-up: ${f.task}`, targetId: f.id })
+              addToast('success', t('ดำเนินการเสร็จสิ้น', 'Follow-up Completed'), f.task)
+            }}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {t('ทำเสร็จแล้ว', 'Mark Complete')}
+          </Button>
+        </div>
       ) : null,
     },
   ]
@@ -75,6 +136,84 @@ export default function FollowUps() {
       ) : (
         <DataTable columns={columns} data={myFollowUps} emptyMessage={t('ไม่มีงานติดตามผลที่ค้างอยู่', 'No pending follow-ups assigned to your profile.')} />
       )}
+
+      {/* Progress History Section */}
+      {myProgress.length > 0 && (
+        <div className="mt-6 space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ประวัติความคืบหน้า', 'Progress History')}
+          </h3>
+          {myProgress.map(fp => {
+            const followUp = myFollowUps.find(f => f.id === fp.followUpId)
+            if (!followUp) return null
+            return (
+              <Card key={fp.id} className="p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">{followUp.task}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{fp.createdAt}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-sky-500 rounded-full"
+                        style={{ width: `${fp.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{fp.progress}%</span>
+                  </div>
+                </div>
+                {fp.notes && (
+                  <p className="text-xs text-slate-600 dark:text-slate-400 italic">{fp.notes}</p>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Progress Update Modal */}
+      <Modal isOpen={showProgressModal} onClose={() => { setShowProgressModal(false); setSelectedFollowUp(null) }} title={t('อัปเดตความคืบหน้า', 'Update Progress')} size="md">
+        <div className="space-y-4">
+          <div className="p-3 bg-sky-50/70 dark:bg-sky-950/40 rounded-xl border border-sky-100 dark:border-sky-800">
+            <p className="text-xs font-semibold text-sky-900 dark:text-sky-200 mb-1">{t('งาน', 'Task')}</p>
+            <p className="text-xs text-slate-700 dark:text-slate-300">{selectedFollowUp?.task}</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('ความคืบหน้า (%)', 'Progress (%)')}</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={progressValue}
+              onChange={e => setProgressValue(Number(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between mt-1">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">0%</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{progressValue}%</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">100%</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">{t('บันทึกเพิ่มเติม', 'Notes')}</label>
+            <textarea
+              value={progressNotes}
+              onChange={e => setProgressNotes(e.target.value)}
+              rows={3}
+              placeholder={t('บันทึกสิ่งที่ทำไป หรือปัญหาที่พบ...', 'Record what you have done or any issues encountered...')}
+              className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 resize-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="secondary" onClick={() => { setShowProgressModal(false); setSelectedFollowUp(null) }}>{t('ยกเลิก', 'Cancel')}</Button>
+            <Button variant="primary" onClick={handleUpdateProgress}>{t('บันทึก', 'Save')}</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

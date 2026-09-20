@@ -233,6 +233,16 @@ export interface FollowUp {
   createdAt: string
 }
 
+export interface FollowUpProgress {
+  id: string
+  followUpId: string
+  studentId: string
+  progress: number // 0-100
+  notes: string
+  status: 'in_progress' | 'submitted' | 'reviewed'
+  createdAt: string
+}
+
 export interface Referral {
   id: string
   sessionId: string

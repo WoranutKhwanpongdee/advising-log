@@ -18,6 +18,7 @@ import type {
   EarlyWarningCase,
   EarlyWarningFollowUp,
   ExitCase,
+  FollowUpProgress,
   AdvisorExitAssessment,
   StudentVoiceResponse,
   AuditLog,
@@ -111,6 +112,29 @@ export const mockFollowUps: FollowUp[] = [
   { id: 'FU008', sessionId: 'SES006', requestId: 'REQ004', studentId: 'STU004', advisorId: 'ADV002', task: 'Prepare internship application documents', dueDate: '2026-09-20', status: 'pending', createdAt: '2026-09-02' },
   // Follow-ups for STU006 (Siriporn Meechai)
   { id: 'FU009', sessionId: 'SES007', requestId: 'REQ006', studentId: 'STU006', advisorId: 'ADV002', task: 'Submit leave of absence form with supporting documents', dueDate: '2026-09-11', status: 'pending', createdAt: '2026-09-01' },
+]
+
+// --- Follow-up Progress Tracking ---
+
+export const mockFollowUpProgress: FollowUpProgress[] = [
+  {
+    id: 'FUP001',
+    followUpId: 'FU004',
+    studentId: 'STU007',
+    progress: 60,
+    notes: 'Met with Financial Office, paperwork submitted. Waiting for approval.',
+    status: 'in_progress',
+    createdAt: '2026-09-05',
+  },
+  {
+    id: 'FUP002',
+    followUpId: 'FU007',
+    studentId: 'STU003',
+    progress: 30,
+    notes: 'Called counseling center, appointment scheduled for next week.',
+    status: 'in_progress',
+    createdAt: '2026-09-04',
+  },
 ]
 
 // --- Referrals ---
