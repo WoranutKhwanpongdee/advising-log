@@ -363,7 +363,7 @@ export default function QualitativeExitAnalysis() {
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
                 {t('การวิเคราะห์ปัญหาเชิงคุณภาพ: ทำไมเด็กลาออก / พักการศึกษา?', 'Qualitative Analysis: Why Do Students Resign or Take Leave?')}
               </h3>
-              <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800">
+              <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800">
                 <Sparkles className="h-3 w-3 text-sky-600 dark:text-sky-400" />
                 AUN-QA Criteria 6.4 & 8.3
               </span>
@@ -483,7 +483,7 @@ export default function QualitativeExitAnalysis() {
                 <p className="font-bold">
                   {t('ระบบ AI ถูกปิดการใช้งานชั่วคราวโดยผู้ดูแลระบบ', 'AI system is currently disabled by System Administrator')}
                 </p>
-                <p className="text-[11px] text-amber-700/80 dark:text-amber-300/80">
+                <p className="text-xs text-amber-700/80 dark:text-amber-300/80">
                   {t('ผู้ดูแลระบบได้ปิดสวิตช์ AI API ไว้ หากต้องการใช้งานกรุณาแจ้งผู้ดูแลระบบเพื่อเปิดสวิตช์ที่ Admin Console', 'API calls are paused platform-wide. Please request the administrator to re-enable in Admin Console.')}
                 </p>
               </div>
@@ -523,7 +523,7 @@ export default function QualitativeExitAnalysis() {
           <button
             type="button"
             onClick={() => setAiMode('strategic')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
               aiMode === 'strategic'
                 ? 'bg-sky-600 text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -536,7 +536,7 @@ export default function QualitativeExitAnalysis() {
           <button
             type="button"
             onClick={() => setAiMode('chat')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${
               aiMode === 'chat'
                 ? 'bg-sky-600 text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -545,7 +545,7 @@ export default function QualitativeExitAnalysis() {
             <Bot className="h-3.5 w-3.5" />
             <span>{t('ถาม-ตอบกับ AI', 'AI Q&A')}</span>
             {aiChatMessages.length > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-sky-200/50 text-sky-900 font-bold">
+              <span className="px-1.5 py-0.2 rounded-full text-xs bg-sky-200/50 text-sky-900 font-bold">
                 {aiChatMessages.length}
               </span>
             )}
@@ -568,7 +568,7 @@ export default function QualitativeExitAnalysis() {
                       navigator.clipboard.writeText(aiResult)
                       addToast('success', t('คัดลอกแล้ว', 'Copied'), t('คัดลอกบทวิเคราะห์ AI ไปยังคลิปบอร์ดแล้ว', 'Copied AI analysis to clipboard.'))
                     }}
-                    className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-sky-600 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors cursor-pointer"
                   >
                     <Copy className="h-3 w-3" />
                     <span>{t('คัดลอก', 'Copy')}</span>
@@ -612,7 +612,7 @@ export default function QualitativeExitAnalysis() {
           <div className="space-y-3">
             {/* Quick Prompt Chips */}
             <div className="flex flex-wrap items-center gap-1.5 pb-1">
-              <span className="text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1">
+              <span className="text-xs font-semibold text-slate-400 mr-1 flex items-center gap-1">
                 <Lightbulb className="h-3 w-3 text-amber-500" />
                 {t('คำถามแนะนำ:', 'Suggested Prompts:')}
               </span>
