@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { PageHeader, DataTable, StatusBadge, SearchInput, Button } from '@/components/ui'
 import type { AdvisingRequest } from '@/types'
 import { useState } from 'react'
-import { FileEdit } from 'lucide-react'
+import { FileEdit, Clock, X, CheckCircle } from 'lucide-react'
 
 export default function AdvisingHistory() {
   const { currentUser } = useAuth()
@@ -34,7 +34,35 @@ export default function AdvisingHistory() {
     { key: 'advisor', header: t('อาจารย์ที่ปรึกษา', 'Faculty Advisor'), render: (r: AdvisingRequest) => <span className="text-xs text-slate-600 dark:text-slate-300">{store.users.find(u => u.id === r.advisorId)?.name || '-'}</span> },
     { key: 'appointment', header: t('เวลานัดหมาย', 'Appointment'), render: (r: AdvisingRequest) => {
       const apt = store.appointments.find(a => a.requestId === r.id)
-      return <span className="text-xs text-slate-500 dark:text-slate-400">{apt ? `${apt.scheduledDate} · ${apt.scheduledTime}` : '—'}</span>
+      if (!apt) return <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+
+      let statusIndicator = null
+      if (apt.status === 'scheduled' && !apt.studentConfirmed && !apt.studentDeclined) {
+        statusIndicator = (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 rounded-full text-[10px] font-medium text-amber-700 dark:text-amber-300">
+            <Clock className="h-3 w-3" /> {t('รอยืนยัน', 'Confirm')}
+          </span>
+        )
+      } else if (apt.studentDeclined) {
+        statusIndicator = (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-full text-[10px] font-medium text-rose-700 dark:text-rose-300">
+            <X className="h-3 w-3" /> {t('ไม่สะดวก', 'Declined')}
+          </span>
+        )
+      } else if (apt.studentConfirmed) {
+        statusIndicator = (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-full text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+            <CheckCircle className="h-3 w-3" /> {t('ยืนยันแล้ว', 'Confirmed')}
+          </span>
+        )
+      }
+
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 dark:text-slate-400">{apt.scheduledDate} · {apt.scheduledTime}</span>
+          {statusIndicator}
+        </div>
+      )
     }},
     { key: 'status', header: t('สถานะ', 'Status'), render: (r: AdvisingRequest) => <StatusBadge status={r.status} /> },
   ]

@@ -85,6 +85,8 @@ interface StoreActions {
   // Appointments
   addAppointment: (apt: Omit<Appointment, 'id' | 'createdAt'>) => Appointment
   updateAppointmentStatus: (id: string, status: Appointment['status']) => void
+  confirmAppointment: (appointmentId: string) => void
+  declineAppointment: (appointmentId: string, reason?: string) => void
 
   // Sessions
   addSession: (ses: Omit<AdvisingSession, 'id' | 'createdAt'>) => AdvisingSession
@@ -212,6 +214,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const updateAppointmentStatus = useCallback((id: string, status: Appointment['status']) => {
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a))
+  }, [])
+
+  const confirmAppointment = useCallback((appointmentId: string) => {
+    setAppointments(prev => prev.map(a => a.id === appointmentId ? { ...a, studentConfirmed: true } : a))
+  }, [])
+
+  const declineAppointment = useCallback((appointmentId: string, reason?: string) => {
+    setAppointments(prev => prev.map(a => a.id === appointmentId ? { ...a, studentDeclined: true, studentDeclineReason: reason } : a))
   }, [])
 
   const addSession = useCallback((ses: Omit<AdvisingSession, 'id' | 'createdAt'>): AdvisingSession => {
@@ -568,6 +578,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     categoryConfigs, documentTypes, auditLogs, systemApiConfig,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
+    confirmAppointment, declineAppointment,
     addSession,
     addFollowUp, updateFollowUpStatus,
     addReferral, updateReferralStatus,

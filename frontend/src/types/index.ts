@@ -198,6 +198,9 @@ export interface Appointment {
   scheduledTime: string
   location: string
   status: AppointmentStatus
+  studentConfirmed?: boolean // Whether student has confirmed the appointment
+  studentDeclined?: boolean // Whether student has declined the appointment
+  studentDeclineReason?: string // Reason for declining
   createdAt: string
 }
 
