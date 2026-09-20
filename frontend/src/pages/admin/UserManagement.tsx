@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useToast } from '@/contexts/ToastContext'
-import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal } from '@/components/ui'
+import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal, UserAvatar } from '@/components/ui'
 import type { User, UserRole } from '@/types'
 import { ChevronDown, Bot, ExternalLink, UserPlus } from 'lucide-react'
 
@@ -36,7 +36,7 @@ export default function UserManagement() {
   function handleAddUser(e: React.FormEvent) {
     e.preventDefault()
     if (!newEmail.trim() || !newName.trim()) {
-      addToast(t('กรุณากรอกอีเมลและชื่อ-นามสกุล', 'Please enter email and full name'), 'error')
+      addToast('error', t('กรุณากรอกอีเมลและชื่อ-นามสกุล', 'Please enter email and full name'))
       return
     }
 
@@ -45,7 +45,7 @@ export default function UserManagement() {
     // Check if duplicate
     const exists = store.users.some(u => u.email.toLowerCase() === email)
     if (exists) {
-      addToast(t('อีเมลนี้ได้รับการลงทะเบียนในระบบแล้ว', 'This email is already registered in the system'), 'warning')
+      addToast('warning', t('อีเมลนี้ได้รับการลงทะเบียนในระบบแล้ว', 'This email is already registered in the system'))
       return
     }
 
@@ -66,8 +66,9 @@ export default function UserManagement() {
 
     store.addUser(newUser)
     addToast(
-      t(`เพิ่มและลงทะเบียนอีเมล ${email} (${effectiveRole}) สำเร็จแล้ว`, `User email ${email} (${effectiveRole}) successfully registered`),
-      'success'
+      'success',
+      t('ลงทะเบียนผู้ใช้สำเร็จ', 'User Registered Successfully'),
+      t(`เพิ่มและลงทะเบียนอีเมล ${email} (${effectiveRole}) สำเร็จแล้ว`, `User email ${email} (${effectiveRole}) successfully registered`)
     )
     setShowAddModal(false)
     setNewEmail('')
@@ -104,9 +105,7 @@ export default function UserManagement() {
       header: t('ชื่อ-นามสกุล', 'Full Name'),
       render: (u: User) => (
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-xs flex-shrink-0">
-            {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-          </div>
+          <UserAvatar name={u.name} avatar={u.avatar} size="sm" />
           <div>
             <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">{u.name}</p>
             <p className="text-[11px] text-slate-400 dark:text-slate-400 font-mono">{u.email}</p>

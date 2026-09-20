@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { ThemeToggle } from '@/components/ui'
+import { ThemeToggle, UserAvatar } from '@/components/ui'
 import { Bell, LogOut, Menu, Calendar } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -52,7 +52,6 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
 
   const myNotifs = store.notifications.filter(n => n.userId === currentUser.id)
   const unreadCount = myNotifs.filter(n => !n.isRead).length
-  const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2)
 
   return (
     <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-30 shadow-xs text-slate-900 dark:text-slate-100">
@@ -166,17 +165,7 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
 
         {/* User info chip with Google Avatar */}
         <div className="flex items-center gap-3 pl-3 border-l border-slate-200/70 dark:border-slate-800">
-          {currentUser.avatar ? (
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="h-9 w-9 rounded-xl object-cover ring-2 ring-sky-500/30 flex-shrink-0 shadow-2xs"
-            />
-          ) : (
-            <div className="h-9 w-9 rounded-xl bg-sky-50 dark:bg-sky-950/70 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-xs font-bold text-sky-700 dark:text-sky-400 flex-shrink-0 shadow-2xs">
-              {initials}
-            </div>
-          )}
+          <UserAvatar name={currentUser.name} avatar={currentUser.avatar} size="md" />
           <div className="hidden sm:block">
             <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">{currentUser.name}</p>
             <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 font-mono mt-0.5">{currentUser.code}</p>

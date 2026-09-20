@@ -2,7 +2,7 @@
 // Reusable UI Components — Ultra-Clean Minimal White & Sky Blue
 // ============================================================
 
-import { type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { X, CheckCircle2, AlertTriangle, AlertCircle, Info, ChevronLeft, ChevronRight, Search, FileText } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
@@ -455,6 +455,71 @@ export function Button({ children, onClick, variant = 'primary', size = 'md', di
   )
 }
 
+// --- User Avatar (Google OAuth & Fallback Safe) ---
+
+export function UserAvatar({
+  name,
+  avatar,
+  size = 'md',
+  className,
+}: {
+  name: string
+  avatar?: string | null
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  className?: string
+}) {
+  const [imgError, setImgError] = useState(false)
+
+  useEffect(() => {
+    setImgError(false)
+  }, [avatar])
+
+  const initials = (name || 'User')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'U'
+
+  const sizeClasses = {
+    xs: 'h-6 w-6 text-[10px] rounded-lg',
+    sm: 'h-8 w-8 text-xs rounded-xl',
+    md: 'h-9 w-9 text-xs rounded-xl',
+    lg: 'h-12 w-12 sm:h-14 sm:w-14 text-base rounded-2xl',
+    xl: 'h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 text-lg sm:text-xl rounded-2xl',
+  }[size]
+
+  if (avatar && !imgError) {
+    return (
+      <img
+        src={avatar}
+        alt={name}
+        referrerPolicy="no-referrer"
+        onError={() => setImgError(true)}
+        className={cn(
+          sizeClasses,
+          'object-cover ring-2 ring-sky-500/30 flex-shrink-0 shadow-2xs bg-slate-100 dark:bg-slate-800',
+          className
+        )}
+      />
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        sizeClasses,
+        'bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800/80 text-sky-700 dark:text-sky-300 font-extrabold flex items-center justify-center flex-shrink-0 shadow-2xs',
+        className
+      )}
+    >
+      {initials}
+    </div>
+  )
+}
+
 // --- Student Profile Banner (REG MFU Academic Information Style) ---
 
 export function StudentProfileBanner({
@@ -467,8 +532,8 @@ export function StudentProfileBanner({
   status,
   semester,
 }: {
-  student: { name: string; code: string; email: string; department?: string }
-  advisor?: { name: string; email: string; phone?: string; department?: string } | null
+  student: { name: string; code: string; email: string; department?: string; avatar?: string }
+  advisor?: { name: string; email: string; phone?: string; department?: string; avatar?: string } | null
   school?: string
   major?: string
   gpax?: string
@@ -477,7 +542,6 @@ export function StudentProfileBanner({
   semester?: string
 }) {
   const { t } = useLanguage()
-  const initials = student.name.split(' ').map(n => n[0]).join('').substring(0, 2)
   const displaySchool = school || t('สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ (ADT)', 'School of Applied Digital Technology (ADT)')
   const displayMajor = major || t('สาขาวิชาวิศวกรรมซอฟต์แวร์', 'Software Engineering')
   const displayStatus = status || t('ปกติ', 'Normal')
@@ -491,9 +555,7 @@ export function StudentProfileBanner({
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5">
         {/* Left: Avatar + Identity */}
         <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-          <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-18 md:w-18 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-700 dark:text-sky-300 font-extrabold text-base sm:text-lg md:text-xl shadow-xs flex-shrink-0">
-            {initials}
-          </div>
+          <UserAvatar name={student.name} avatar={student.avatar} size="xl" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
               <span className="px-2 sm:px-2.5 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-[10px] sm:text-xs font-mono font-bold border border-sky-200/60 dark:border-sky-800">
@@ -549,13 +611,12 @@ export function AdvisorCohortBanner({
   school,
   semester,
 }: {
-  advisor: { name: string; code: string; email: string; department?: string }
+  advisor: { name: string; code: string; email: string; department?: string; avatar?: string }
   adviseeCount: number
   school?: string
   semester?: string
 }) {
   const { t } = useLanguage()
-  const initials = advisor.name.split(' ').map(n => n[0]).join('').substring(0, 2)
   const displaySchool = school || advisor.department || t('สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ (ADT)', 'School of Applied Digital Technology (ADT)')
   const displaySemester = semester || t('1/2569', 'Semester 1 / Academic Year 2026')
 
@@ -564,9 +625,7 @@ export function AdvisorCohortBanner({
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800/60 flex items-center justify-center text-sky-700 dark:text-sky-300 font-extrabold text-base sm:text-lg shadow-xs flex-shrink-0">
-            {initials}
-          </div>
+          <UserAvatar name={advisor.name} avatar={advisor.avatar} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
               <span className="px-2 py-0.5 rounded-md bg-sky-100/70 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 text-[10px] sm:text-[11px] font-mono font-bold border border-sky-200/50 dark:border-sky-800">

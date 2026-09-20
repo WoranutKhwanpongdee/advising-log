@@ -1,14 +1,27 @@
 // ============================================================
-// AdvisingLog — Login Page (Google OAuth SSO + Demo Switcher)
+// AdvisingLog — Premium University Login Page
+// Modern Split-Screen Glassmorphism with Google SSO & Security Badges
 // ============================================================
 
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ThemeToggle } from '@/components/ui'
-import { GraduationCap, Sparkles, Eye, EyeOff, LogIn } from 'lucide-react'
+import {
+  GraduationCap,
+  Sparkles,
+  ShieldCheck,
+  Lock,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  HelpCircle,
+  Building2,
+  Users2,
+  TrendingUp,
+} from 'lucide-react'
 
 // Map each role to its default route
 const ROLE_REDIRECT: Record<string, string> = {
@@ -23,11 +36,9 @@ export default function LoginPage() {
   const { language, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
 
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showDemoSection, setShowDemoSection] = useState(false)
 
   function redirectForRole(role: string) {
     if (role === 'student') navigate(ROLE_REDIRECT.student)
@@ -55,202 +66,305 @@ export default function LoginPage() {
     }
   }
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+  function handleDemoQuickLogin(id: string) {
     setError('')
-
-    if (!username.trim()) {
-      setError(t('กรุณากรอกชื่อผู้ใช้', 'Please enter your username'))
-      return
-    }
-    if (!password) {
-      setError(t('กรุณากรอกรหัสผ่าน', 'Please enter your password'))
-      return
-    }
-
     setLoading(true)
-    const success = login(username.trim(), password)
+    const success = login(id, 'demo')
     setLoading(false)
-
     if (success) {
-      const id = username.trim().toUpperCase()
       if (id.startsWith('STU')) navigate(ROLE_REDIRECT.student)
       else if (id.startsWith('ADV')) navigate(ROLE_REDIRECT.advisor)
       else if (id.startsWith('QA')) navigate(ROLE_REDIRECT.qa_chair)
       else if (id.startsWith('ADM')) navigate(ROLE_REDIRECT.admin)
-      else navigate('/')
-    } else {
-      setError(t('ไม่พบผู้ใช้งาน กรุณาตรวจสอบชื่อผู้ใช้', 'User not found. Please check your username.'))
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#090d16] bg-dot-pattern flex flex-col items-center justify-center p-4 sm:p-6 relative">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#060a12] flex flex-col lg:flex-row text-slate-900 dark:text-slate-100 selection:bg-sky-500/20 selection:text-sky-900 dark:selection:text-sky-200">
+      
+      {/* ------------------------------------------------------------- */}
+      {/* Left / Hero Showcase Panel (Desktop) */}
+      {/* ------------------------------------------------------------- */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative overflow-hidden bg-gradient-to-br from-[#060c18] via-[#09152e] to-[#0f244a] text-white p-12 xl:p-16 flex-col justify-between border-r border-sky-900/30">
+        {/* Background glow orbs & geometric elements */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-sky-600/10 blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-dot-pattern opacity-10 pointer-events-none" />
 
-      {/* Top-right: language switch + theme toggle */}
-      <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
-        <div className="flex items-center text-[11px] font-bold bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-          <button
-            type="button"
-            onClick={() => setLanguage('th')}
-            className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-              language === 'th' ? 'bg-sky-600 text-white shadow-xs font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-            }`}
-          >
-            ภาษาไทย
-          </button>
-          <button
-            type="button"
-            onClick={() => setLanguage('en')}
-            className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-              language === 'en' ? 'bg-sky-600 text-white shadow-xs font-extrabold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-            }`}
-          >
-            English
-          </button>
-        </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs p-0.5">
-          <ThemeToggle />
-        </div>
-      </div>
-
-      <div className="w-full max-w-sm z-10">
-        {/* Brand Header */}
-        <div className="text-center mb-7">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200/80 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-semibold mb-4 shadow-2xs">
-            <Sparkles className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
-            {t('ระบบอาจารย์ที่ปรึกษาและประกันคุณภาพการศึกษา', 'University Academic Advising System')}
-          </div>
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="inline-flex items-center justify-center h-12 w-12 bg-sky-600 text-white rounded-2xl shadow-lg shadow-sky-600/20 ring-4 ring-sky-100 dark:ring-sky-950">
-              <GraduationCap className="h-6 w-6" />
+        {/* Top brand */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white flex items-center justify-center shadow-lg shadow-sky-500/30 ring-4 ring-sky-500/20">
+              <GraduationCap className="h-7 w-7" />
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-sans" aria-label="AdvisingLog">
-              Advising<span className="text-sky-600 dark:text-sky-400">Log</span>
-            </h1>
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-white block leading-none" aria-label="AdvisingLog">
+                Advising<span className="text-sky-400">Log</span>
+              </h1>
+              <span className="text-[11px] font-semibold text-sky-200/70 uppercase tracking-widest mt-1 block">
+                Academic Advisory & Quality Assurance
+              </span>
+            </div>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
-            {t('ระบบบริหารจัดการการให้คำปรึกษาและติดตามคุณภาพนักศึกษา', 'Institutional Student Success & Quality Assurance Platform')}
-          </p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl dark:shadow-none overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/50">
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              {t('เข้าสู่ระบบ', 'Sign In')}
+        {/* Center: Value Propositions & High-Impact Cards */}
+        <div className="relative z-10 my-auto py-12 max-w-xl space-y-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-xs font-bold backdrop-blur-md shadow-inner">
+              <Sparkles className="h-3.5 w-3.5 text-sky-400" />
+              <span>{t('ระบบบริหารการให้คำปรึกษาทางวิชาการ มฟล.', 'Mae Fah Luang University Academic Portal')}</span>
+            </div>
+            <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight tracking-tight">
+              {t(
+                'ยกระดับการดูแลนักศึกษา และการประกันคุณภาพการศึกษาแบบครบวงจร',
+                'Empowering Student Success, Faculty Advisory & AUN-QA Quality Assurance'
+              )}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {t('เข้าใช้งานด้วยบัญชีมหาวิทยาลัยหรือบัญชีทดสอบ', 'Sign in with your Google account or demo credentials')}
+            <p className="text-sm xl:text-base text-sky-100/75 leading-relaxed font-normal">
+              {t(
+                'แพลตฟอร์มศูนย์กลางสำหรับการนัดหมาย ให้คำปรึกษา ติดตามผลนักศึกษา และวิเคราะห์สถิติการคงอยู่ของนักศึกษาด้วยระบบ AI อัจฉริยะ',
+                'Institutional platform for academic advising records, follow-up tracking, early risk interventions, and qualitative AI retention insights.'
+              )}
             </p>
           </div>
 
-          <div className="p-6 space-y-4">
-            {/* Google OAuth Button */}
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {t('เข้าสู่ระบบด้วย Google Single Sign-On', 'Institutional Google SSO')}
-              </label>
-              <div className="w-full flex justify-center py-1">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError(t('การยืนยันตัวตนกับ Google ล้มเหลว', 'Google Authentication Failed'))}
-                  useOneTap={false}
-                  theme="outline"
-                  shape="pill"
-                  size="large"
-                  text="signin_with"
-                  locale={language === 'th' ? 'th' : 'en'}
-                />
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="relative flex items-center justify-center my-3">
-              <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
-              <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                {t('หรือเข้าสู่ระบบด้วยชื่อผู้ใช้', 'Or sign in with username')}
-              </span>
-              <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Username */}
-              <div className="space-y-1.5">
-                <label htmlFor="username" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  {t('ชื่อผู้ใช้', 'Username')}
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  autoComplete="username"
-                  placeholder={t('เช่น STU001, ADV001', 'e.g. STU001, ADV001')}
-                  value={username}
-                  onChange={e => { setUsername(e.target.value); setError('') }}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                />
-              </div>
-
-              {/* Password */}
-              <div className="space-y-1.5">
-                <label htmlFor="password" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  {t('รหัสผ่าน', 'Password')}
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    placeholder={t('รหัสผ่าน (ใส่อะไรก็ได้)', 'Any value accepted for now')}
-                    value={password}
-                    onChange={e => { setPassword(e.target.value); setError('') }}
-                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer"
-                    tabIndex={-1}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+          {/* Feature Badges Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center">
+                  <Users2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">{t('จัดสรรอาจารย์ที่ปรึกษา', 'Advisor Cohorts')}</h4>
+                  <p className="text-[11px] text-sky-200/60 mt-0.5">{t('จัดการรายชื่อ นศ. ในความดูแล', 'Direct advisee roster management')}</p>
                 </div>
               </div>
+            </div>
 
-              {/* Error */}
-              {error && (
-                <p className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl px-3.5 py-2.5">
-                  {error}
-                </p>
-              )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-bold shadow-md shadow-sky-600/20 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
-              >
-                <LogIn className="h-4 w-4" />
-                {loading ? t('กำลังเข้าสู่ระบบ…', 'Signing in…') : t('เข้าสู่ระบบ', 'Sign In')}
-              </button>
-            </form>
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">{t('ประกันคุณภาพ AUN-QA', 'AUN-QA Criteria')}</h4>
+                  <p className="text-[11px] text-sky-200/60 mt-0.5">{t('วิเคราะห์สถิติและการคงอยู่', 'Retention & student voice analytics')}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Hint */}
-        <div className="mt-4 bg-sky-50/70 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900 rounded-2xl px-4 py-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-          <p className="font-semibold text-slate-600 dark:text-slate-300">{t('บัญชีทดสอบด่วน', 'Quick Demo Accounts')}</p>
-          <p>{t('นักศึกษา:', 'Students:')} STU001 – STU010</p>
-          <p>{t('อาจารย์:', 'Advisors:')} ADV001 – ADV003</p>
-          <p>{t('ประกันคุณภาพ:', 'QA Chair:')} QA001</p>
-          <p>{t('ผู้ดูแล:', 'Admin:')} ADM001</p>
-          <p className="mt-1 italic">{t('รหัสผ่าน: ใส่อะไรก็ได้', 'Password: anything works')}</p>
+        {/* Bottom Institutional Info */}
+        <div className="relative z-10 pt-6 border-t border-sky-900/40 flex items-center justify-between text-xs text-sky-200/60 font-medium">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-sky-400" />
+            <span>School of Applied Digital Technology (ADT)</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span>{t('ความปลอดภัยมาตรฐาน PDPA', 'PDPA & SIS Compliant')}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* Right / Interactive Auth Panel */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 max-w-xl mx-auto w-full relative">
+        
+        {/* Top Actions: Language switcher & Theme toggle */}
+        <div className="flex items-center justify-between pb-6 sm:pb-8">
+          {/* Mobile Logo Branding (Shown on small screens) */}
+          <div className="flex lg:hidden items-center gap-2">
+            <div className="h-8 w-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md shadow-sky-600/20">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <span className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
+              Advising<span className="text-sky-600 dark:text-sky-400">Log</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Language switch */}
+            <div className="flex items-center text-[11px] font-bold bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setLanguage('th')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  language === 'th'
+                    ? 'bg-sky-600 text-white shadow-xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                ไทย
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  language === 'en'
+                    ? 'bg-sky-600 text-white shadow-xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                EN
+              </button>
+            </div>
+
+            {/* Theme toggle */}
+            <div className="bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs p-0.5">
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
 
-        <p className="text-center text-[11px] text-slate-400 mt-4 font-medium">
-          {t('ระบบยืนยันตัวตน Google SSO · ข้อมูลความลับทางการศึกษา', 'Google SSO & Protected Student Information')}
-        </p>
+        {/* Main Form Area */}
+        <div className="my-auto space-y-6">
+          {/* Header */}
+          <div className="space-y-1.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+              {t('เข้าสู่ระบบ', 'Sign in to AdvisingLog')}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              {t(
+                'กรุณาใช้บัญชี Google สถาบันเพื่อเข้าสู่ระบบงานให้คำปรึกษา',
+                'Please use your institutional university account to access academic advising.'
+              )}
+            </p>
+          </div>
+
+          {/* Primary Google SSO Section */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-none space-y-4 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-indigo-500" />
+            
+            <div className="flex items-center justify-between pb-1">
+              <div>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
+                  {t('ยืนยันตัวตนด้วย Google Single Sign-On', 'Institutional Google SSO')}
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {t('รองรับอีเมล @mfu.ac.th และ @lamduan.mfu.ac.th', 'Accepts @mfu.ac.th, @student.mfu.ac.th, @lamduan.mfu.ac.th')}
+                </span>
+              </div>
+              <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100 dark:ring-emerald-950/60" />
+            </div>
+
+            {/* Google OAuth Button Container */}
+            <div className="flex justify-center py-2 bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800 rounded-2xl relative">
+              {loading && (
+                <div className="absolute inset-0 bg-white/70 dark:bg-slate-900/70 rounded-2xl flex items-center justify-center z-10">
+                  <div className="h-5 w-5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError(t('การยืนยันตัวตนกับ Google ล้มเหลว', 'Google Authentication Failed'))}
+                useOneTap={false}
+                theme="outline"
+                shape="pill"
+                size="large"
+                text="signin_with"
+              />
+            </div>
+
+            {/* Error Alert Box */}
+            {error && (
+              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/80 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-[fadeIn_0.2s_ease-out]">
+                <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-bold">{t('ไม่สามารถเข้าสู่ระบบได้', 'Authentication Denied')}</p>
+                  <p className="text-[11px] leading-relaxed text-rose-700 dark:text-rose-300/90">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Policy badge */}
+            <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 font-medium">
+              <span className="flex items-center gap-1.5">
+                <Lock className="h-3 w-3 text-slate-400" />
+                {t('ระบบความปลอดภัยระดับสถาบัน', 'Secure Encrypted SSO')}
+              </span>
+              <span className="text-sky-600 dark:text-sky-400 font-semibold">
+                OAuth 2.0 / OIDC
+              </span>
+            </div>
+          </div>
+
+          {/* Divider with Secondary / Quick Demo Switcher */}
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => setShowDemoSection(v => !v)}
+              className="w-full flex items-center justify-between py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer border-b border-dashed border-slate-200 dark:border-slate-800"
+            >
+              <span className="flex items-center gap-2">
+                <HelpCircle className="h-3.5 w-3.5 text-sky-500" />
+                <span>{t('ทดสอบระบบด่วน (1-Click Quick Demo Preview)', '1-Click Quick Demo Role Switcher')}</span>
+              </span>
+              {showDemoSection ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+
+            {/* Collapsible 1-Click Demo Pills */}
+            {showDemoSection && (
+              <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 animate-[fadeIn_0.2s_ease-out]">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                    {t('เลือกบทบาทเพื่อเข้าชมตัวอย่าง', 'Select Role to Preview')}
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-medium">{t('คลิกเพื่อเข้าใช้งานทันที', 'Click to switch instantly')}</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => handleDemoQuickLogin('STU001')}
+                    className="p-3 text-center rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-sky-500 hover:bg-sky-50 dark:hover:bg-sky-950/60 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                  >
+                    <span className="block text-sky-600 dark:text-sky-400 text-[10px] uppercase font-mono font-extrabold group-hover:scale-105 transition-transform">Student</span>
+                    <span className="truncate block font-semibold text-slate-800 dark:text-slate-100 mt-0.5">Somchai</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDemoQuickLogin('ADV001')}
+                    className="p-3 text-center rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                  >
+                    <span className="block text-emerald-600 dark:text-emerald-400 text-[10px] uppercase font-mono font-extrabold group-hover:scale-105 transition-transform">Advisor</span>
+                    <span className="truncate block font-semibold text-slate-800 dark:text-slate-100 mt-0.5">Dr. Prasit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDemoQuickLogin('QA001')}
+                    className="p-3 text-center rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/60 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                  >
+                    <span className="block text-violet-600 dark:text-violet-400 text-[10px] uppercase font-mono font-extrabold group-hover:scale-105 transition-transform">QA Chair</span>
+                    <span className="truncate block font-semibold text-slate-800 dark:text-slate-100 mt-0.5">Assoc. Rattana</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDemoQuickLogin('ADM001')}
+                    className="p-3 text-center rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                  >
+                    <span className="block text-rose-600 dark:text-rose-400 text-[10px] uppercase font-mono font-extrabold group-hover:scale-105 transition-transform">Admin</span>
+                    <span className="truncate block font-semibold text-slate-800 dark:text-slate-100 mt-0.5">Supattra</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="pt-8 text-center text-[11px] text-slate-400 dark:text-slate-500 space-y-1 font-medium">
+          <p>© 2026 Mae Fah Luang University · School of Applied Digital Technology</p>
+          <p>{t('ระบบงานให้คำปรึกษาและประกันคุณภาพการศึกษาตามเกณฑ์ AUN-QA', 'University Academic Advisory & AUN-QA Quality Assurance System')}</p>
+        </div>
       </div>
     </div>
   )

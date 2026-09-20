@@ -80,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
         const decoded = JSON.parse(atob(payloadBase64))
         const email = (decoded.email || '').toLowerCase()
+        const isAuthorizedAdmin = email === 'se.advisinglog@gmail.com'
         const name = decoded.name || 'Google User'
         const googleId = decoded.sub || `${Date.now()}`
         const picture = decoded.picture || null
