@@ -221,6 +221,97 @@ Admin can extend categories via FR-03. Each category/document type has attribute
 
 **AUN-QA Mapping:** C6.2, C8
 
+#### FR-29: Dropout Playbook & Intervention Workflow
+**Priority:** High  
+**Description:** System provides structured dropout intervention playbook for advisors to guide students through retention alternatives before final withdrawal. When a student indicates intention to withdraw or dropout (FR-02 category 6), system prompts advisor to:
+1. Assess retention feasibility (GPA, academic standing, financial barriers)
+2. Explore alternatives: temporary leave of absence, credit load reduction, academic support programs
+3. Document intervention attempt with outcome
+4. If withdrawal proceeds, ensure proper dropout form completion with required signatures
+
+**AUN-QA Mapping:** C6.2 (monitoring student progress), C8 (retention/dropout)
+
+#### FR-30: Detailed Exit Form Workflow with Signature Methods
+**Priority:** High  
+**Description:** System implements formal exit form (Leave of Absence / Withdrawal / Dropout) with signature method routing per FR-21:
+- **Wet Signature Path:** Student prints form → signs physically → scans/uploads → advisor verifies signature → advisor approves → system marks as complete with audit trail
+- **E-Signature Path:** Student completes form online → ticks PDPA consent checkbox → digital signature timestamp → auto-routes to advisor for review → advisor approves electronically → system marks as complete with audit trail
+- **Conditional Approval:** System enforces that wet-signature documents require advisor approval before completion, while e-signature documents can be completed immediately with digital confirmation
+
+**Exit Form Fields:**
+- Student ID, Name, Current Academic Year, Cohort
+- Exit Type: Withdrawal / Leave of Absence / Transfer / Dropout
+- Effective Date of Exit
+- Reason Code (mandatory, per FR-27 taxonomy)
+- Narrative Description (free text)
+- Student Voice Feedback (optional, for context)
+- Signature Method: Wet/E-Signature (auto-selected per document type config)
+- Digital Signature Consent (if e-signature path)
+- Advisor Approval (timestamped)
+- Department Chair Approval (if required per university policy)
+
+**AUN-QA Mapping:** C6.2, C8
+
+#### FR-31: Enhanced Referral Integration & Tracking
+**Priority:** Medium  
+**Description:** System strengthens referral workflow with structured follow-up tracking:
+- When advisor marks referral in interaction note (FR-09), system captures: destination unit, referral purpose, urgency level
+- System generates referral ticket sent to destination unit (Counselling, Financial Aid, Career Services, etc.)
+- Destination unit can update referral status: received → in progress → completed → closed
+- Referral status syncs back to advising session timeline
+- System tracks referral completion rate as QA metric for intervention effectiveness
+
+**Referral Fields:**
+- Destination Unit (categorized: wellbeing, academic, financial, specialized)
+- Referral Purpose: e.g., mental health counseling, emergency financial aid, career guidance
+- Urgency: Routine / Urgent / Emergency
+- Referral Date
+- Referring Advisor
+- Outcome / Resolution
+- Closure Date
+
+**AUN-QA Mapping:** C6.2 (close the loop), C8 (intervention effectiveness)
+
+#### FR-32: Semester Root-Cause Analysis Report Generation
+**Priority:** High  
+**Description:** System generates semester-level root-cause analysis report for dropout/late graduation based on coded taxonomy from FR-27:
+- Aggregates all dropout cases by reason code with counts and percentages
+- Compares semester-over-semester trends in dropout rates by reason
+- Identifies top 3 root causes with actionable recommendations
+- Cross-references with GPA distribution, withdrawal patterns, and referral outcomes
+- Generates PDF report with: executive summary, statistical tables, trend charts, improvement actions
+- Report auto-generated at semester end or on-demand for QA Coordinator
+
+**Report Sections:**
+1. Executive Summary (key patterns and trends)
+2. Dropout Statistics (total count, rate by semester, reason code breakdown)
+3. Academic Performance Correlation (GPA distribution of dropout vs non-dropout)
+4. Timing Analysis (when in semester dropouts occur most)
+5. Referral Effectiveness (which interventions had success rates)
+6. Recommended Actions (semester-specific and curriculum-level)
+7. Appendix: De-identified case summary table
+
+**AUN-QA Mapping:** C8 (retention/dropout analysis & improvement actions)
+
+#### FR-33: Evidence Capture Automation for AUN-QA
+**Priority:** High  
+**Description:** System automates evidence capture aligned to AUN-QA requirements as work happens, eliminating year-end reconstruction:
+- Advising sessions: auto-capture date, category, outcome → C6.2, C6.3 evidence
+- Dropouts: auto-capture reason code, timeline, referral status → C8 evidence
+- Interventions: auto-capture early-warning triggers + actions + outcomes → C6.2 evidence
+- Student Voice: auto-capture satisfaction scores + qualitative feedback → C6.3 evidence
+- Workload: auto-calculate advisor session counts, response times → C5 evidence
+- Referrals: auto-track referral requests, destination responses, outcomes → C6.2 close-the-loop evidence
+
+**Evidence Storage:**
+- De-identified data for QA statistics (no personal identifiers)
+- Time-stamped audit trails for all records
+- Links to source documents (Cloudinary) where applicable
+- Export-ready formats: CSV for statistics, PDF for case files
+- Access logs for sensitive data viewing (per NFR-07)
+
+**AUN-QA Mapping:** C6.2, C6.3, C5, C8
+
 ### 3.2 System Configuration & Administration
 
 #### FR-30: Category and Signature Method Configuration
