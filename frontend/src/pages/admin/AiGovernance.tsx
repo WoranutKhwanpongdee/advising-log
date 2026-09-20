@@ -351,7 +351,7 @@ export default function AiGovernance() {
                   className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 cursor-pointer shadow-xs"
                 >
                   <Plus className="h-4 w-4" />
-                  <span>{t('เพิ่ม API Key ใหม่', '+ Add New API Key')}</span>
+                  <span>{t('เพิ่ม API Key ใหม่', 'Add New API Key')}</span>
                 </Button>
               </div>
 
