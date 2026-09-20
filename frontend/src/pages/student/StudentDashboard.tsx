@@ -21,11 +21,19 @@ export default function StudentDashboard() {
   const rosterEntry = store.roster.find(r => r.studentId === currentUser.id && r.isActive)
   const advisor = rosterEntry ? store.users.find(u => u.id === rosterEntry.advisorId) : null
 
-  // My data
+  // My data (sorted chronologically so upcomingAppointment is the earliest pending session)
   const myRequests = store.requests.filter(r => r.studentId === currentUser.id)
-  const myAppointments = store.appointments.filter(a => a.studentId === currentUser.id && a.status === 'scheduled')
+  const myAppointments = store.appointments
+    .filter(a => a.studentId === currentUser.id && a.status === 'scheduled' && !a.studentDeclined)
+    .sort((a, b) => {
+      const cmpDate = a.scheduledDate.localeCompare(b.scheduledDate)
+      if (cmpDate !== 0) return cmpDate
+      return (a.scheduledTime || '').localeCompare(b.scheduledTime || '')
+    })
   const myFollowUps = store.followUps.filter(f => f.studentId === currentUser.id && f.status !== 'completed')
   const upcomingAppointment = myAppointments[0]
+  const upcomingReq = upcomingAppointment ? store.requests.find(r => r.id === upcomingAppointment.requestId) : null
+  const upcomingAdvisor = upcomingAppointment ? store.users.find(u => u.id === upcomingAppointment.advisorId) : null
 
   return (
     <div>
@@ -66,7 +74,7 @@ export default function StudentDashboard() {
           <Card>
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ตารางนัดหมายที่ได้รับการยืนยัน', 'Confirmed Upcoming Appointment')}
+                <Calendar className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ตารางนัดหมายที่กำลังจะมาถึง', 'Upcoming Advising Appointment')}
               </h3>
               {upcomingAppointment && (
                 <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-0.5 rounded-full border border-sky-100 dark:border-sky-800">
@@ -83,28 +91,48 @@ export default function StudentDashboard() {
                       <Calendar className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{upcomingAppointment.scheduledDate}</p>
                         <StatusBadge status={upcomingAppointment.status} />
+                        {upcomingAppointment.studentConfirmed && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-full text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                            <CheckCircle2 className="h-3 w-3" /> {t('ยืนยันแล้ว', 'Confirmed')}
+                          </span>
+                        )}
+                        {!upcomingAppointment.studentConfirmed && !upcomingAppointment.studentDeclined && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 rounded-full text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                            <Clock className="h-3 w-3" /> {t('รอยืนยันการนัดพบ', 'Awaiting Confirmation')}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 flex items-center gap-2 font-medium">
+                      {upcomingAdvisor && (
+                        <p className="text-xs text-slate-700 dark:text-slate-200 font-semibold mt-1">
+                          <span className="text-slate-400 dark:text-slate-400 font-medium">{t('อาจารย์ที่ปรึกษา:', 'Advisor:')}</span> {upcomingAdvisor.name}
+                          {upcomingReq && <span className="font-normal text-slate-500 dark:text-slate-400"> ({getCategoryLabel(upcomingReq.category)})</span>}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 flex flex-wrap items-center gap-2 font-medium">
                         <span className="flex items-center gap-1 text-sky-700 dark:text-sky-400 font-semibold">
                           <Clock className="h-3.5 w-3.5" /> {upcomingAppointment.scheduledTime}
                         </span>
                         <span className="text-slate-300 dark:text-slate-600">·</span>
-                        <span>{t('สถานที่:', 'Location:')} {upcomingAppointment.location}</span>
+                        <span><span className="text-slate-400 font-medium">{t('สถานที่:', 'Location:')}</span> {upcomingAppointment.location}</span>
                       </p>
                     </div>
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => navigate('/student/history')}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => navigate(upcomingAppointment.requestId ? `/student/history/${upcomingAppointment.requestId}` : '/student/history')}
+                  >
                     {t('ดูรายละเอียด', 'View Details')}
                   </Button>
                 </div>
               </div>
             ) : (
               <EmptyState
-                title={t('ไม่มีนัดหมายที่รอดำเนินการ', 'No upcoming appointments')}
-                description={t('คุณยังไม่มีการนัดหมายที่กำลังจะมาถึง สามารถยื่นคำร้องขอเข้าพบอาจารย์ที่ปรึกษาได้ตลอดเวลา', 'You have no confirmed sessions scheduled. Submit a petition to meet with your advisor.')}
+                title={t('ไม่มีนัดหมายที่กำลังจะมาถึง', 'No upcoming appointments')}
+                description={t('คุณยังไม่มีตารางนัดหมายเข้าพบอาจารย์ที่ปรึกษาในเร็วๆ นี้ สามารถยื่นคำร้องขอเข้าพบได้ตลอดเวลา', 'You have no scheduled appointments coming up. You can submit an advising request anytime.')}
                 action={
                   <Button size="sm" onClick={() => navigate('/student/request')}>
                     {t('ยื่นคำร้องขอนัดหมาย', 'Request Advising Session')}

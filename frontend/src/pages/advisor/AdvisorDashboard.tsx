@@ -19,10 +19,16 @@ export default function AdvisorDashboard() {
   const myAdvisees = store.roster.filter(r => r.advisorId === currentUser.id && r.isActive)
   const myRequests = store.requests.filter(r => r.advisorId === currentUser.id)
   const pendingRequests = myRequests.filter(r => r.status === 'requested' || r.status === 'pending')
-  const upcomingApts = store.appointments.filter(a => a.advisorId === currentUser.id && a.status === 'scheduled')
+  const upcomingApts = store.appointments
+    .filter(a => a.advisorId === currentUser.id && a.status === 'scheduled')
+    .sort((a, b) => {
+      const cmpDate = a.scheduledDate.localeCompare(b.scheduledDate)
+      if (cmpDate !== 0) return cmpDate
+      return (a.scheduledTime || '').localeCompare(b.scheduledTime || '')
+    })
   const myFollowUps = store.followUps.filter(f => f.advisorId === currentUser.id && f.status !== 'completed')
   const myExitCases = store.exitCases.filter(e => e.advisorId === currentUser.id && e.status !== 'closed')
-  const myWarnings = store.earlyWarnings.filter(w => w.advisorId === currentUser.id && w.status === 'active')
+  const myWarnings = store.earlyWarnings.filter(w => w.advisorId === currentUser.id && w.status !== 'resolved')
   const recentSessions = store.sessions.filter(s => s.advisorId === currentUser.id).slice(0, 5)
 
   return (
