@@ -219,9 +219,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true
     async function syncFromBackend() {
-      const [uRes, rRes, fRes, sRes, eRes, vRes, aRes] = await Promise.all([
+      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes] = await Promise.all([
         api.getUsers(),
+        api.getRoster(),
         api.getRequests(),
+        api.getAppointments(),
         api.getFollowUps(),
         api.getSessions(),
         api.getExitCases(),
@@ -230,7 +232,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       ])
       if (!isMounted) return
       if (uRes && Array.isArray(uRes.users)) setUsers(uRes.users)
+      if (rosRes && Array.isArray(rosRes.roster)) setRoster(rosRes.roster)
       if (rRes && Array.isArray(rRes.requests)) setRequests(rRes.requests)
+      if (aptRes && Array.isArray(aptRes.appointments)) setAppointments(aptRes.appointments)
       if (fRes && Array.isArray(fRes.followUps)) setFollowUps(fRes.followUps)
       if (sRes && Array.isArray(sRes.sessions)) setSessions(sRes.sessions)
       if (eRes && Array.isArray(eRes.exitCases)) setExitCases(eRes.exitCases)

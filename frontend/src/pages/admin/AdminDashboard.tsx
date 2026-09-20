@@ -159,7 +159,7 @@ export default function AdminDashboard() {
     {
       title: t('จัดการผู้ใช้งาน', 'User Management'),
       desc: t('ตรวจสอบบัญชี กำหนดบทบาท และจัดการข้อมูลผู้ใช้งาน', 'Manage accounts, roles, and user authentications.'),
-      count: `${totalUsers} ${t('บัญชี', 'Accounts')}`,
+      count: `${totalUsers} ${t('บัญชี', totalUsers === 1 ? 'Account' : 'Accounts')}`,
       icon: <Users className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
       topGradient: 'from-sky-500 via-sky-400 to-sky-600',
       tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
     {
       title: t('จัดสรรอาจารย์ที่ปรึกษา', 'Student-Advisor Roster'),
       desc: t('จับคู่อาจารย์ที่ปรึกษากับนักศึกษา และดูแลความครอบคลุม', 'Pair advisors with advisees and track caseload distribution.'),
-      count: `${activeRosterCount} ${t('คู่ในระบบ', 'Pairings')}`,
+      count: `${activeRosterCount} ${t('คู่ในระบบ', activeRosterCount === 1 ? 'Pairing' : 'Pairings')}`,
       icon: <BookOpen className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
       topGradient: 'from-sky-500 via-sky-400 to-sky-600',
       tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
     {
       title: t('หมวดหมู่คำปรึกษา', 'Categories Configuration'),
       desc: t('ปรับแต่ง taxonomy หัวข้อการให้คำปรึกษา และระยะเวลาบริการ', 'Configure advising topics, subcategories, and service metrics.'),
-      count: `${totalCategories} ${t('หมวดหมู่', 'Categories')}`,
+      count: `${totalCategories} ${t('หมวดหมู่', totalCategories === 1 ? 'Category' : 'Categories')}`,
       icon: <Tag className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
       topGradient: 'from-sky-500 via-sky-400 to-sky-600',
       tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
     {
       title: t('ประเภทเอกสาร', 'Document Types'),
       desc: t('ตั้งค่าแบบฟอร์มคำร้อง ประเภทไฟล์ และรูปแบบการลงนาม', 'Define request forms, allowed file formats, and signatures.'),
-      count: `${totalDocTypes} ${t('ประเภท', 'Types')}`,
+      count: `${totalDocTypes} ${t('ประเภท', totalDocTypes === 1 ? 'Type' : 'Types')}`,
       icon: <FileCog className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
       topGradient: 'from-sky-500 via-sky-400 to-sky-600',
       tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
     {
       title: t('ประวัติการทำงานระบบ', 'Security Audit Logs'),
       desc: t('บันทึกความปลอดภัย ตรวจสอบการทำรายการ และการเข้าถึงระบบ', 'Trace administrative actions, user logins, and data changes.'),
-      count: `${store.auditLogs.length} ${t('เหตุการณ์', 'Events')}`,
+      count: `${store.auditLogs.length} ${t('เหตุการณ์', store.auditLogs.length === 1 ? 'Event' : 'Events')}`,
       icon: <ScrollText className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
       topGradient: 'from-sky-500 via-sky-400 to-sky-600',
       tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',

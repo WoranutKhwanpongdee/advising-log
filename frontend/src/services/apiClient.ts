@@ -5,6 +5,7 @@
 
 import type {
   User,
+  StudentAdvisorAssignment,
   AdvisingRequest,
   Appointment,
   AdvisingSession,
@@ -67,6 +68,18 @@ class ApiClient {
     return this.request<{ success: boolean; user: User }>('/api/users', {
       method: 'POST',
       body: JSON.stringify(user),
+    })
+  }
+
+  // --- Student-Advisor Roster ---
+  async getRoster() {
+    return this.request<{ roster: StudentAdvisorAssignment[] }>('/api/roster')
+  }
+
+  async saveRosterEntry(assignment: Partial<StudentAdvisorAssignment>) {
+    return this.request<{ success: boolean; assignment: StudentAdvisorAssignment }>('/api/roster', {
+      method: 'POST',
+      body: JSON.stringify(assignment),
     })
   }
 

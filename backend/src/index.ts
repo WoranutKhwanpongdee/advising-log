@@ -318,6 +318,33 @@ app.patch('/api/users/:id', async (c) => {
   return c.json({ success: true })
 })
 
+app.get('/api/roster', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ roster: [] })
+  const list = await database.select().from(schema.studentAdvisorAssignments)
+  return c.json({ roster: list })
+})
+
+app.post('/api/roster', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const assignment = {
+    id: body.id || `R_${Date.now()}`,
+    studentId: body.studentId,
+    advisorId: body.advisorId,
+    assignedAt: body.assignedAt || new Date().toISOString().split('T')[0],
+    isActive: body.isActive !== undefined ? body.isActive : true,
+  }
+
+  await database.insert(schema.studentAdvisorAssignments).values(assignment).onConflictDoUpdate({
+    target: schema.studentAdvisorAssignments.id,
+    set: assignment,
+  })
+  return c.json({ success: true, assignment })
+})
+
 // ============================================================
 // 2. Advising Requests
 // ============================================================
