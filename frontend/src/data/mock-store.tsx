@@ -80,6 +80,7 @@ interface StoreState {
   exitCases: ExitCase[]
   advisorAssessments: AdvisorExitAssessment[]
   studentVoiceResponses: StudentVoiceResponse[]
+  completedVoiceStudents: string[]
   documents: StudentDocument[]
   categoryConfigs: AdvisingCategoryConfig[]
   documentTypes: DocumentType[]
@@ -135,6 +136,7 @@ interface StoreActions {
 
   // Student Voice Responses
   addStudentVoiceResponse: (svr: Omit<StudentVoiceResponse, 'id' | 'createdAt'>) => StudentVoiceResponse
+  markVoiceSurveyCompleted: (studentId: string) => void
 
   // Documents
   addDocument: (doc: Omit<StudentDocument, 'id'>) => StudentDocument
@@ -194,6 +196,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [exitCases, setExitCases] = useState<ExitCase[]>([...mockExitCases])
   const [advisorAssessments, setAdvisorAssessments] = useState<AdvisorExitAssessment[]>([...mockAdvisorAssessments])
   const [studentVoiceResponses, setStudentVoiceResponses] = useState<StudentVoiceResponse[]>([...mockStudentVoiceResponses])
+  const [completedVoiceStudents, setCompletedVoiceStudents] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem('advising_log_voice_survey_completed_students')
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  })
   const [documents, setDocuments] = useState<StudentDocument[]>([...mockStudentDocuments])
   const [categoryConfigs, setCategoryConfigs] = useState<AdvisingCategoryConfig[]>([...mockCategoryConfigs])
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([...mockDocumentTypes])
@@ -377,11 +387,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return newA
   }, [])
 
+  const markVoiceSurveyCompleted = useCallback((studentId: string) => {
+    if (!studentId) return
+    setCompletedVoiceStudents(prev => {
+      if (prev.includes(studentId)) return prev
+      const next = [...prev, studentId]
+      try {
+        localStorage.setItem('advising_log_voice_survey_completed_students', JSON.stringify(next))
+      } catch {}
+      return next
+    })
+  }, [])
+
   const addStudentVoiceResponse = useCallback((svr: Omit<StudentVoiceResponse, 'id' | 'createdAt'>): StudentVoiceResponse => {
     const newSvr: StudentVoiceResponse = { ...svr, id: nextId('SVR'), createdAt: new Date().toISOString() }
     setStudentVoiceResponses(prev => [newSvr, ...prev])
+    if (svr.studentId) {
+      markVoiceSurveyCompleted(svr.studentId)
+    }
     return newSvr
-  }, [])
+  }, [markVoiceSurveyCompleted])
 
   const addDocument = useCallback((doc: Omit<StudentDocument, 'id'>): StudentDocument => {
     const newDoc: StudentDocument = { ...doc, id: nextId('DOC') }
@@ -663,7 +688,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const store: Store = {
     users, roster, requests, appointments, sessions, followUps, referrals,
-    notifications, earlyWarnings, earlyWarningFollowUps, followUpProgress, requestProgress, exitCases, advisorAssessments, studentVoiceResponses, documents,
+    notifications, earlyWarnings, earlyWarningFollowUps, followUpProgress, requestProgress, exitCases, advisorAssessments, studentVoiceResponses, completedVoiceStudents, documents,
     categoryConfigs, documentTypes, auditLogs, systemApiConfig,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
@@ -678,7 +703,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addEarlyWarningFollowUp, updateEarlyWarningFollowUpStatus,
     addExitCase, updateExitCaseStatus,
     addAdvisorAssessment,
-    addStudentVoiceResponse,
+    addStudentVoiceResponse, markVoiceSurveyCompleted,
     addDocument, updateDocument, updateDocumentStatus, deleteDocument,
     addUser, updateUser,
     addRosterEntry, updateRosterEntry, batchImportRoster,

@@ -294,6 +294,42 @@ describe('Student Voice Feature', () => {
     expect(submitBtn).not.toBeDisabled()
   })
 
+  it('allows submit in RequestAdvising when survey was submitted in anonymous mode without infinite redirect', () => {
+    mockUser = { ...studentUser }
+    // Simulate student completed anonymous survey saved in localStorage/sessionStorage
+    sessionStorage.setItem(`student_voice_completed_${studentUser.id}`, 'true')
+
+    renderWithProviders(<RequestAdvising />, { route: '/student/request?category=withdrawal_leave' })
+
+    // Check status shows completed even though response payload was anonymous
+    expect(screen.getByText(/บันทึกข้อมูลเสียงของนักศึกษาเรียบร้อยแล้ว/i)).toBeInTheDocument()
+    expect(screen.getByText(/ทำแบบสำรวจเรียบร้อยแล้ว/i)).toBeInTheDocument()
+    const submitBtn = screen.getByRole('button', { name: /ยืนยันส่งคำร้อง/i })
+    expect(submitBtn).not.toBeDisabled()
+    sessionStorage.clear()
+  })
+
+  it('displays completion banner with continue button when student revisits Student Voice survey', () => {
+    // STU006 has completed survey in mock data
+    mockUser = {
+      id: 'STU006',
+      code: '6631503006',
+      name: 'Vichai Srisuk',
+      email: 'vichai.s@student.mfu.ac.th',
+      role: 'student',
+      department: 'School of Applied Digital Technology (ADT)',
+      isActive: true,
+      hasAiAccess: false,
+      createdAt: '2024-06-01',
+    }
+
+    renderWithProviders(<StudentVoiceSurvey />, { route: '/student/voice?return=/student/request?category=withdrawal_leave' })
+
+    // Verify completion notification banner exists with return button
+    expect(screen.getAllByText(/คุณได้ทำแบบสำรวจเสียงของนักศึกษาเรียบร้อยแล้ว/i)[0]).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /ดำเนินการยื่นคำร้องต่อ/i })).toBeInTheDocument()
+  })
+
   it('does NOT enforce Student Voice for other advising categories in RequestAdvising', () => {
     mockUser = { ...studentUser }
     renderWithProviders(<RequestAdvising />, { route: '/student/request' })

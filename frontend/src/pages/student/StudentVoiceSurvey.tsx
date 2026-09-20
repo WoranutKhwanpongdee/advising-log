@@ -69,6 +69,17 @@ export default function StudentVoiceSurvey() {
 
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  const hasAlreadyCompleted = Boolean(
+    store.studentVoiceResponses.some(
+      v => v.studentId === currentUser?.id || v.studentCode === currentUser?.code
+    ) ||
+    (currentUser?.id && store.completedVoiceStudents.includes(currentUser.id)) ||
+    (typeof window !== 'undefined' && currentUser?.id && (
+      sessionStorage.getItem(`student_voice_completed_${currentUser.id}`) === 'true' ||
+      localStorage.getItem(`student_voice_completed_${currentUser.id}`) === 'true'
+    ))
+  )
+
   if (!currentUser) return null
 
   function toggleFactor(factorLabel: string) {
@@ -109,6 +120,14 @@ export default function StudentVoiceSurvey() {
       adviceForFutureStudents,
       shareWithAdvisor,
     })
+
+    // Decoupled gate: mark student user account as having completed the survey gate
+    // while keeping response payload anonymous in studentVoiceResponses
+    store.markVoiceSurveyCompleted(currentUser!.id)
+    try {
+      sessionStorage.setItem(`student_voice_completed_${currentUser!.id}`, 'true')
+      localStorage.setItem(`student_voice_completed_${currentUser!.id}`, 'true')
+    } catch {}
 
     store.addAuditLog({
       userId: isAnonymous ? 'ANONYMOUS_STUDENT' : currentUser!.id,
@@ -216,6 +235,40 @@ export default function StudentVoiceSurvey() {
           </p>
         </div>
       </div>
+
+      {/* Completion Notification if already submitted / completed earlier */}
+      {hasAlreadyCompleted && (
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                {t('คุณได้ทำแบบสำรวจเสียงของนักศึกษาเรียบร้อยแล้ว', 'You have already completed the Student Voice survey')}
+              </p>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                {t(
+                  'ระบบได้บันทึกสถานะเรียบร้อยแล้ว ท่านสามารถดำเนินการส่งคำร้องขอรับคำปรึกษาต่อได้ทันที',
+                  'Your survey completion is recorded. You may proceed directly to your advising request.'
+                )}
+              </p>
+            </div>
+          </div>
+          {returnUrl && (
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => navigate(returnUrl)}
+              className="whitespace-nowrap text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs self-end sm:self-auto"
+            >
+              {t('ดำเนินการยื่นคำร้องต่อ', 'Continue to Advising Request')}
+              <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+            </Button>
+          )}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1: Identity & Context */}

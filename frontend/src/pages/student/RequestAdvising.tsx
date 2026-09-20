@@ -50,9 +50,16 @@ export default function RequestAdvising() {
   const subCategories = selectedCategoryConfig?.subCategories || []
 
   // Check if student completed Student Voice on the dedicated /student/voice page
-  const hasVoiceResponse = store.studentVoiceResponses.some(
-    v => v.studentId === currentUser.id || v.studentCode === currentUser.code
-  )
+  // Supports both identified responses and anonymous submissions tracked via completedVoiceStudents
+  const hasVoiceResponse =
+    store.studentVoiceResponses.some(
+      v => v.studentId === currentUser.id || v.studentCode === currentUser.code
+    ) ||
+    store.completedVoiceStudents.includes(currentUser.id) ||
+    (typeof window !== 'undefined' && (
+      sessionStorage.getItem(`student_voice_completed_${currentUser.id}`) === 'true' ||
+      localStorage.getItem(`student_voice_completed_${currentUser.id}`) === 'true'
+    ))
 
   function handleFileSimulate() {
     const fakeFiles = ['study_plan.pdf', 'grade_transcript.pdf', 'petition_form.pdf']
