@@ -21,8 +21,61 @@ export default function UserManagement() {
   const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
   const [newCode, setNewCode] = useState('')
+  const [isCodeCustomized, setIsCodeCustomized] = useState(false)
   const [newRole, setNewRole] = useState<UserRole>('student')
   const [newDept, setNewDept] = useState('School of Applied Digital Technology (ADT)')
+
+  // Helper to safely determine code by role & checking database users
+  function getSuggestedCode(role: UserRole, email: string): string {
+    const emailPrefix = email.trim().split('@')[0]
+    
+    // 1. Student: Only extract real digits if present in institutional email (e.g. 6631503001)
+    // Never synthesize or invent fake student ID numbers!
+    if (role === 'student' || /^\d/.test(emailPrefix) || email.includes('@student.') || email.includes('@lamduan.')) {
+      if (/^\d{8,12}/.test(emailPrefix)) {
+        return emailPrefix
+      }
+      return '' // Leave empty so admin provides the student's actual university ID
+    }
+
+    // 2. Faculty Advisor: Query database for highest existing ADV ID
+    if (role === 'advisor') {
+      const numbers = store.users
+        .map(u => {
+          const match = u.code.match(/^ADV(\d+)$/i)
+          return match ? parseInt(match[1], 10) : 0
+        })
+        .filter(n => n > 0)
+      const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0
+      return `ADV${String(maxNum + 1).padStart(3, '0')}`
+    }
+
+    // 3. QA Chair: Query database for highest existing QA ID
+    if (role === 'qa_chair') {
+      const numbers = store.users
+        .map(u => {
+          const match = u.code.match(/^QA(\d+)$/i)
+          return match ? parseInt(match[1], 10) : 0
+        })
+        .filter(n => n > 0)
+      const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0
+      return `QA${String(maxNum + 1).padStart(3, '0')}`
+    }
+
+    // 4. System Admin: Query database for highest existing ADM ID
+    if (role === 'admin') {
+      const numbers = store.users
+        .map(u => {
+          const match = u.code.match(/^ADM(\d+)$/i)
+          return match ? parseInt(match[1], 10) : 0
+        })
+        .filter(n => n > 0)
+      const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0
+      return `ADM${String(maxNum + 1).padStart(3, '0')}`
+    }
+
+    return emailPrefix ? emailPrefix.toUpperCase() : ''
+  }
 
   // Auto-detect Student ID from email prefix or student code
   const isStudentDetected =
@@ -33,10 +86,43 @@ export default function UserManagement() {
 
   const effectiveRole: UserRole = isStudentDetected ? 'student' : newRole
 
+  // Automatically update code if user has not manually customized it
+  function handleEmailChange(email: string) {
+    setNewEmail(email)
+    if (!isCodeCustomized) {
+      const isStu = /^\d/.test(email.trim().split('@')[0]) || email.includes('@student.') || email.includes('@lamduan.')
+      const r = isStu ? 'student' : newRole
+      setNewCode(getSuggestedCode(r, email))
+    }
+  }
+
+  function handleRoleChange(r: UserRole) {
+    setNewRole(r)
+    if (!isCodeCustomized) {
+      setNewCode(getSuggestedCode(r, newEmail))
+    }
+  }
+
+  function openAddModal() {
+    setNewEmail('')
+    setNewName('')
+    setNewRole('student')
+    setNewDept('School of Applied Digital Technology (ADT)')
+    setIsCodeCustomized(false)
+    setNewCode('')
+    setShowAddModal(true)
+  }
+
   function handleAddUser(e: React.FormEvent) {
     e.preventDefault()
     if (!newEmail.trim() || !newName.trim()) {
       addToast('error', t('กรุณากรอกอีเมลและชื่อ-นามสกุล', 'Please enter email and full name'))
+      return
+    }
+
+    // Student ID must be present
+    if (effectiveRole === 'student' && !newCode.trim()) {
+      addToast('error', t('กรุณาระบุรหัสนักศึกษา (Student ID)', 'Please enter student ID code'))
       return
     }
 
@@ -49,7 +135,7 @@ export default function UserManagement() {
       return
     }
 
-    const generatedCode = newCode.trim() || email.split('@')[0].toUpperCase()
+    const generatedCode = newCode.trim() || (effectiveRole === 'student' ? email.split('@')[0] : getSuggestedCode(effectiveRole, email))
     const generatedId = `${effectiveRole.toUpperCase().slice(0, 3)}_${Date.now().toString().slice(-6)}`
 
     const newUser: User = {
@@ -176,7 +262,7 @@ export default function UserManagement() {
           'Manage student and faculty accounts, system roles, and account status.'
         )}
         actions={
-          <Button onClick={() => setShowAddModal(true)}>
+          <Button onClick={openAddModal}>
             <UserPlus className="h-4 w-4 mr-1.5" />
             {t('เพิ่มผู้ใช้ / ลงทะเบียนอีเมล', 'Add User / Register Email')}
           </Button>
@@ -292,7 +378,7 @@ export default function UserManagement() {
               required
               placeholder="e.g. 6631503099@lamduan.mfu.ac.th or advisor@mfu.ac.th"
               value={newEmail}
-              onChange={e => setNewEmail(e.target.value)}
+              onChange={e => handleEmailChange(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
@@ -313,16 +399,42 @@ export default function UserManagement() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                {t('รหัสประจำตัว (Student/Staff Code)', 'Student/Staff Code')}
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 6631503099 or ADV-102"
-                value={newCode}
-                onChange={e => setNewCode(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                  {t('รหัสประจำตัว (Code) *', 'User / Student Code *')}
+                </label>
+                {!isCodeCustomized && newCode && (
+                  <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold flex items-center gap-0.5">
+                    ⚡ {t('สร้างอัตโนมัติ', 'Auto-generated')}
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 6631503099 or ADV004"
+                  value={newCode}
+                  onChange={e => {
+                    setNewCode(e.target.value)
+                    setIsCodeCustomized(true)
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
+                />
+                {isCodeCustomized && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCodeCustomized(false)
+                      setNewCode(getSuggestedCode(effectiveRole, newEmail))
+                    }}
+                    className="absolute right-2 top-2 px-2 py-0.5 text-[10px] text-sky-600 hover:text-sky-700 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/60 rounded-md cursor-pointer transition-colors"
+                    title={t('สร้างรหัสใหม่อัตโนมัติ', 'Auto-regenerate code')}
+                  >
+                    ↻ {t('รีเซ็ต', 'Reset')}
+                  </button>
+                )}
+              </div>
             </div>
 
             <div>
@@ -337,7 +449,7 @@ export default function UserManagement() {
               ) : (
                 <select
                   value={newRole}
-                  onChange={e => setNewRole(e.target.value as UserRole)}
+                  onChange={e => handleRoleChange(e.target.value as UserRole)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 >
                   <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>

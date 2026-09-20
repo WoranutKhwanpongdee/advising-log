@@ -68,6 +68,7 @@ describe('Backend Hono API', () => {
     expect(data.success).toBe(true)
     expect(data.user.email).toBe('se.advisinglog@gmail.com')
     expect(data.user.role).toBe('admin')
+    expect(data.user.code).toBe('ADM-SUPER')
   })
 
   it('POST /api/auth/google rejects non-MFU unauthorized outside emails', async () => {

@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const googleId = decoded.sub || `${Date.now()}`
         const picture = decoded.picture || null
 
-        const userCode = isAuthorizedAdmin ? 'ADM-9999' : email.split('@')[0].toUpperCase()
+        const userCode = isAuthorizedAdmin ? 'ADM-SUPER' : email.split('@')[0].toUpperCase()
 
         // 1. Check if user is pre-registered in the system
         const existingUser = mockUsers.find(u => u.email.toLowerCase() === email || u.code.toUpperCase() === userCode)
@@ -129,6 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const newUser: User = existingUser ? {
           ...existingUser,
+          code: isAuthorizedAdmin ? 'ADM-SUPER' : existingUser.code,
           avatar: picture || existingUser.avatar,
         } : {
           id: isAuthorizedAdmin ? 'ADM_SE_GOOGLE' : `${role === 'student' ? 'STU' : role === 'admin' ? 'ADM' : role === 'qa_chair' ? 'QA' : 'ADV'}_${googleId.substring(0, 6)}`,

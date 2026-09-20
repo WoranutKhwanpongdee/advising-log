@@ -98,7 +98,7 @@ app.post('/api/auth/google', async (c) => {
       if (isAuthorizedSuperAdmin) {
         const adminUser = {
           id: 'ADM_SE_GOOGLE',
-          code: 'ADM-9999',
+          code: 'ADM-SUPER',
           name: 'System Admin (SE AdvisingLog)',
           email: lowerEmail,
           role: 'admin' as const,
@@ -158,11 +158,11 @@ app.post('/api/auth/google', async (c) => {
         )
       ).get()
 
-    // If Super Admin account, auto-provision if not exists
+    // If Super Admin account, auto-provision if not exists or update code
     if (!user && isAuthorizedSuperAdmin) {
       const newAdmin = {
         id: 'ADM_SE_GOOGLE',
-        code: 'ADM-9999',
+        code: 'ADM-SUPER',
         name: 'System Admin (SE AdvisingLog)',
         email: lowerEmail,
         role: 'admin' as const,
@@ -174,6 +174,9 @@ app.post('/api/auth/google', async (c) => {
       }
       await database.insert(schema.users).values(newAdmin)
       user = newAdmin
+    } else if (user && isAuthorizedSuperAdmin && user.code !== 'ADM-SUPER') {
+      await database.update(schema.users).set({ code: 'ADM-SUPER' }).where(eq(schema.users.id, user.id))
+      user = { ...user, code: 'ADM-SUPER' }
     }
 
     // If not found in database (not registered by Admin)
