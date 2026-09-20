@@ -198,31 +198,47 @@ Answer the Program Chair query:
 "${req.query}"`
       }
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`
-      const geminiRes = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `${systemInstruction}\n\n${prompt}` }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 2048,
-          },
-        }),
-      })
+      const candidateEndpoints = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+      ]
 
-      if (geminiRes.ok) {
-        const data = await geminiRes.json() as any
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
-        if (text) {
-          return {
-            success: true,
-            provider: 'Google Gemini 1.5 Flash (Direct Client Key)',
-            mode,
-            analysis: text,
-            timestamp: new Date().toISOString(),
+      for (const endpoint of candidateEndpoints) {
+        try {
+          const geminiUrl = `${endpoint}?key=${encodeURIComponent(userApiKey.trim())}`
+          const geminiRes = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `${systemInstruction}\n\n${prompt}` }] }],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 2048,
+              },
+            }),
+          })
+
+          if (geminiRes.ok) {
+            const data = await geminiRes.json() as any
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+            if (text) {
+              const match = endpoint.match(/models\/([^:]+)/)
+              const modelTag = match ? match[1] : 'gemini'
+              return {
+                success: true,
+                provider: `Google Gemini (${modelTag}) (Direct Client Key)`,
+                mode,
+                analysis: text,
+                timestamp: new Date().toISOString(),
+              }
+            }
           }
-        }
+        } catch (_err) {}
       }
     } catch (_err) {
       // Fallback below

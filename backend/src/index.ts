@@ -803,28 +803,87 @@ app.post('/api/ai/keys/:id/test', async (c) => {
   }
 
   try {
-    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(keyString)}`
-    const geminiRes = await fetch(testUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
-      }),
-    })
+    const candidateEndpoints = [
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+    ]
 
-    if (geminiRes.ok) {
+    let verified = false
+    let lastErrMsg = ''
+    let activeModelName = 'Google Gemini'
+
+    for (const endpoint of candidateEndpoints) {
+      try {
+        const testUrl = `${endpoint}?key=${encodeURIComponent(keyString.trim())}`
+        const geminiRes = await fetch(testUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
+          }),
+        })
+
+        if (geminiRes.ok) {
+          verified = true
+          const match = endpoint.match(/models\/([^:]+)/)
+          if (match && match[1]) {
+            activeModelName = `Google Gemini (${match[1]})`
+          }
+          break
+        } else {
+          const errJson = await geminiRes.json().catch(() => ({})) as any
+          lastErrMsg = errJson?.error?.message || `HTTP ${geminiRes.status}: Connection failed`
+          if (geminiRes.status === 400 && (lastErrMsg.includes('API_KEY_INVALID') || lastErrMsg.includes('not valid'))) {
+            break
+          }
+        }
+      } catch (err: any) {
+        lastErrMsg = err.message || 'Network error'
+      }
+    }
+
+    // Dynamic fallback: Discover model via listModels if candidates failed with not found
+    if (!verified && !lastErrMsg.includes('API_KEY_INVALID') && !lastErrMsg.includes('not valid')) {
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(keyString.trim())}`)
+        if (listRes.ok) {
+          const listData = await listRes.json() as any
+          const models = (listData?.models || []).filter((m: any) => 
+            Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent')
+          )
+          if (models.length > 0) {
+            const firstModel = models[0].name
+            const dynamicUrl = `https://generativelanguage.googleapis.com/v1beta/${firstModel}:generateContent?key=${encodeURIComponent(keyString.trim())}`
+            const dynRes = await fetch(dynamicUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }] }),
+            })
+            if (dynRes.ok) {
+              verified = true
+              activeModelName = `Google Gemini (${firstModel.replace('models/', '')})`
+            }
+          }
+        }
+      } catch (_e) {}
+    }
+
+    if (verified) {
       const now = new Date().toISOString()
       if (database) {
         await database.update(schema.aiApiKeys).set({ status: 'active', lastTestedAt: now }).where(eq(schema.aiApiKeys.id, id))
       }
-      return c.json({ success: true, message: 'Google Gemini 1.5 Flash connection verified successfully!' })
+      return c.json({ success: true, message: `${activeModelName} connection verified successfully!` })
     } else {
-      const errJson = await geminiRes.json().catch(() => ({})) as any
-      const errMsg = errJson?.error?.message || `HTTP ${geminiRes.status}: Connection failed`
       if (database) {
         await database.update(schema.aiApiKeys).set({ status: 'rate_limited' }).where(eq(schema.aiApiKeys.id, id))
       }
-      return c.json({ success: false, message: errMsg })
+      return c.json({ success: false, message: lastErrMsg })
     }
   } catch (err: any) {
     return c.json({ success: false, message: err.message || 'Network error connecting to Google Gemini' })
@@ -916,32 +975,82 @@ Please answer the Program Chair's question:
 Provide a concise, evidence-based academic response with clear takeaways for curriculum improvement.`
       }
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`
-      const response = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `${systemInstruction}\n\n${userPrompt}` }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 2048,
-          },
-        }),
-      })
+      const candidateEndpoints = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+      ]
 
-      if (response.ok) {
-        const data = await response.json() as any
-        const textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text
-        if (textContent) {
-          return c.json({
-            success: true,
-            provider: 'Google Gemini 1.5 Flash (D1 Active Cloud Key)',
-            mode,
-            analysis: textContent,
-            timestamp: new Date().toISOString(),
-          })
-        }
+      const payload = {
+        contents: [{ parts: [{ text: `${systemInstruction}\n\n${userPrompt}` }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 2048,
+        },
       }
+
+      for (const endpoint of candidateEndpoints) {
+        try {
+          const geminiUrl = `${endpoint}?key=${encodeURIComponent(apiKey.trim())}`
+          const response = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+
+          if (response.ok) {
+            const data = await response.json() as any
+            const textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text
+            if (textContent) {
+              const match = endpoint.match(/models\/([^:]+)/)
+              const modelTag = match ? match[1] : 'gemini'
+              return c.json({
+                success: true,
+                provider: `Google Gemini (${modelTag}) (D1 Active Cloud Key)`,
+                mode,
+                analysis: textContent,
+                timestamp: new Date().toISOString(),
+              })
+            }
+          }
+        } catch (_err) {}
+      }
+
+      // Dynamic model fallback via listModels
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey.trim())}`)
+        if (listRes.ok) {
+          const listData = await listRes.json() as any
+          const models = (listData?.models || []).filter((m: any) => 
+            Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent')
+          )
+          if (models.length > 0) {
+            const dynamicUrl = `https://generativelanguage.googleapis.com/v1beta/${models[0].name}:generateContent?key=${encodeURIComponent(apiKey.trim())}`
+            const dynRes = await fetch(dynamicUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            })
+            if (dynRes.ok) {
+              const data = await dynRes.json() as any
+              const textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text
+              if (textContent) {
+                return c.json({
+                  success: true,
+                  provider: `Google Gemini (${models[0].name.replace('models/', '')}) (D1 Active Cloud Key)`,
+                  mode,
+                  analysis: textContent,
+                  timestamp: new Date().toISOString(),
+                })
+              }
+            }
+          }
+        }
+      } catch (_e) {}
     }
 
     // Smart Local Analytical Fallback (when no active key or offline)
