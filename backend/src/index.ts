@@ -679,7 +679,160 @@ app.post('/api/audit-logs', async (c) => {
 })
 
 // ============================================================
-// 7. POST /api/qa/ai-analyze: LLM Qualitative Retention Analysis
+// 7. Multi-Key AI Governance (Cloudflare D1)
+// ============================================================
+app.get('/api/ai/keys', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ keys: [] })
+  const list = await database.select().from(schema.aiApiKeys).orderBy(desc(schema.aiApiKeys.createdAt))
+  
+  // Return masked keys for security
+  const safeList = list.map(item => ({
+    id: item.id,
+    name: item.name,
+    isDefault: item.isDefault,
+    provider: item.provider,
+    model: item.model,
+    status: item.status,
+    createdAt: item.createdAt,
+    lastTestedAt: item.lastTestedAt,
+    maskedKey: item.key.length > 8 
+      ? `${item.key.substring(0, 6)}...${item.key.substring(item.key.length - 4)}`
+      : '••••••••',
+  }))
+  return c.json({ keys: safeList })
+})
+
+app.post('/api/ai/keys', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json<{ name?: string; key?: string; isDefault?: boolean }>()
+  if (!body.key || !body.key.trim()) {
+    return c.json({ error: 'API key string is required' }, 400)
+  }
+
+  const cleanKey = body.key.trim()
+  const name = (body.name && body.name.trim()) || `Gemini Key ${new Date().toISOString().split('T')[0]}`
+
+  // Check existing keys count
+  const existing = await database.select().from(schema.aiApiKeys)
+  const isFirstKey = existing.length === 0
+  const makeDefault = isFirstKey || Boolean(body.isDefault)
+
+  // If this key is default, reset all other keys isDefault to false
+  if (makeDefault && existing.length > 0) {
+    await database.update(schema.aiApiKeys).set({ isDefault: false })
+  }
+
+  const newKeyRecord = {
+    id: `KEY_${Date.now()}`,
+    name,
+    key: cleanKey,
+    isDefault: makeDefault,
+    provider: 'Google Gemini',
+    model: 'gemini-1.5-flash',
+    status: 'active' as const,
+    createdAt: new Date().toISOString().split('T')[0],
+    lastTestedAt: null,
+  }
+
+  await database.insert(schema.aiApiKeys).values(newKeyRecord)
+  return c.json({
+    success: true,
+    key: {
+      ...newKeyRecord,
+      maskedKey: cleanKey.length > 8
+        ? `${cleanKey.substring(0, 6)}...${cleanKey.substring(cleanKey.length - 4)}`
+        : '••••••••',
+    }
+  }, 201)
+})
+
+app.patch('/api/ai/keys/:id/default', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  
+  // 1. Reset all keys to isDefault = false
+  await database.update(schema.aiApiKeys).set({ isDefault: false })
+
+  // 2. Set target key to isDefault = true
+  await database.update(schema.aiApiKeys).set({ isDefault: true }).where(eq(schema.aiApiKeys.id, id))
+
+  return c.json({ success: true, activeId: id })
+})
+
+app.delete('/api/ai/keys/:id', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  const target = await database.select().from(schema.aiApiKeys).where(eq(schema.aiApiKeys.id, id)).get()
+  if (!target) return c.json({ error: 'Key not found' }, 404)
+
+  const wasDefault = target.isDefault
+  await database.delete(schema.aiApiKeys).where(eq(schema.aiApiKeys.id, id))
+
+  // If the deleted key was default, promote the next available key to default
+  if (wasDefault) {
+    const remaining = await database.select().from(schema.aiApiKeys).orderBy(desc(schema.aiApiKeys.createdAt)).limit(1)
+    if (remaining.length > 0) {
+      await database.update(schema.aiApiKeys).set({ isDefault: true }).where(eq(schema.aiApiKeys.id, remaining[0].id))
+    }
+  }
+
+  return c.json({ success: true })
+})
+
+app.post('/api/ai/keys/:id/test', async (c) => {
+  const database = db(c)
+  const id = c.req.param('id')
+  
+  let keyString = ''
+  if (database) {
+    const record = await database.select().from(schema.aiApiKeys).where(eq(schema.aiApiKeys.id, id)).get()
+    if (record) {
+      keyString = record.key
+    }
+  }
+
+  if (!keyString) {
+    return c.json({ success: false, error: 'Key not found' }, 404)
+  }
+
+  try {
+    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(keyString)}`
+    const geminiRes = await fetch(testUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
+      }),
+    })
+
+    if (geminiRes.ok) {
+      const now = new Date().toISOString()
+      if (database) {
+        await database.update(schema.aiApiKeys).set({ status: 'active', lastTestedAt: now }).where(eq(schema.aiApiKeys.id, id))
+      }
+      return c.json({ success: true, message: 'Google Gemini 1.5 Flash connection verified successfully!' })
+    } else {
+      const errJson = await geminiRes.json().catch(() => ({})) as any
+      const errMsg = errJson?.error?.message || `HTTP ${geminiRes.status}: Connection failed`
+      if (database) {
+        await database.update(schema.aiApiKeys).set({ status: 'rate_limited' }).where(eq(schema.aiApiKeys.id, id))
+      }
+      return c.json({ success: false, message: errMsg })
+    }
+  } catch (err: any) {
+    return c.json({ success: false, message: err.message || 'Network error connecting to Google Gemini' })
+  }
+})
+
+// ============================================================
+// 8. POST /api/qa/ai-analyze: LLM Qualitative Retention Analysis
 // ============================================================
 app.post('/api/qa/ai-analyze', async (c) => {
   try {
@@ -704,7 +857,19 @@ app.post('/api/qa/ai-analyze', async (c) => {
     const cases = body.cases || []
     const userQuery = body.query || ''
     const lang = body.language || 'th'
-    const apiKey = body.apiKey || c.req.header('x-gemini-key') || c.env?.GEMINI_API_KEY
+    const database = db(c)
+
+    // 1. Determine active API key: direct override > D1 default key > env/header
+    let apiKey = body.apiKey || c.req.header('x-gemini-key')
+    if (!apiKey && database) {
+      const activeDbKey = await database.select().from(schema.aiApiKeys).where(eq(schema.aiApiKeys.isDefault, true)).get()
+      if (activeDbKey && activeDbKey.key) {
+        apiKey = activeDbKey.key
+      }
+    }
+    if (!apiKey) {
+      apiKey = c.env?.GEMINI_API_KEY
+    }
 
     // De-identify: Only pass sanitized academic context
     const sanitizedDataSummary = cases.map((item, idx) => {
@@ -748,75 +913,67 @@ ${sanitizedDataSummary}
 Please answer the Program Chair's question:
 "${userQuery}"
 
-Provide a direct, evidence-backed qualitative answer with actionable recommendations.`
+Provide a concise, evidence-based academic response with clear takeaways for curriculum improvement.`
       }
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
-      const geminiResponse = await fetch(geminiUrl, {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`
+      const response = await fetch(geminiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: `${systemInstruction}\n\n${userPrompt}` }] }],
           generationConfig: {
-            temperature: 0.3,
+            temperature: 0.2,
             maxOutputTokens: 2048,
           },
         }),
       })
 
-      if (geminiResponse.ok) {
-        const data = await geminiResponse.json() as any
-        const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text
-        if (generatedText) {
+      if (response.ok) {
+        const data = await response.json() as any
+        const textContent = data?.candidates?.[0]?.content?.parts?.[0]?.text
+        if (textContent) {
           return c.json({
             success: true,
-            provider: 'Google Gemini 1.5 Flash (Live API)',
+            provider: 'Google Gemini 1.5 Flash (D1 Active Cloud Key)',
             mode,
-            analysis: generatedText,
+            analysis: textContent,
             timestamp: new Date().toISOString(),
           })
         }
       }
     }
 
-    // High-Fidelity Intelligent Fallback (Offline Qualitative Engine)
-    const withdrawalCount = cases.filter(c => c.exitType === 'withdrawal' || c.exitType === 'dropout').length
-    const leaveCount = cases.filter(c => c.exitType === 'leave_of_absence').length
-
+    // Smart Local Analytical Fallback (when no active key or offline)
     let fallbackText = ''
-
     if (mode === 'strategic_synthesis') {
       fallbackText = lang === 'th'
-        ? `### 📊 บทวิเคราะห์เชิงคุณภาพระดับหลักสูตร (AUN-QA Strategic Synthesis)
+        ? `### 📊 ผลการสังเคราะห์ข้อมูลเชิงคุณภาพเพื่อการประกันคุณภาพ (AUN-QA Criteria 6 & 8)
 
-#### 1. สรุปภาพรวมและจุดตัดสำคัญ (Executive Pattern Recognition)
-จากการสังเคราะห์ข้อมูลนักศึกษาที่ขอยื่นคำร้องทั้งหมด ${cases.length} เคส พบความแตกต่างของรูปแบบอย่างมีนัยสำคัญ:
-* **กลุ่มขอลาออกถาวร (${withdrawalCount} เคส):** ปัจจัยขับเคลื่อนหลักเกิดจาก **"ช่องว่างทักษะพื้นฐาน (Foundation Gap)"** ในวิชาการเขียนโปรแกรมปี 1 (~50%) และการค้นพบเป้าหมายอาชีพใหม่ (~30%) ซึ่งเป็นความเสี่ยงต่ออัตราการคงอยู่ (Student Attrition) ของหลักสูตรโดยตรง
-* **กลุ่มขอพักการศึกษา (${leaveCount} เคส):** ขับเคลื่อนด้วย **"ภาระดูแลครอบครัวกะทันหัน"** (~50%) และ **"ภาวะหมดไฟ/ความเครียดสะสม (Burnout)"** (~30%) ซึ่งนักศึกษากลุ่มนี้มีผลการเรียนเฉลี่ยดี (GPAX > 3.00) และมีเจตนารมณ์จะกลับมาศึกษาต่อสูงมาก เป็นโอกาสสำคัญในการรักษาผู้เรียน (Retention Opportunity 100%)
+#### 1. บทสรุปสำหรับผู้บริหาร (Executive Summary)
+จากข้อมูลเชิงคุณภาพของนักศึกษาที่ขอยื่นลาออกถาวร (Withdrawal) และขอพักการศึกษา (Leave of Absence) รวมทั้งสิ้น ${cases.length} กรณี:
+* **การลาออกถาวร (Permanent Withdrawal):** สาเหตุหลักเกิดจากการค้นพบว่า *สาขาวิชาไม่ตรงกับความถนัด* และ *ความยากสะสมของวิชาโปรแกรมมิ่งในปี 1*
+* **การขอพักการศึกษา (Leave of Absence):** ปัจจัยหลักคือ *ปัญหาสุขภาพจิต/ความเครียดสะสม* และ *ภาระทางการเงิน/ครอบครัว* โดยนักศึกษาส่วนใหญ่ยังมีความประสงค์จะกลับมาศึกษาต่อหากได้รับการช่วยเหลือ
 
-#### 2. เจาะลึก 3 ปัจจัยรากเหง้า (Root Cause Diagnostics)
-1. 🎓 **ความเร่งในการสอนวิชาแกนปี 1:** นักศึกษาที่ไม่มีพื้นฐานการเขียนโค้ดมาก่อน ประสบปัญหาตามไม่ทันในสัปดาห์ที่ 3-5 และไม่กล้าเข้ารับคำปรึกษาจนเกรดตก
-2. 🧠 **ปัญหา Deadline Clustering:** กำหนดส่งงานโครงงานและแบบฝึกหัดกระจุกตัวก่อนสัปดาห์สอบกลางภาค ส่งผลต่อภาวะวิตกกังวลและนอนไม่หลับเรื้อรัง
-3. 💰 **ขาดสภาพคล่องและทุนการศึกษาฉุกเฉิน:** ขาดแคลนทุนการศึกษาแบบให้เปล่าที่สามารถอนุมัติได้ภายใน 48 ชั่วโมงสำหรับครอบครัวที่ประสบภาวะวิกฤต
+#### 2. สาเหตุรากเหง้า 3 ลำดับแรก (Top 3 Qualitative Root Causes)
+1. **Curriculum Pacing & Foundation Shock:** นักศึกษาที่ไม่มีพื้นฐานสายคำนวณปรับตัวกับความเร็วในการสอนวิชาเขียนโปรแกรมช่วง 4 สัปดาห์แรกไม่ทัน
+2. **Mental Health & Isolation:** ความกดดันในการทำงานกลุ่มและขาดการปฏิสัมพันธ์เชิงลึกกับอาจารย์ที่ปรึกษา
+3. **Financial Hardship:** ปัญหาค่าครองชีพและอุปกรณ์คอมพิวเตอร์สำหรับการเรียน
 
-#### 3. ข้อเสนอแนะเชิงมาตรการตามเกณฑ์ AUN-QA (CQI Recommendations)
-* **ระยะเร่งด่วน (0–3 เดือน):**
-  1. จัดทำ **Assignment Coordination Matrix** ประสานกำหนดส่งงานในระดับสำนักวิชาเพื่อลดความเครียดสะสม
-  2. เปิดระบบ **Pre-sessional Coding Boot Camp** ปรับพื้นฐาน 2 สัปดาห์ก่อนเปิดเทอมสำหรับนักศึกษาใหม่
-* **ระยะกลาง (1 ปี):**
-  1. ปรับปรุงหลักสูตรให้มี **Flexible Minor Tracks (UX/UI, Creative Tech)** เพื่อรองรับนักศึกษาที่ต้องการเปลี่ยนสายโดยไม่ต้องลาออก
-  2. จัดตั้งระบบ **Re-entry Study Roadmap** ติดตามนักศึกษาที่ลาพักให้กลับมารายงานตัวครบ 100%`
-        : `### 📊 Programme-Level Qualitative Synthesis (AUN-QA Criteria 6 & 8)
+#### 3. ข้อเสนอแนะเชิงมาตรการพัฒนาคุณภาพ (CQI Recommendations)
+* **ระยะสั้น (0–3 เดือน):** จัดคลินิกเขียนโปรแกรม (Peer Tutoring) และให้อาจารย์ที่ปรึกษานัดพบเชิงรุกสำหรับกลุ่มเสี่ยง
+* **ระยะยาว (1 ปี):** ทบทวนแผนการจัดการเรียนรู้วิชาปี 1 เทอม 1 และเพิ่มหลักสูตรเสริมทักษะแบบไมโครเครเดนเชียล`
+        : `### 📊 Qualitative Retention & Exit Synthesis (AUN-QA Criteria 6 & 8)
 
-#### 1. Executive Pattern Recognition
-Synthesizing across ${cases.length} departure cases reveals sharp divergences:
-* **Permanent Withdrawals (${withdrawalCount} cases):** Driven predominantly by **Foundation Gaps in Year 1 programming** (~50%) and career redirection (~30%). Represents severe attrition risk.
-* **Leaves of Absence (${leaveCount} cases):** Driven by **sudden family caregiving crises** (~50%) and **acute burnout/stress** (~30%). Students maintain solid academic standing (GPAX > 3.00) with unanimous intention to return.
+#### 1. Executive Summary
+Based on ${cases.length} qualitative departure records (Withdrawals vs. Leaves of Absence):
+* **Permanent Withdrawals:** Heavily driven by mismatched curriculum expectations and introductory programming difficulty.
+* **Leaves of Absence:** Primarily linked to mental health strain, temporary family financial needs, and medical recovery.
 
-#### 2. Root Cause Diagnostics
-1. 🎓 **Early Pacing Rigor in Core Courses:** Non-tech background freshmen struggle by weeks 3-5 without early intervention.
-2. 🧠 **Deadline Clustering:** Compounding assignment deadlines pre-midterms trigger severe insomnia and anxiety.
-3. 💰 **Emergency Relief Friction:** Absence of micro-grants disbursed within 48 hours forces working-class students into full-time employment.
+#### 2. Top Qualitative Root Causes
+1. **Foundation Shock:** Steep learning curve in Year 1 Term 1 computing and mathematics modules.
+2. **Mental Well-being:** Burnout and hesitation in seeking timely counselling.
+3. **Financial Constraints:** Need for interim employment or lack of high-performance development hardware.
 
 #### 3. AUN-QA CQI Interventions
 * **Immediate (0–3 Months):** Implement departmental assignment coordination and mandatory 2-week pre-sessional coding boot camps.

@@ -412,6 +412,19 @@ export interface SystemApiConfig {
   notes?: string
 }
 
+export interface AiApiKey {
+  id: string
+  name: string
+  key?: string
+  maskedKey: string
+  isDefault: boolean
+  provider: string
+  model: string
+  status: 'active' | 'inactive' | 'rate_limited'
+  createdAt: string
+  lastTestedAt?: string | null
+}
+
 export interface RosterImportEntry {
   studentCode: string
   advisorCodeOrEmail: string

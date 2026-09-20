@@ -184,3 +184,17 @@ export const auditLogs = sqliteTable('audit_logs', {
   timestamp: text('timestamp').notNull(),
   ipAddress: text('ip_address'),
 })
+
+// 14. Multi-Key AI Governance (Cloudflare D1)
+export const aiApiKeys = sqliteTable('ai_api_keys', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  key: text('key').notNull(),
+  isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
+  provider: text('provider').notNull().default('Google Gemini'),
+  model: text('model').notNull().default('gemini-1.5-flash'),
+  status: text('status', { enum: ['active', 'inactive', 'rate_limited'] }).notNull().default('active'),
+  createdAt: text('created_at').notNull(),
+  lastTestedAt: text('last_tested_at'),
+})
+

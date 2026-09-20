@@ -14,6 +14,7 @@ import type {
   ExitCase,
   StudentVoiceResponse,
   AuditLog,
+  AiApiKey,
 } from '@/types'
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8787'
@@ -199,6 +200,36 @@ class ApiClient {
     return this.request<{ success: boolean; log: AuditLog }>('/api/audit-logs', {
       method: 'POST',
       body: JSON.stringify(log),
+    })
+  }
+
+  // --- Multi-Key AI Management (Cloudflare D1) ---
+  async getAiKeys() {
+    return this.request<{ keys: AiApiKey[] }>('/api/ai/keys')
+  }
+
+  async addAiKey(name: string, key: string, isDefault?: boolean) {
+    return this.request<{ success: boolean; key: AiApiKey }>('/api/ai/keys', {
+      method: 'POST',
+      body: JSON.stringify({ name, key, isDefault }),
+    })
+  }
+
+  async setDefaultAiKey(id: string) {
+    return this.request<{ success: boolean; activeId: string }>(`/api/ai/keys/${id}/default`, {
+      method: 'PATCH',
+    })
+  }
+
+  async deleteAiKey(id: string) {
+    return this.request<{ success: boolean }>(`/api/ai/keys/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async testAiKey(id: string) {
+    return this.request<{ success: boolean; message: string }>(`/api/ai/keys/${id}/test`, {
+      method: 'POST',
     })
   }
 }
