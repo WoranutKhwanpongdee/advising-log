@@ -1,9 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Modal, ThemeToggle } from '@/components/ui'
-import type { Notification } from '@/types'
-import { Bell, LogOut, Menu, Calendar, ArrowRight } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui'
+import { Bell, LogOut, Menu, Calendar } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -48,33 +47,12 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const store = useStore()
   const navigate = useNavigate()
   const [showNotifs, setShowNotifs] = useState(false)
-  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
 
   if (!currentUser) return null
 
   const myNotifs = store.notifications.filter(n => n.userId === currentUser.id)
   const unreadCount = myNotifs.filter(n => !n.isRead).length
   const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2)
-
-  function getNotificationPath(notification: Notification): string | null {
-    if (!notification.relatedId) return null
-
-    if (currentUser?.role === 'student') {
-      if (notification.relatedId.startsWith('APT')) {
-        const appointment = store.appointments.find(a => a.id === notification.relatedId)
-        return appointment ? `/student/history/${appointment.requestId}` : '/student/history'
-      }
-      if (notification.relatedId.startsWith('REQ')) return `/student/history/${notification.relatedId}`
-      if (notification.relatedId.startsWith('FU')) return '/student/followups'
-      if (notification.relatedId.startsWith('DOC')) return '/student/documents'
-    }
-
-    if (currentUser?.role === 'advisor' && notification.relatedId.startsWith('REQ')) {
-      return '/advisor/sessions'
-    }
-
-    return null
-  }
 
   return (
     <header className="h-16 bg-white/90 dark:bg-[#0e1424]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-30 shadow-xs text-slate-900 dark:text-slate-100">
@@ -167,68 +145,23 @@ export function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
                   myNotifs.slice(0, 10).map(n => {
                     const translated = language === 'th' ? thaiNotificationTranslations[n.id] : undefined
                     return (
-                      <button
+                      <div
                         key={n.id}
-                        type="button"
-                        onClick={() => { store.markNotificationRead(n.id); setSelectedNotification(n); setShowNotifs(false) }}
-                        className={`w-full text-left px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/60 cursor-pointer hover:bg-sky-50/30 dark:hover:bg-slate-800/60 transition-colors ${!n.isRead ? 'bg-sky-50/50 dark:bg-sky-500/10' : ''}`}
+                        onClick={() => { store.markNotificationRead(n.id); setShowNotifs(false) }}
+                        className={`px-5 py-3.5 border-b border-slate-50 dark:border-slate-800/60 cursor-pointer hover:bg-sky-50/30 dark:hover:bg-slate-800/60 transition-colors ${!n.isRead ? 'bg-sky-50/50 dark:bg-sky-500/10' : ''}`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <p className={`text-xs ${n.isRead ? 'text-slate-600 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100 font-bold'}`}>{translated?.title ?? n.title}</p>
                           {!n.isRead && <span className="h-2 w-2 rounded-full bg-sky-500 flex-shrink-0 mt-1 ring-2 ring-sky-100 dark:ring-sky-900" />}
                         </div>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">{translated?.message ?? n.message}</p>
-                      </button>
+                      </div>
                     )
                   })
                 )}
               </div>
             </>
           )}
-          <Modal
-            isOpen={!!selectedNotification}
-            onClose={() => setSelectedNotification(null)}
-            title={t('รายละเอียดการแจ้งเตือน', 'Notification Details')}
-            size="sm"
-          >
-            {selectedNotification && (() => {
-              const translated = language === 'th' ? thaiNotificationTranslations[selectedNotification.id] : undefined
-              const notificationPath = getNotificationPath(selectedNotification)
-              return (
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {translated?.title ?? selectedNotification.title}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                      {translated?.message ?? selectedNotification.message}
-                    </p>
-                  </div>
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-2 text-xs">
-                    <div className="flex justify-between gap-4">
-                      <span className="text-slate-400 dark:text-slate-500">{t('วันที่แจ้งเตือน', 'Received')}</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">{selectedNotification.createdAt}</span>
-                    </div>
-                    {selectedNotification.relatedId && (
-                      <div className="flex justify-between gap-4">
-                        <span className="text-slate-400 dark:text-slate-500">{t('รายการที่เกี่ยวข้อง', 'Related item')}</span>
-                        <span className="font-mono font-medium text-slate-700 dark:text-slate-300">{selectedNotification.relatedId}</span>
-                      </div>
-                    )}
-                  </div>
-                  {notificationPath && (
-                    <button
-                      type="button"
-                      onClick={() => { setSelectedNotification(null); navigate(notificationPath) }}
-                      className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-colors cursor-pointer"
-                    >
-                      {t('ไปยังรายการที่เกี่ยวข้อง', 'Open related item')} <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-              )
-            })()}
-          </Modal>
         </div>
 
         {/* User info chip */}

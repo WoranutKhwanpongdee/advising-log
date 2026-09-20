@@ -138,26 +138,26 @@ export default function AdvisingSessions() {
       header: t('การจัดการ', 'Actions'),
       render: (r: AdvisingRequest) => (
         <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); setDetailReq(r) }}>
+          <Button size="sm" variant="ghost" onClick={() => setDetailReq(r)}>
             <Eye className="h-3 w-3 mr-1" /> {t('ดูรายละเอียด', 'View')}
           </Button>
           {r.status === 'requested' && (
-            <Button size="sm" variant="primary" onClick={e => { e.stopPropagation(); handleAccept(r) }}>
+            <Button size="sm" variant="primary" onClick={() => handleAccept(r)}>
               {t('ตอบรับ', 'Accept')}
             </Button>
           )}
           {(r.status === 'requested' || r.status === 'pending') && (
-            <Button size="sm" variant="secondary" onClick={e => { e.stopPropagation(); setSelectedReq(r); setShowSchedule(true) }}>
+            <Button size="sm" variant="secondary" onClick={() => { setSelectedReq(r); setShowSchedule(true) }}>
               <Calendar className="h-3 w-3 mr-1 text-sky-600 dark:text-sky-400" /> {t('นัดหมาย', 'Schedule')}
             </Button>
           )}
           {r.status === 'scheduled' && (
-            <Button size="sm" variant="primary" onClick={e => { e.stopPropagation(); handleComplete(r) }}>
+            <Button size="sm" variant="primary" onClick={() => handleComplete(r)}>
               <CheckCircle2 className="h-3 w-3 mr-1" /> {t('เสร็จสิ้น', 'Complete')}
             </Button>
           )}
           {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
-            <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); handleCancel(r) }}>
+            <Button size="sm" variant="ghost" onClick={() => handleCancel(r)}>
               {t('ยกเลิก', 'Cancel')}
             </Button>
           )}
