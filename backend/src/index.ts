@@ -803,74 +803,76 @@ app.post('/api/ai/keys/:id/test', async (c) => {
   }
 
   try {
-    const candidateEndpoints = [
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-      'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
-    ]
-
+    const trimmedKey = keyString.trim()
     let verified = false
-    let lastErrMsg = ''
     let activeModelName = 'Google Gemini'
+    let detailedError = ''
 
-    for (const endpoint of candidateEndpoints) {
-      try {
-        const testUrl = `${endpoint}?key=${encodeURIComponent(keyString.trim())}`
-        const geminiRes = await fetch(testUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
-          }),
-        })
+    // Step 1: Query ListModels to see what models this key has access to
+    try {
+      const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(trimmedKey)}`)
+      if (listRes.ok) {
+        const listData = await listRes.json() as any
+        const availableModels = (listData?.models || []).filter((m: any) =>
+          Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent')
+        )
 
-        if (geminiRes.ok) {
-          verified = true
-          const match = endpoint.match(/models\/([^:]+)/)
-          if (match && match[1]) {
-            activeModelName = `Google Gemini (${match[1]})`
+        if (availableModels.length > 0) {
+          // Find preferred model or use first available
+          const preferred = availableModels.find((m: any) => m.name.includes('flash')) || availableModels[0]
+          const modelName = preferred.name // e.g. "models/gemini-1.5-flash" or "models/gemini-2.0-flash"
+          const generateUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(trimmedKey)}`
+
+          const genRes = await fetch(generateUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
+            }),
+          })
+
+          if (genRes.ok) {
+            verified = true
+            activeModelName = `Google Gemini (${modelName.replace('models/', '')})`
+          } else {
+            const errJson = await genRes.json().catch(() => ({})) as any
+            detailedError = errJson?.error?.message || `HTTP ${genRes.status}: Failed to generate content with ${modelName}`
           }
-          break
         } else {
-          const errJson = await geminiRes.json().catch(() => ({})) as any
-          lastErrMsg = errJson?.error?.message || `HTTP ${geminiRes.status}: Connection failed`
-          if (geminiRes.status === 400 && (lastErrMsg.includes('API_KEY_INVALID') || lastErrMsg.includes('not valid'))) {
-            break
-          }
+          detailedError = 'No models supporting "generateContent" found for this API key. Make sure the Generative Language API is enabled in your Google Cloud Project.'
         }
-      } catch (err: any) {
-        lastErrMsg = err.message || 'Network error'
+      } else {
+        const errJson = await listRes.json().catch(() => ({})) as any
+        detailedError = errJson?.error?.message || `HTTP ${listRes.status}: Unable to list models for this key.`
       }
+    } catch (e: any) {
+      detailedError = e.message || 'Network error connecting to Google Gemini'
     }
 
-    // Dynamic fallback: Discover model via listModels if candidates failed with not found
-    if (!verified && !lastErrMsg.includes('API_KEY_INVALID') && !lastErrMsg.includes('not valid')) {
-      try {
-        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(keyString.trim())}`)
-        if (listRes.ok) {
-          const listData = await listRes.json() as any
-          const models = (listData?.models || []).filter((m: any) => 
-            Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent')
-          )
-          if (models.length > 0) {
-            const firstModel = models[0].name
-            const dynamicUrl = `https://generativelanguage.googleapis.com/v1beta/${firstModel}:generateContent?key=${encodeURIComponent(keyString.trim())}`
-            const dynRes = await fetch(dynamicUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }] }),
-            })
-            if (dynRes.ok) {
-              verified = true
-              activeModelName = `Google Gemini (${firstModel.replace('models/', '')})`
-            }
+    // Step 2: Fallback attempt with direct candidate URLs if ListModels had an issue
+    if (!verified && !detailedError.includes('API_KEY_INVALID') && !detailedError.includes('not valid')) {
+      const fallbackModels = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
+      ]
+
+      for (const endpoint of fallbackModels) {
+        try {
+          const res = await fetch(`${endpoint}?key=${encodeURIComponent(trimmedKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }] }),
+          })
+          if (res.ok) {
+            verified = true
+            const match = endpoint.match(/models\/([^:]+)/)
+            activeModelName = `Google Gemini (${match ? match[1] : 'flash'})`
+            break
           }
-        }
-      } catch (_e) {}
+        } catch (_err) {}
+      }
     }
 
     if (verified) {
@@ -883,7 +885,7 @@ app.post('/api/ai/keys/:id/test', async (c) => {
       if (database) {
         await database.update(schema.aiApiKeys).set({ status: 'rate_limited' }).where(eq(schema.aiApiKeys.id, id))
       }
-      return c.json({ success: false, message: lastErrMsg })
+      return c.json({ success: false, message: detailedError })
     }
   } catch (err: any) {
     return c.json({ success: false, message: err.message || 'Network error connecting to Google Gemini' })
