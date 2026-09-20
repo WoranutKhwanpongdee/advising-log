@@ -5,7 +5,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, Tabs, DataTable, StatusBadge, Button, Modal } from '@/components/ui'
 import type { AdvisingRequest } from '@/types'
-import { Calendar, CheckCircle2 } from 'lucide-react'
+import { Calendar, CheckCircle2, Eye } from 'lucide-react'
 
 export default function AdvisingSessions() {
   const { currentUser } = useAuth()
@@ -14,6 +14,7 @@ export default function AdvisingSessions() {
   const { t, getCategoryLabel } = useLanguage()
   const [tab, setTab] = useState('pending')
   const [selectedReq, setSelectedReq] = useState<AdvisingRequest | null>(null)
+  const [detailReq, setDetailReq] = useState<AdvisingRequest | null>(null)
   const [showSchedule, setShowSchedule] = useState(false)
   const [schedDate, setSchedDate] = useState('')
   const [schedTime, setSchedTime] = useState('')
@@ -137,23 +138,26 @@ export default function AdvisingSessions() {
       header: t('การจัดการ', 'Actions'),
       render: (r: AdvisingRequest) => (
         <div className="flex items-center gap-1.5">
+          <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); setDetailReq(r) }}>
+            <Eye className="h-3 w-3 mr-1" /> {t('ดูรายละเอียด', 'View')}
+          </Button>
           {r.status === 'requested' && (
-            <Button size="sm" variant="primary" onClick={() => handleAccept(r)}>
+            <Button size="sm" variant="primary" onClick={e => { e.stopPropagation(); handleAccept(r) }}>
               {t('ตอบรับ', 'Accept')}
             </Button>
           )}
           {(r.status === 'requested' || r.status === 'pending') && (
-            <Button size="sm" variant="secondary" onClick={() => { setSelectedReq(r); setShowSchedule(true) }}>
+            <Button size="sm" variant="secondary" onClick={e => { e.stopPropagation(); setSelectedReq(r); setShowSchedule(true) }}>
               <Calendar className="h-3 w-3 mr-1 text-sky-600 dark:text-sky-400" /> {t('นัดหมาย', 'Schedule')}
             </Button>
           )}
           {r.status === 'scheduled' && (
-            <Button size="sm" variant="primary" onClick={() => handleComplete(r)}>
+            <Button size="sm" variant="primary" onClick={e => { e.stopPropagation(); handleComplete(r) }}>
               <CheckCircle2 className="h-3 w-3 mr-1" /> {t('เสร็จสิ้น', 'Complete')}
             </Button>
           )}
           {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
-            <Button size="sm" variant="ghost" onClick={() => handleCancel(r)}>
+            <Button size="sm" variant="ghost" onClick={e => { e.stopPropagation(); handleCancel(r) }}>
               {t('ยกเลิก', 'Cancel')}
             </Button>
           )}
@@ -169,7 +173,85 @@ export default function AdvisingSessions() {
         description={t('ตรวจสอบคำร้องของนักศึกษา กำหนดเวลานัดหมายเข้าพบ และบันทึกผลการให้คำปรึกษา', 'Review student advising requests, schedule appointments, and mark sessions complete.')}
       />
       <Tabs tabs={tabs} active={tab} onChange={setTab} />
-      <DataTable columns={columns} data={filtered} emptyMessage={t(`ไม่พบรายการในสถานะนี้`, `No ${tab} sessions found.`)} />
+      <DataTable
+        columns={columns}
+        data={filtered}
+        onRowClick={setDetailReq}
+        emptyMessage={t(`ไม่พบรายการในสถานะนี้`, `No ${tab} sessions found.`)}
+      />
+
+      {/* Request Details Modal */}
+      <Modal
+        isOpen={!!detailReq}
+        onClose={() => setDetailReq(null)}
+        title={t('รายละเอียดคำร้องของนักศึกษา', 'Student Request Details')}
+        size="lg"
+      >
+        {detailReq && (() => {
+          const student = store.users.find(u => u.id === detailReq.studentId)
+          const appointment = store.appointments.find(a => a.requestId === detailReq.id)
+          return (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('นักศึกษา', 'Student')}</span>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">{student?.name || '-'} ({student?.code || '-'})</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('รหัสคำร้อง', 'Request ID')}</span>
+                  <p className="font-mono font-semibold text-slate-900 dark:text-slate-100">{detailReq.id}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('หมวดหมู่', 'Category')}</span>
+                  <p className="font-semibold text-slate-900 dark:text-slate-100">{getCategoryLabel(detailReq.category)}</p>
+                  {detailReq.subCategory && <p className="text-slate-500 dark:text-slate-400 mt-0.5">{detailReq.subCategory}</p>}
+                </div>
+                <div>
+                  <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('สถานะ', 'Status')}</span>
+                  <StatusBadge status={detailReq.status} />
+                </div>
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">{t('รายละเอียดที่นักศึกษาเขียน', 'Student Description')}</span>
+                <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl p-4">
+                  {detailReq.details}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
+                <div>
+                  <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('วันที่ยื่นคำร้อง', 'Submitted')}</span>
+                  <p className="font-medium text-slate-700 dark:text-slate-300">{detailReq.createdAt}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('วันที่/เวลาที่ประสงค์ขอเข้าพบ', 'Preferred Meeting')}</span>
+                  <p className="font-medium text-slate-700 dark:text-slate-300">{detailReq.preferredDate} · {detailReq.preferredTime}</p>
+                </div>
+                {appointment && (
+                  <div className="sm:col-span-2">
+                    <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('นัดหมายที่กำหนดแล้ว', 'Scheduled Appointment')}</span>
+                    <p className="font-medium text-slate-700 dark:text-slate-300">{appointment.scheduledDate} · {appointment.scheduledTime} · {appointment.location}</p>
+                  </div>
+                )}
+              </div>
+
+              {detailReq.attachments.length > 0 && (
+                <div>
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-2">{t('เอกสารแนบ', 'Attachments')}</span>
+                  <div className="flex flex-wrap gap-2">
+                    {detailReq.attachments.map(file => (
+                      <span key={file} className="px-2.5 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800 text-xs text-sky-700 dark:text-sky-300 font-medium">
+                        {file}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })()}
+      </Modal>
 
       {/* Schedule Modal */}
       <Modal isOpen={showSchedule} onClose={() => setShowSchedule(false)} title={t('นัดหมายเวลาเข้าพบอาจารย์ที่ปรึกษา', 'Schedule Advising Appointment')} size="sm">

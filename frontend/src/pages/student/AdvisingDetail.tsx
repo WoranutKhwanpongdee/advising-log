@@ -54,10 +54,10 @@ export default function AdvisingDetail() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-4">
+      <div className="mb-4 sm:mb-5">
         <button
           onClick={() => navigate('/student/history')}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-sky-700 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-500 hover:text-sky-700 dark:hover:text-sky-400 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
         >
           <ArrowLeft className="h-4 w-4" /> {t('กลับสู่ประวัติคำร้อง', 'Back to Advising History')}
         </button>
@@ -65,13 +65,13 @@ export default function AdvisingDetail() {
 
       <PageHeader title={catLabel} actions={<StatusBadge status={request.status} />} />
 
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         {/* Request details */}
         <Card>
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
             <FileText className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('รายละเอียดคำร้อง', 'Request Details')}
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
               <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('รหัสคำร้อง', 'Request ID')}</span>
               <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{request.id}</p>
@@ -92,17 +92,17 @@ export default function AdvisingDetail() {
 
           <div className="mt-4">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">{t('ประเด็นที่ขอรับคำปรึกษา', 'Description')}</span>
-            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1 leading-relaxed bg-slate-50/60 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1 leading-relaxed bg-slate-50/60 dark:bg-slate-800/60 p-3 sm:p-4 rounded-lg border border-slate-100 dark:border-slate-800">
               {request.details}
             </p>
           </div>
 
           {request.attachments.length > 0 && (
             <div className="mt-4">
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">{t('เอกสารแนบ', 'Attached Files')}</span>
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">{t('เอกสารแนบ', 'Attached Files')}</span>
               <div className="flex flex-wrap gap-2">
                 {request.attachments.map((f, i) => (
-                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 rounded-lg text-xs font-medium text-sky-800 dark:text-sky-300">
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 rounded-lg text-xs font-medium text-sky-800 dark:text-sky-300 shadow-xs">
                     <Paperclip className="h-3 w-3" /> {f}
                   </span>
                 ))}
@@ -118,17 +118,17 @@ export default function AdvisingDetail() {
               <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> {t('บันทึกผลการเข้าพบอาจารย์ที่ปรึกษา', 'Advising Session Log')}
             </h3>
             <div className="space-y-3.5 text-xs sm:text-sm">
-              <div className="p-3 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-lg">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-0.5">{t('สรุปผลการให้คำปรึกษา', 'Session Summary')}</span>
+              <div className="p-3 sm:p-4 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-lg">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">{t('สรุปผลการให้คำปรึกษา', 'Session Summary')}</span>
                 <p className="text-slate-800 dark:text-slate-200 leading-relaxed">{session.summary}</p>
               </div>
-              <div className="p-3 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-lg">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-0.5">{t('คำแนะนำและแนวทางปฏิบัติ', 'Advice & Guidance Provided')}</span>
+              <div className="p-3 sm:p-4 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-lg">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">{t('คำแนะนำและแนวทางปฏิบัติ', 'Advice & Guidance Provided')}</span>
                 <p className="text-slate-800 dark:text-slate-200 leading-relaxed">{session.advice}</p>
               </div>
               {session.outcome && (
-                <div className="p-3 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-lg">
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-0.5">{t('ผลลัพธ์ / ข้อตกลงร่วมกัน', 'Outcome / Action Items')}</span>
+                <div className="p-3 sm:p-4 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-lg">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">{t('ผลลัพธ์ / ข้อตกลงร่วมกัน', 'Outcome / Action Items')}</span>
                   <p className="text-slate-800 dark:text-slate-200 leading-relaxed">{session.outcome}</p>
                 </div>
               )}

@@ -130,8 +130,8 @@ export default function StudentVoiceSurvey() {
 
   if (isSubmitted) {
     return (
-      <div className="max-w-2xl mx-auto py-8">
-        <Card className="text-center py-10 px-6 sm:px-12 border-sky-200/80 bg-gradient-to-b from-sky-50/40 via-white to-white dark:from-slate-900 dark:to-slate-900 shadow-xl">
+      <div className="max-w-2xl mx-auto py-6 sm:py-8">
+        <Card className="text-center py-10 sm:py-12 px-6 sm:px-12 border-sky-200/80 bg-gradient-to-b from-sky-50/40 via-white to-white dark:from-slate-900 dark:to-slate-900 shadow-xl dark:shadow-premium">
           <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-5 ring-8 ring-emerald-50 dark:ring-emerald-900/30 shadow-inner">
             <CheckCircle2 className="h-9 w-9" />
           </div>
@@ -146,7 +146,7 @@ export default function StudentVoiceSurvey() {
             )}
           </p>
 
-          <div className="p-4 bg-sky-50/70 dark:bg-sky-950/40 rounded-2xl border border-sky-100 dark:border-sky-800/60 max-w-md mx-auto text-left text-xs space-y-2 mb-8">
+          <div className="p-4 sm:p-5 bg-sky-50/70 dark:bg-sky-950/40 rounded-2xl border border-sky-100 dark:border-sky-800/60 max-w-md mx-auto text-left text-xs space-y-2 mb-8">
             <div className="flex items-center gap-2 text-sky-800 dark:text-sky-300 font-bold">
               <ShieldCheck className="h-4 w-4 text-sky-600" />
               <span>{t('การรักษาความลับและความเป็นส่วนตัว', 'Confidentiality Assurance')}</span>
@@ -162,16 +162,16 @@ export default function StudentVoiceSurvey() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             {returnUrl ? (
               <>
-                <Button variant="primary" onClick={() => navigate(returnUrl)}>
+                <Button variant="primary" onClick={() => navigate(returnUrl)} className="flex-1 sm:flex-none">
                   {t('ดำเนินการยื่นคำร้องขอเข้าพบต่อ', 'Continue to Advising Request')}
                   <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
-                <Button variant="secondary" onClick={() => navigate('/student')}>
+                <Button variant="secondary" onClick={() => navigate('/student')} className="flex-1 sm:flex-none">
                   {t('กลับสู่หน้าหลักนักศึกษา', 'Return to Student Dashboard')}
                 </Button>
               </>
             ) : (
-              <Button variant="primary" onClick={() => navigate('/student')}>
+              <Button variant="primary" onClick={() => navigate('/student')} className="w-full sm:w-auto">
                 <ArrowLeft className="h-4 w-4 mr-1.5" />
                 {t('กลับสู่หน้าหลักนักศึกษา', 'Return to Student Dashboard')}
               </Button>
@@ -193,12 +193,12 @@ export default function StudentVoiceSurvey() {
       />
 
       {/* Official Guarantee Banner */}
-      <div className="relative overflow-hidden mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white via-sky-50/30 to-blue-50/40 dark:from-[#0e1424] dark:via-[#111827] dark:to-[#0c1222] border border-sky-200/80 dark:border-slate-800/90 shadow-xs dark:shadow-premium flex items-start gap-3.5 sm:gap-4 transition-all">
+      <div className="relative overflow-hidden mb-6 sm:mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white via-sky-50/40 to-blue-50/50 dark:from-[#0e1424] dark:via-[#111827] dark:to-[#0c1222] border border-sky-200/80 dark:border-slate-800/90 shadow-sm dark:shadow-premium flex items-start gap-3.5 sm:gap-4 transition-all">
         <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-sky-500/10 dark:bg-sky-500/15 blur-3xl pointer-events-none" />
         <div className="relative z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-sky-600/25 ring-2 ring-sky-100 dark:ring-sky-400/20">
           <MessageSquareHeart className="h-5 w-5" />
         </div>
-        <div className="relative z-10 space-y-1">
+        <div className="relative z-10 space-y-1 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
               {t('แบบสอบถามความสมัครใจเพื่อพัฒนาคุณภาพการศึกษา', 'Voluntary Quality Improvement Survey')}
@@ -217,15 +217,15 @@ export default function StudentVoiceSurvey() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
         {/* Section 1: Identity & Context */}
-        <Card className="space-y-5 border-slate-200/80 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+        <Card className="space-y-5 sm:space-y-6 border-slate-200/80 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-4">
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span className="h-6 w-6 rounded-lg bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 flex items-center justify-center text-xs font-black">1</span>
               {t('ข้อมูลสถานะและการไม่ระบุตัวตน', 'Context & Anonymity')}
             </h3>
-            
+
             {/* Anonymity Switch */}
             <button
               type="button"
@@ -252,13 +252,13 @@ export default function StudentVoiceSurvey() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 {t('กรณีที่เกิดขึ้น', 'Case Category')} <span className="text-rose-500">*</span>
               </label>
               <select
                 value={exitType}
                 onChange={e => setExitType(e.target.value as ExitType)}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors cursor-pointer"
+                className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
               >
                 <option value="withdrawal">{t('ขอลาออกจากการเป็นนักศึกษา (Withdrawal)', 'Withdrawal / Drop Out')}</option>
                 <option value="leave_of_absence">{t('ขอลาพักการศึกษา (Leave of Absence)', 'Leave of Absence')}</option>
@@ -268,13 +268,13 @@ export default function StudentVoiceSurvey() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 {t('ชั้นปีการศึกษาปัจจุบัน', 'Academic Year')} <span className="text-rose-500">*</span>
               </label>
               <select
                 value={academicYear}
                 onChange={e => setAcademicYear(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors cursor-pointer"
+                className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all cursor-pointer hover:border-slate-300 dark:hover:border-slate-600"
               >
                 <option value="Year 1 (ชั้นปีที่ 1)">Year 1 (ชั้นปีที่ 1)</option>
                 <option value="Year 2 (ชั้นปีที่ 2)">Year 2 (ชั้นปีที่ 2)</option>
@@ -286,8 +286,8 @@ export default function StudentVoiceSurvey() {
         </Card>
 
         {/* Section 2: Key Driving Factors */}
-        <Card className="space-y-4 border-slate-200/80 dark:border-slate-800">
-          <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+        <Card className="space-y-4 sm:space-y-5 border-slate-200/80 dark:border-slate-800">
+          <div className="border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-4">
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span className="h-6 w-6 rounded-lg bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 flex items-center justify-center text-xs font-black">2</span>
               {t('ปัจจัยสำคัญที่มีผลต่อการตัดสินใจ', 'Primary Factors Influencing Your Decision')}
@@ -298,7 +298,7 @@ export default function StudentVoiceSurvey() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
             {FACTOR_OPTIONS.map(opt => {
               const label = language === 'th' ? opt.th : opt.en
               const isSelected = selectedFactors.includes(label)
@@ -307,10 +307,10 @@ export default function StudentVoiceSurvey() {
                   type="button"
                   key={opt.id}
                   onClick={() => toggleFactor(label)}
-                  className={`p-3 rounded-xl border text-left text-xs transition-all flex items-start gap-2.5 cursor-pointer ${
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left text-xs transition-all flex items-start gap-2.5 cursor-pointer ${
                     isSelected
                       ? 'bg-sky-50 dark:bg-sky-950/70 border-sky-300 dark:border-sky-700 text-sky-900 dark:text-sky-200 font-semibold shadow-xs ring-1 ring-sky-300/40'
-                      : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                      : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
                 >
                   <div
@@ -328,8 +328,8 @@ export default function StudentVoiceSurvey() {
         </Card>
 
         {/* Section 3: Experience Ratings */}
-        <Card className="space-y-4 border-slate-200/80 dark:border-slate-800">
-          <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+        <Card className="space-y-4 sm:space-y-5 border-slate-200/80 dark:border-slate-800">
+          <div className="border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-4">
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span className="h-6 w-6 rounded-lg bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-300 flex items-center justify-center text-xs font-black">3</span>
               {t('การประเมินประสบการณ์การเรียนรู้และการสนับสนุน (1 = น้อยที่สุด, 5 = มากที่สุด)', 'Experience & Support Ratings (1-5 Scale)')}
@@ -369,8 +369,8 @@ export default function StudentVoiceSurvey() {
                 set: setOverallRating,
               },
             ].map(metric => (
-              <div key={metric.id} className="p-3 bg-slate-50/60 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{metric.label}</span>
+              <div key={metric.id} className="p-3 sm:p-4 bg-slate-50/60 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">{metric.label}</span>
                 <div className="flex items-center gap-1.5 self-end sm:self-auto">
                   {[1, 2, 3, 4, 5].map(star => (
                     <button

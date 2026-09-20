@@ -217,14 +217,16 @@ export default function AiGovernance() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Master Switch Card */}
-          <div className="relative overflow-hidden p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-[#0e1424] dark:to-[#0f172a] border border-slate-200/70 dark:border-slate-800/80 shadow-sm hover:shadow-premium transition-all duration-300">
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-sky-50/35 to-white dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20 p-6 sm:p-8 shadow-premium transition-all duration-200 hover:border-sky-200/90 dark:hover:border-sky-500/35 hover:shadow-premium-hover">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
+            <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-sky-400/70" />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-start gap-5">
                 <div
                   className={`h-14 w-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
                     isEnabled
-                      ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white dark:from-emerald-400 dark:to-emerald-500 shadow-lg shadow-emerald-500/30'
-                      : 'bg-gradient-to-br from-rose-500 to-rose-600 text-white dark:from-rose-400 dark:to-rose-500 shadow-lg shadow-rose-500/30'
+                      ? 'bg-white/80 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 shadow-sm ring-4 ring-sky-50/80 dark:ring-sky-500/10'
+                      : 'bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 shadow-sm ring-4 ring-slate-50/80 dark:ring-slate-700/30'
                   }`}
                 >
                   <Bot className="h-7 w-7" />
@@ -274,10 +276,10 @@ export default function AiGovernance() {
           {/* Configuration Grid: API Key & Model Specs */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Column 1 & 2: API Credentials & Connection */}
-            <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm space-y-5">
+            <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-premium space-y-5">
               <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                  <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 ring-1 ring-sky-200/70 dark:ring-sky-500/25 flex items-center justify-center shadow-xs">
                     <KeyRound className="h-5 w-5" />
                   </div>
                   <div>
@@ -362,9 +364,9 @@ export default function AiGovernance() {
               </div>
 
               {/* PDPA & Security Guarantee Card */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-sky-50 dark:from-emerald-950/30 dark:to-sky-950/30 border border-emerald-200/60 dark:border-emerald-800/60 text-sm space-y-2">
+              <div className="p-4 rounded-xl bg-sky-50/70 dark:bg-sky-950/25 border border-sky-200/70 dark:border-sky-800/50 text-sm space-y-2">
                 <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-bold">
-                  <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <ShieldCheck className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   <span>{t('การปกป้องข้อมูลส่วนบุคคล (PDPA Data Protection Policy)', 'PDPA Protection Policy')}</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -377,9 +379,9 @@ export default function AiGovernance() {
             </div>
 
             {/* Column 3: Telemetry & Model Overview */}
-            <div className="p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm space-y-5">
+            <div className="p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-premium space-y-5">
               <div className="flex items-center gap-3 border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md">
+                <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 ring-1 ring-sky-200/70 dark:ring-sky-500/25 flex items-center justify-center shadow-xs">
                   <Layers className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -388,7 +390,7 @@ export default function AiGovernance() {
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-gradient-to-br from-sky-50 to-indigo-50 dark:from-sky-950/30 dark:to-indigo-950/30 border border-sky-200/60 dark:border-sky-800/60">
+                <div className="p-4 rounded-xl bg-sky-50/70 dark:bg-sky-950/25 border border-sky-200/60 dark:border-sky-800/60">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('บุคลากรที่ได้รับสิทธิ์', 'Authorized Personnel')}</p>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300">
@@ -398,23 +400,23 @@ export default function AiGovernance() {
                   <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">{authorizedPersonnelCount} / {totalPersonnelCount}</p>
                   <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-sky-500 to-indigo-600 rounded-full transition-all duration-500"
+                      className="h-full bg-sky-500 rounded-full transition-all duration-500"
                       style={{ width: `${(authorizedPersonnelCount / (totalPersonnelCount || 1)) * 100}%` }}
                     />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200/60 dark:border-emerald-800/60">
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('โมเดลหลักที่เปิดใช้งาน', 'Active LLM Engine')}</p>
                       <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1">Gemini 1.5 Flash</p>
                     </div>
-                    <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 ring-1 ring-sky-200/70 dark:ring-sky-500/25 flex items-center justify-center">
                       <Zap className="h-5 w-5" />
                     </div>
                   </div>
-                  <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                  <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-500/12 text-sky-700 dark:text-sky-300 border border-sky-100 dark:border-sky-500/25">
                     Fast & Cost-Smart
                   </span>
                 </div>
@@ -445,9 +447,11 @@ export default function AiGovernance() {
       {activeTab === 'personnel' && (
         <div className="space-y-4">
           {/* Strict Role Filtering Notice Banner */}
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-50 via-sky-50/40 to-white dark:from-[#0b101b] dark:via-[#0f172a] dark:to-[#0e1424] border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-sky-50/35 to-white dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20 p-5 shadow-premium flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
+            <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-sky-400/70" />
             <div className="flex items-center gap-4">
-              <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-lg flex-shrink-0">
+              <div className="h-11 w-11 rounded-xl bg-white/80 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 flex items-center justify-center shadow-sm ring-4 ring-sky-50/80 dark:ring-sky-500/10 flex-shrink-0">
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
@@ -483,8 +487,8 @@ export default function AiGovernance() {
                 onClick={() => setPersonnelAiFilter('granted')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
                   personnelAiFilter === 'granted'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50'
+                    ? 'bg-sky-600 text-white shadow-sm'
+                    : 'text-sky-700 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/50'
                 }`}
               >
                 {t('เฉพาะมีสิทธิ์', 'Allowed')}
@@ -531,7 +535,7 @@ export default function AiGovernance() {
           </div>
 
           {/* Personnel Table */}
-          <div className="bg-white dark:bg-[#0e1424] rounded-2xl border border-slate-200/70 dark:border-slate-800/80 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-[#0e1424] rounded-2xl border border-slate-200/70 dark:border-slate-800/80 overflow-hidden shadow-premium">
             <DataTable
               data={filteredPersonnel}
               columns={[
@@ -587,12 +591,12 @@ export default function AiGovernance() {
                         onClick={() => handleTogglePersonnelAi(u)}
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs border ${
                           hasAccess
-                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100'
+                            ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800 hover:bg-sky-100'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
                         }`}
                         title={t('คลิกเพื่อเปิดหรือระงับสิทธิ์ AI สำหรับบุคคลนี้', 'Click to grant or revoke AI permission')}
                       >
-                        <Bot className={`h-3.5 w-3.5 ${hasAccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
+                        <Bot className={`h-3.5 w-3.5 ${hasAccess ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}`} />
                         <span>{hasAccess ? t('มีสิทธิ์ AI (Allowed)', 'Allowed') : t('ระงับสิทธิ์ (Revoked)', 'Revoked')}</span>
                       </button>
                     )
@@ -615,10 +619,10 @@ export default function AiGovernance() {
       {/* ============================================================ */}
       {activeTab === 'audit' && (
         <div className="space-y-5">
-          <div className="p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-sm">
+          <div className="p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-premium">
             <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-200/60 dark:border-slate-800/80">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md">
+                <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 ring-1 ring-sky-200/70 dark:ring-sky-500/25 flex items-center justify-center shadow-xs">
                   <ScrollText className="h-5 w-5" />
                 </div>
                 <div>
@@ -654,10 +658,10 @@ export default function AiGovernance() {
                 {aiAuditLogs.map((log, index) => (
                   <div 
                     key={log.id} 
-                    className="group relative p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900/40 border border-slate-200/60 dark:border-slate-700/60 hover:border-indigo-200/60 dark:hover:border-indigo-800/60 transition-all duration-200"
+                    className="group relative p-4 rounded-xl bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/40 dark:to-slate-900/40 border border-slate-200/60 dark:border-slate-700/60 hover:border-sky-200/70 dark:hover:border-sky-800/60 transition-all duration-200"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950/60 dark:to-purple-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-800 flex items-center justify-center flex-shrink-0 shadow-sm">
                         <Bot className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -679,7 +683,7 @@ export default function AiGovernance() {
                     </div>
                     {/* Timeline connector for consecutive items */}
                     {index < aiAuditLogs.length - 1 && (
-                      <div className="absolute left-9 top-12 bottom-0 w-px bg-gradient-to-b from-indigo-200/60 to-transparent dark:from-indigo-800/60" />
+                      <div className="absolute left-9 top-12 bottom-0 w-px bg-gradient-to-b from-sky-200/60 to-transparent dark:from-sky-800/60" />
                     )}
                   </div>
                 ))}

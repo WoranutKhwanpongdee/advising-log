@@ -102,9 +102,9 @@ export default function AdminDashboard() {
   // Role chart data for Donut Pie
   const roleChartData = [
     { name: t('นักศึกษา', 'Students'), value: totalStudents, color: '#0284c7' },
-    { name: t('อาจารย์ที่ปรึกษา', 'Advisors'), value: totalAdvisors, color: '#10b981' },
-    { name: t('ประกันคุณภาพ', 'QA Chairs'), value: totalQAChairs, color: '#a855f7' },
-    { name: t('ผู้ดูแลระบบ', 'Admins'), value: totalAdmins, color: '#6366f1' },
+    { name: t('อาจารย์ที่ปรึกษา', 'Advisors'), value: totalAdvisors, color: '#0ea5e9' },
+    { name: t('ประกันคุณภาพ', 'QA Chairs'), value: totalQAChairs, color: '#38bdf8' },
+    { name: t('ผู้ดูแลระบบ', 'Admins'), value: totalAdmins, color: '#94a3b8' },
   ].filter(d => d.value > 0)
 
   // Filtered audit logs
@@ -137,20 +137,20 @@ export default function AdminDashboard() {
     advisor: {
       labelTh: 'อาจารย์ที่ปรึกษา',
       labelEn: 'Faculty Advisor',
-      color: 'text-emerald-700 dark:text-emerald-300',
-      bg: 'bg-emerald-50 dark:bg-emerald-500/12 border-emerald-200/70 dark:border-emerald-500/25',
+      color: 'text-sky-700 dark:text-sky-300',
+      bg: 'bg-sky-50 dark:bg-sky-500/12 border-sky-200/70 dark:border-sky-500/25',
     },
     qa_chair: {
       labelTh: 'ประกันคุณภาพ',
       labelEn: 'QA Chair',
-      color: 'text-purple-700 dark:text-purple-300',
-      bg: 'bg-purple-50 dark:bg-purple-500/12 border-purple-200/70 dark:border-purple-500/25',
+      color: 'text-sky-700 dark:text-sky-300',
+      bg: 'bg-sky-50 dark:bg-sky-500/12 border-sky-200/70 dark:border-sky-500/25',
     },
     admin: {
       labelTh: 'ผู้ดูแลระบบ',
       labelEn: 'System Admin',
-      color: 'text-indigo-700 dark:text-indigo-300',
-      bg: 'bg-indigo-50 dark:bg-indigo-500/12 border-indigo-200/70 dark:border-indigo-500/25',
+      color: 'text-slate-700 dark:text-slate-300',
+      bg: 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/70 dark:border-slate-700/60',
     },
   }
 
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       desc: t('ตรวจสอบบัญชี กำหนดบทบาท และจัดการข้อมูลผู้ใช้งาน', 'Manage accounts, roles, and user authentications.'),
       count: `${totalUsers} ${t('บัญชี', 'Accounts')}`,
       icon: <Users className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
-      topGradient: 'from-sky-500 to-blue-600',
+      topGradient: 'from-sky-500 via-sky-400 to-sky-600',
       tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
       borderColor: 'hover:border-sky-300 dark:hover:border-sky-500/50',
       to: '/admin/users',
@@ -170,40 +170,40 @@ export default function AdminDashboard() {
       title: t('จัดสรรอาจารย์ที่ปรึกษา', 'Student-Advisor Roster'),
       desc: t('จับคู่อาจารย์ที่ปรึกษากับนักศึกษา และดูแลความครอบคลุม', 'Pair advisors with advisees and track caseload distribution.'),
       count: `${activeRosterCount} ${t('คู่ในระบบ', 'Pairings')}`,
-      icon: <BookOpen className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
-      topGradient: 'from-emerald-500 to-teal-600',
-      tagColor: 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/12 border-emerald-200/60 dark:border-emerald-500/30',
-      borderColor: 'hover:border-emerald-300 dark:hover:border-emerald-500/50',
+      icon: <BookOpen className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
+      topGradient: 'from-sky-500 via-sky-400 to-sky-600',
+      tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
+      borderColor: 'hover:border-sky-300 dark:hover:border-sky-500/50',
       to: '/admin/roster',
     },
     {
       title: t('หมวดหมู่คำปรึกษา', 'Categories Configuration'),
       desc: t('ปรับแต่ง taxonomy หัวข้อการให้คำปรึกษา และระยะเวลาบริการ', 'Configure advising topics, subcategories, and service metrics.'),
       count: `${totalCategories} ${t('หมวดหมู่', 'Categories')}`,
-      icon: <Tag className="h-5 w-5 text-purple-600 dark:text-purple-400" />,
-      topGradient: 'from-purple-500 to-indigo-600',
-      tagColor: 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-500/12 border-purple-200/60 dark:border-purple-500/30',
-      borderColor: 'hover:border-purple-300 dark:hover:border-purple-500/50',
+      icon: <Tag className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
+      topGradient: 'from-sky-500 via-sky-400 to-sky-600',
+      tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
+      borderColor: 'hover:border-sky-300 dark:hover:border-sky-500/50',
       to: '/admin/categories',
     },
     {
       title: t('ประเภทเอกสาร', 'Document Types'),
       desc: t('ตั้งค่าแบบฟอร์มคำร้อง ประเภทไฟล์ และรูปแบบการลงนาม', 'Define request forms, allowed file formats, and signatures.'),
       count: `${totalDocTypes} ${t('ประเภท', 'Types')}`,
-      icon: <FileCog className="h-5 w-5 text-amber-600 dark:text-amber-400" />,
-      topGradient: 'from-amber-500 to-orange-600',
-      tagColor: 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/12 border-amber-200/60 dark:border-amber-500/30',
-      borderColor: 'hover:border-amber-300 dark:hover:border-amber-500/50',
+      icon: <FileCog className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
+      topGradient: 'from-sky-500 via-sky-400 to-sky-600',
+      tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
+      borderColor: 'hover:border-sky-300 dark:hover:border-sky-500/50',
       to: '/admin/document-types',
     },
     {
       title: t('ประวัติการทำงานระบบ', 'Security Audit Logs'),
       desc: t('บันทึกความปลอดภัย ตรวจสอบการทำรายการ และการเข้าถึงระบบ', 'Trace administrative actions, user logins, and data changes.'),
       count: `${store.auditLogs.length} ${t('เหตุการณ์', 'Events')}`,
-      icon: <ScrollText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />,
-      topGradient: 'from-indigo-500 to-sky-600',
-      tagColor: 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/12 border-indigo-200/60 dark:border-indigo-500/30',
-      borderColor: 'hover:border-indigo-300 dark:hover:border-indigo-500/50',
+      icon: <ScrollText className="h-5 w-5 text-sky-600 dark:text-sky-400" />,
+      topGradient: 'from-sky-500 via-sky-400 to-sky-600',
+      tagColor: 'text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 border-sky-200/60 dark:border-sky-500/30',
+      borderColor: 'hover:border-sky-300 dark:hover:border-sky-500/50',
       to: '/admin/audit-logs',
     },
   ]
@@ -232,14 +232,13 @@ export default function AdminDashboard() {
       />
 
       {/* Hero Welcome & Live Telemetry Banner */}
-      <div className="relative overflow-hidden p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-white via-sky-50/40 to-blue-50/50 dark:from-[#0e1424] dark:via-[#10182b] dark:to-[#0c1222] border border-sky-200/80 dark:border-slate-800/90 shadow-sm dark:shadow-premium transition-all">
-        {/* Ambient decorative glow orbs */}
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-sky-500/10 dark:bg-sky-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-14 -left-14 w-52 h-52 rounded-full bg-indigo-500/10 dark:bg-indigo-500/12 blur-2xl pointer-events-none" />
+      <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-sky-50/35 to-white dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20 p-4 sm:p-5 md:p-6 shadow-premium transition-all duration-200 hover:border-sky-200/90 dark:hover:border-sky-500/35 hover:shadow-premium-hover">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-sky-600" />
+        <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-sky-400/70" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="h-13 w-13 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-sky-600/30 ring-4 ring-sky-100 dark:ring-sky-400/20">
+            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-white/80 dark:bg-sky-950/50 border-2 border-sky-100 dark:border-sky-800/60 text-sky-700 dark:text-sky-300 flex items-center justify-center flex-shrink-0 shadow-sm ring-4 ring-sky-50/80 dark:ring-sky-500/10 transition-transform duration-200 group-hover:scale-[1.03]">
               <Shield className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
@@ -247,8 +246,8 @@ export default function AdminDashboard() {
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                   {t('ยินดีต้อนรับ ผู้ดูแลระบบ (Admin Console)', 'Welcome to Admin Console')}
                 </h2>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-500/25 shadow-2xs">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse ring-4 ring-emerald-500/20" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-500/25 shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-sky-500 dark:bg-sky-400 animate-pulse ring-4 ring-sky-500/20" />
                   {t('ระบบทำงานปกติ 100%', 'All Systems Operational')}
                 </span>
               </div>
@@ -268,7 +267,7 @@ export default function AdminDashboard() {
               <span>Cloudflare D1 & Hono Edge</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-lg">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
               <span>Bangkok Edge Node · 12ms</span>
             </div>
           </div>
@@ -318,10 +317,10 @@ export default function AdminDashboard() {
 
         <div className="group relative overflow-hidden bg-white dark:bg-[#0e1424] rounded-2xl border border-slate-200/70 dark:border-slate-800/80 p-5 shadow-sm hover:shadow-premium dark:hover:border-sky-500/40 hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <div className="h-11 w-11 rounded-xl bg-emerald-50 dark:bg-emerald-500/12 text-emerald-600 dark:text-emerald-300 flex items-center justify-center ring-1 ring-emerald-200/60 dark:ring-emerald-500/25 shadow-2xs group-hover:scale-105 transition-transform">
+            <div className="h-11 w-11 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 flex items-center justify-center ring-1 ring-sky-200/60 dark:ring-sky-500/25 shadow-2xs group-hover:scale-105 transition-transform">
               <Shield className="h-5 w-5" />
             </div>
-            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/12 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-500/25">
+            <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 px-2 py-0.5 rounded-full border border-sky-100 dark:border-sky-500/25">
               {advisorPct}% {t('สัดส่วนผู้ใช้', 'Share')}
             </span>
           </div>
@@ -337,10 +336,10 @@ export default function AdminDashboard() {
 
         <div className="group relative overflow-hidden bg-white dark:bg-[#0e1424] rounded-2xl border border-slate-200/70 dark:border-slate-800/80 p-5 shadow-sm hover:shadow-premium dark:hover:border-sky-500/40 hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <div className="h-11 w-11 rounded-xl bg-emerald-50 dark:bg-emerald-500/12 text-emerald-600 dark:text-emerald-300 flex items-center justify-center ring-1 ring-emerald-200/60 dark:ring-emerald-500/25 shadow-2xs group-hover:scale-105 transition-transform">
+            <div className="h-11 w-11 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 flex items-center justify-center ring-1 ring-sky-200/60 dark:ring-sky-500/25 shadow-2xs group-hover:scale-105 transition-transform">
               <FolderCog className="h-5 w-5" />
             </div>
-            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/12 px-2 py-0.5 rounded-full border border-emerald-100 dark:border-emerald-500/25">
+            <span className="text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 px-2 py-0.5 rounded-full border border-sky-100 dark:border-sky-500/25">
               {t('จับคู่สมบูรณ์', 'Mapped')}
             </span>
           </div>
@@ -606,7 +605,7 @@ export default function AdminDashboard() {
               <div className="p-2 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/80">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="h-2 w-2 rounded-full bg-sky-500" />
                     {t('อาจารย์', 'Advisors')}
                   </span>
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{totalAdvisors}</span>
@@ -617,7 +616,7 @@ export default function AdminDashboard() {
               <div className="p-2 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/80">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-purple-500" />
+                    <span className="h-2 w-2 rounded-full bg-sky-300" />
                     {t('ประกันคุณภาพ', 'QA Chairs')}
                   </span>
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{totalQAChairs}</span>
@@ -628,7 +627,7 @@ export default function AdminDashboard() {
               <div className="p-2 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800/80">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                    <span className="h-2 w-2 rounded-full bg-slate-400" />
                     {t('ผู้ดูแลระบบ', 'Admins')}
                   </span>
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{totalAdmins}</span>
@@ -641,13 +640,13 @@ export default function AdminDashboard() {
           {/* AI & LLM API Service Control Console */}
           <Card className={`transition-all duration-300 border ${
             isAiEnabled
-              ? 'border-sky-300/80 dark:border-sky-800/80 bg-gradient-to-br from-white via-sky-50/20 to-indigo-50/20 dark:from-[#0d1526] dark:via-[#0e172a] dark:to-[#0f172a]'
-              : 'border-amber-300/80 dark:border-amber-900/60 bg-gradient-to-br from-white via-amber-50/20 to-orange-50/20 dark:from-[#1a140d] dark:via-[#1a1208] dark:to-[#0f172a]'
+              ? 'border-sky-200/80 dark:border-sky-800/60 bg-gradient-to-br from-white via-sky-50/25 to-white dark:from-slate-900 dark:via-slate-900 dark:to-sky-950/20'
+              : 'border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50/70 to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-950'
           }`}>
             <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className={`h-8 w-8 rounded-xl flex items-center justify-center text-white shadow-xs ${
-                  isAiEnabled ? 'bg-gradient-to-br from-sky-500 to-indigo-600' : 'bg-slate-500'
+                <div className={`h-8 w-8 rounded-xl flex items-center justify-center shadow-xs ring-1 ${
+                  isAiEnabled ? 'bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 ring-sky-200/70 dark:ring-sky-500/25' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 ring-slate-200/70 dark:ring-slate-700'
                 }`}>
                   <Bot className="h-4 w-4" />
                 </div>
@@ -689,7 +688,7 @@ export default function AdminDashboard() {
                   onClick={handleToggleAiApi}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold text-xs cursor-pointer shadow-xs transition-all flex-shrink-0 ${
                     isAiEnabled
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      ? 'bg-sky-600 hover:bg-sky-700 text-white'
                       : 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200'
                   }`}
                 >
