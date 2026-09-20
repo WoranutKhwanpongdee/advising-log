@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, Modal, Card } from '@/components/ui'
 import { EARLY_WARNING_TYPES } from '@/types'
 import type { EarlyWarningCase, EarlyWarningType, EarlyWarningSeverity, EarlyWarningFollowUp } from '@/types'
-import { Plus, FileText, Clock } from 'lucide-react'
+import { Plus, FileText, Clock, CheckCircle2 } from 'lucide-react'
 
 export default function EarlyWarning() {
   const { currentUser } = useAuth()
@@ -136,15 +136,17 @@ export default function EarlyWarning() {
           >
             <FileText className="h-3.5 w-3.5 mr-1" /> {t('บันทึกติดตาม', 'Add Follow-up')}
           </Button>
-          {w.status === 'active' && (
+          {(w.status === 'active' || w.status === 'monitoring') && (
             <>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => { store.updateEarlyWarningStatus(w.id, 'monitoring'); addToast('info', t('ปรับสถานะเป็นกำลังเฝ้าระวังแล้ว', 'Status updated to Monitoring')) }}
-              >
-                {t('เฝ้าระวัง', 'Monitor')}
-              </Button>
+              {w.status === 'active' && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => { store.updateEarlyWarningStatus(w.id, 'monitoring'); addToast('info', t('ปรับสถานะเป็นกำลังเฝ้าระวังแล้ว', 'Status updated to Monitoring')) }}
+                >
+                  {t('เฝ้าระวัง', 'Monitor')}
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="primary"
@@ -186,7 +188,7 @@ export default function EarlyWarning() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-xs font-semibold text-slate-900 dark:text-slate-100">{store.users.find(u => u.id === w.studentId)?.name}</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{w.warningType} · {w.dateDetected}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{getWarningTypeLabel(w.warningType)} · {w.dateDetected}</p>
                   </div>
                   <StatusBadge status={w.status} />
                 </div>
@@ -195,7 +197,22 @@ export default function EarlyWarning() {
                     <div key={fw.id} className="p-3 bg-slate-50/60 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">{fw.createdAt}</span>
-                        <StatusBadge status={fw.status} />
+                        <div className="flex items-center gap-1.5">
+                          <StatusBadge status={fw.status} />
+                          {fw.status !== 'completed' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                store.updateEarlyWarningFollowUpStatus(fw.id, 'completed')
+                                addToast('success', t('ดำเนินการติดตามผลเสร็จสิ้นแล้ว', 'Follow-up Marked Completed'))
+                              }}
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                              {t('เสร็จสิ้น', 'Complete')}
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-slate-700 dark:text-slate-300 mb-1">{fw.notes}</p>
                       {fw.actionsTaken && (
