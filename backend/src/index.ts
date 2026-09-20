@@ -308,6 +308,12 @@ app.patch('/api/users/:id', async (c) => {
 
   const id = c.req.param('id')
   const body = await c.req.json()
+
+  // Protect Super Admin from being deactivated
+  if (id === 'ADM_SE_GOOGLE' && body.isActive === false) {
+    return c.json({ success: false, error: 'Cannot deactivate Master Super Admin account' }, 400)
+  }
+
   await database.update(schema.users).set(body).where(eq(schema.users.id, id))
   return c.json({ success: true })
 })

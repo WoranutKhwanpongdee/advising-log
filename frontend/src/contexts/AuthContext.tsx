@@ -112,6 +112,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        // Deactivation check
+        if (existingUser && !existingUser.isActive) {
+          return {
+            success: false,
+            error: 'ACCOUNT_DEACTIVATED',
+            message: 'บัญชีผู้ใช้งานนี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ',
+          }
+        }
+
         let role: User['role'] = existingUser ? existingUser.role : (isAuthorizedAdmin ? 'admin' : 'advisor')
 
         // 3. Student Advisee Check: Student MUST be assigned to an advisor

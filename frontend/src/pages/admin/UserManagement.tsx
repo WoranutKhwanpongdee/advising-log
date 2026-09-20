@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useToast } from '@/contexts/ToastContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal, UserAvatar } from '@/components/ui'
 import type { User, UserRole } from '@/types'
-import { ChevronDown, Bot, ExternalLink, UserPlus } from 'lucide-react'
+import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck } from 'lucide-react'
 
 export default function UserManagement() {
   const store = useStore()
@@ -241,15 +241,33 @@ export default function UserManagement() {
     {
       key: 'actions',
       header: t('การจัดการ', 'Actions'),
-      render: (u: User) => (
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => store.updateUser(u.id, { isActive: !u.isActive })}
-        >
-          {u.isActive ? t('ปิดการใช้งาน', 'Deactivate') : t('เปิดใช้งาน', 'Activate')}
-        </Button>
-      ),
+      render: (u: User) => {
+        const isSuperAdmin = u.email === 'se.advisinglog@gmail.com' || u.code === 'ADM-SUPER' || u.id === 'ADM_SE_GOOGLE'
+        if (isSuperAdmin) {
+          return (
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 dark:text-slate-400 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
+              <ShieldCheck className="h-3.5 w-3.5 text-sky-500" />
+              {t('คุ้มครองระดับระบบ', 'Root Protected')}
+            </span>
+          )
+        }
+        return (
+          <Button
+            size="sm"
+            variant={u.isActive ? 'secondary' : 'primary'}
+            onClick={() => {
+              store.updateUser(u.id, { isActive: !u.isActive })
+              addToast(
+                'info',
+                u.isActive ? t('ระงับการใช้งานบัญชี', 'Account Deactivated') : t('เปิดใช้งานบัญชี', 'Account Activated'),
+                t(`บัญชีของ ${u.name} (${u.code}) ถูก${u.isActive ? 'ระงับการใช้งาน' : 'เปิดใช้งาน'}แล้ว`, `User account for ${u.name} has been ${u.isActive ? 'deactivated' : 'activated'}.`)
+              )
+            }}
+          >
+            {u.isActive ? t('ปิดการใช้งาน', 'Deactivate') : t('เปิดใช้งาน', 'Activate')}
+          </Button>
+        )
+      },
     },
   ]
 
