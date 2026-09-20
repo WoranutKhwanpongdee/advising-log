@@ -818,25 +818,43 @@ app.post('/api/ai/keys/:id/test', async (c) => {
         )
 
         if (availableModels.length > 0) {
-          // Find preferred model or use first available
-          const preferred = availableModels.find((m: any) => m.name.includes('flash')) || availableModels[0]
-          const modelName = preferred.name // e.g. "models/gemini-1.5-flash" or "models/gemini-2.0-flash"
-          const generateUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(trimmedKey)}`
-
-          const genRes = await fetch(generateUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
-            }),
+          // Sort available models to try the best/latest models first (e.g. 3.6-flash, 2.0-flash, 1.5-flash)
+          const sortedModels = [...availableModels].sort((a: any, b: any) => {
+            const getScore = (name: string) => {
+              if (name.includes('3.6-flash')) return 100
+              if (name.includes('3-flash')) return 90
+              if (name.includes('2.0-flash')) return 80
+              if (name.includes('1.5-flash')) return 70
+              if (name.includes('flash')) return 60
+              if (name.includes('pro')) return 50
+              return 10
+            }
+            return getScore(b.name) - getScore(a.name)
           })
 
-          if (genRes.ok) {
-            verified = true
-            activeModelName = `Google Gemini (${modelName.replace('models/', '')})`
-          } else {
-            const errJson = await genRes.json().catch(() => ({})) as any
-            detailedError = errJson?.error?.message || `HTTP ${genRes.status}: Failed to generate content with ${modelName}`
+          for (const model of sortedModels) {
+            const modelName = model.name // e.g. "models/gemini-3.6-flash"
+            const generateUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(trimmedKey)}`
+
+            const genRes = await fetch(generateUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: 'Ping test. Reply with: OK' }] }],
+              }),
+            })
+
+            if (genRes.ok) {
+              verified = true
+              activeModelName = `Google Gemini (${modelName.replace('models/', '')})`
+              break
+            } else {
+              const errJson = await genRes.json().catch(() => ({})) as any
+              detailedError = errJson?.error?.message || `HTTP ${genRes.status}: Failed to generate content with ${modelName}`
+              if (genRes.status === 400 && (detailedError.includes('API_KEY_INVALID') || detailedError.includes('not valid'))) {
+                break
+              }
+            }
           }
         } else {
           detailedError = 'No models supporting "generateContent" found for this API key. Make sure the Generative Language API is enabled in your Google Cloud Project.'
@@ -852,9 +870,10 @@ app.post('/api/ai/keys/:id/test', async (c) => {
     // Step 2: Fallback attempt with direct candidate URLs if ListModels had an issue
     if (!verified && !detailedError.includes('API_KEY_INVALID') && !detailedError.includes('not valid')) {
       const fallbackModels = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent',
       ]
 
@@ -1030,8 +1049,22 @@ Provide a concise, evidence-based academic response with clear takeaways for cur
           const models = (listData?.models || []).filter((m: any) => 
             Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent')
           )
-          if (models.length > 0) {
-            const dynamicUrl = `https://generativelanguage.googleapis.com/v1beta/${models[0].name}:generateContent?key=${encodeURIComponent(apiKey.trim())}`
+          
+          const sortedModels = [...models].sort((a: any, b: any) => {
+            const getScore = (name: string) => {
+              if (name.includes('3.6-flash')) return 100
+              if (name.includes('3-flash')) return 90
+              if (name.includes('2.0-flash')) return 80
+              if (name.includes('1.5-flash')) return 70
+              if (name.includes('flash')) return 60
+              if (name.includes('pro')) return 50
+              return 10
+            }
+            return getScore(b.name) - getScore(a.name)
+          })
+
+          for (const m of sortedModels) {
+            const dynamicUrl = `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent?key=${encodeURIComponent(apiKey.trim())}`
             const dynRes = await fetch(dynamicUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1043,7 +1076,7 @@ Provide a concise, evidence-based academic response with clear takeaways for cur
               if (textContent) {
                 return c.json({
                   success: true,
-                  provider: `Google Gemini (${models[0].name.replace('models/', '')}) (D1 Active Cloud Key)`,
+                  provider: `Google Gemini (${m.name.replace('models/', '')}) (D1 Active Cloud Key)`,
                   mode,
                   analysis: textContent,
                   timestamp: new Date().toISOString(),
