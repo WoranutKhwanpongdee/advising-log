@@ -562,8 +562,8 @@ export default function AiGovernance() {
                 </p>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                   {t(
-                    '🔒 หน้านี้คัดกรองเฉพาะอาจารย์และฝ่ายประกันคุณภาพเท่านั้น (ตัดนักศึกษาออกทั้งหมด 100%) เพื่อป้องกันการเปิดสิทธิ์ผิดคนและควบคุมค่าใช้จ่ายอย่างรัดกุม',
-                    '🔒 Restricted to faculty and QA personnel only. Students are completely excluded from AI access privileges.'
+                    'หน้านี้คัดกรองเฉพาะอาจารย์และฝ่ายประกันคุณภาพเท่านั้น (ตัดนักศึกษาออกทั้งหมด 100%) เพื่อป้องกันการเปิดสิทธิ์ผิดคนและควบคุมค่าใช้จ่ายอย่างรัดกุม',
+                    'Restricted to faculty and QA personnel only. Students are completely excluded from AI access privileges.'
                   )}
                 </p>
               </div>

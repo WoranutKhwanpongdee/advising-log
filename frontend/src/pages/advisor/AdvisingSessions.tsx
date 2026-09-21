@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, Tabs, DataTable, StatusBadge, Button, Modal, Card } from '@/components/ui'
+import { PageHeader, Tabs, DataTable, StatusBadge, Button, Modal, Card, GoogleCalendarButton } from '@/components/ui'
 import type { AdvisingRequest, RequestProgress } from '@/types'
 import { Calendar, CheckCircle2, Eye, TrendingUp, Clock } from 'lucide-react'
 
@@ -185,42 +185,61 @@ export default function AdvisingSessions() {
     {
       key: 'actions',
       header: t('การจัดการ', 'Actions'),
-      render: (r: AdvisingRequest) => (
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="ghost" onClick={() => setDetailReq(r)}>
-            <Eye className="h-3 w-3 mr-1" /> {t('ดูรายละเอียด', 'View')}
-          </Button>
-          {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => { setSelectedReq(r); setShowProgressModal(true) }}
-            >
-              <TrendingUp className="h-3 w-3 mr-1" /> {t('อัปเดตความคืบหน้า', 'Update Progress')}
+      render: (r: AdvisingRequest) => {
+        const s = store.users.find(u => u.id === r.studentId)
+        const apt = store.appointments.find(a => a.requestId === r.id && a.status === 'scheduled')
+        return (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Button size="sm" variant="ghost" onClick={() => setDetailReq(r)}>
+              <Eye className="h-3 w-3 mr-1" /> {t('ดูรายละเอียด', 'View')}
             </Button>
-          )}
-          {r.status === 'requested' && (
-            <Button size="sm" variant="primary" onClick={() => handleAccept(r)}>
-              {t('ตอบรับ', 'Accept')}
-            </Button>
-          )}
-          {(r.status === 'requested' || r.status === 'pending') && (
-            <Button size="sm" variant="secondary" onClick={() => { setSelectedReq(r); setShowSchedule(true) }}>
-              <Calendar className="h-3 w-3 mr-1 text-sky-600 dark:text-sky-400" /> {t('นัดหมาย', 'Schedule')}
-            </Button>
-          )}
-          {r.status === 'scheduled' && (
-            <Button size="sm" variant="primary" onClick={() => handleComplete(r)}>
-              <CheckCircle2 className="h-3 w-3 mr-1" /> {t('เสร็จสิ้น', 'Complete')}
-            </Button>
-          )}
-          {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
-            <Button size="sm" variant="ghost" onClick={() => handleCancel(r)}>
-              {t('ยกเลิก', 'Cancel')}
-            </Button>
-          )}
-        </div>
-      ),
+            {r.status === 'scheduled' && (
+              <GoogleCalendarButton
+                event={{
+                  title: `Advising Meeting: ${s?.name || r.studentId} & ${currentUser.name}`,
+                  description: `Advising Topic: ${getCategoryLabel(r.category)}\nStudent Code: ${s?.code || ''}\nLocation: ${apt?.location || 'Office / Online'}\nDetails: ${r.details}`,
+                  location: apt?.location || 'Office / Online',
+                  date: apt?.scheduledDate || r.preferredDate,
+                  time: apt?.scheduledTime || r.preferredTime,
+                  attendeeEmails: [s?.email || '', currentUser.email],
+                }}
+                label={t('ปฏิทิน & เชิญ', 'Invite & Calendar')}
+                size="sm"
+                variant="secondary"
+              />
+            )}
+            {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => { setSelectedReq(r); setShowProgressModal(true) }}
+              >
+                <TrendingUp className="h-3 w-3 mr-1" /> {t('อัปเดตความคืบหน้า', 'Update Progress')}
+              </Button>
+            )}
+            {r.status === 'requested' && (
+              <Button size="sm" variant="primary" onClick={() => handleAccept(r)}>
+                {t('ตอบรับ', 'Accept')}
+              </Button>
+            )}
+            {(r.status === 'requested' || r.status === 'pending') && (
+              <Button size="sm" variant="secondary" onClick={() => { setSelectedReq(r); setShowSchedule(true) }}>
+                <Calendar className="h-3 w-3 mr-1 text-sky-600 dark:text-sky-400" /> {t('นัดหมาย', 'Schedule')}
+              </Button>
+            )}
+            {r.status === 'scheduled' && (
+              <Button size="sm" variant="primary" onClick={() => handleComplete(r)}>
+                <CheckCircle2 className="h-3 w-3 mr-1" /> {t('เสร็จสิ้น', 'Complete')}
+              </Button>
+            )}
+            {r.status !== 'completed' && r.status !== 'cancelled' && r.status !== 'closed' && (
+              <Button size="sm" variant="ghost" onClick={() => handleCancel(r)}>
+                {t('ยกเลิก', 'Cancel')}
+              </Button>
+            )}
+          </div>
+        )
+      },
     },
   ]
 
@@ -287,9 +306,23 @@ export default function AdvisingSessions() {
                   <p className="font-medium text-slate-700 dark:text-slate-300">{detailReq.preferredDate} · {detailReq.preferredTime}</p>
                 </div>
                 {appointment && (
-                  <div className="sm:col-span-2">
-                    <span className="text-slate-400 dark:text-slate-500 block mb-1">{t('นัดหมายที่กำหนดแล้ว', 'Scheduled Appointment')}</span>
-                    <p className="font-medium text-slate-700 dark:text-slate-300">{appointment.scheduledDate} · {appointment.scheduledTime} · {appointment.location}</p>
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[11px] text-sky-800 dark:text-sky-300 font-bold block mb-0.5">{t('นัดหมายที่กำหนดแล้ว', 'Scheduled Appointment')}</span>
+                      <p className="font-semibold text-xs text-slate-800 dark:text-slate-200">{appointment.scheduledDate} · {appointment.scheduledTime} · {appointment.location}</p>
+                    </div>
+                    <GoogleCalendarButton
+                      event={{
+                        title: `Advising Meeting: ${student?.name || detailReq.studentId} & ${currentUser.name}`,
+                        description: `Advising Topic: ${getCategoryLabel(detailReq.category)}\nLocation: ${appointment.location}\nDetails: ${detailReq.details}`,
+                        location: appointment.location,
+                        date: appointment.scheduledDate,
+                        time: appointment.scheduledTime,
+                        attendeeEmails: [student?.email || '', currentUser.email],
+                      }}
+                      size="sm"
+                      variant="primary"
+                    />
                   </div>
                 )}
               </div>

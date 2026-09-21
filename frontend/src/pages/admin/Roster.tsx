@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   ArrowRight,
   Sparkles,
+  GitMerge,
 } from 'lucide-react'
 import type { StudentAdvisorAssignment, RosterImportEntry, RosterImportResult } from '@/types'
 
@@ -156,16 +157,22 @@ export default function Roster() {
       }
       seenStudentCodes.add(sCode)
 
-      const student = store.users.find(u => u.code === sCode && u.role === 'student')
+      const student = store.users.find(
+        u =>
+          u.role === 'student' &&
+          (u.code.toLowerCase() === sCode.toLowerCase() ||
+            u.email.toLowerCase() === sCode.toLowerCase() ||
+            u.email.toLowerCase().startsWith(sCode.toLowerCase()))
+      )
       if (!student) {
         skipped++
-        errors.push(`ไม่พบรหัสนักศึกษา "${sCode}" ในระบบ`)
+        errors.push(`ไม่พบนักศึกษา "${sCode}" ในระบบ (ระบุด้วยรหัสนักศึกษาหรืออีเมล)`)
         preview.push({
           studentCode: sCode,
           studentName: t('ไม่พบในระบบ', 'Unknown Student'),
           newAdvisorName: entry.advisorCodeOrEmail,
           action: 'error',
-          errorReason: t(`ไม่พบรหัสนักศึกษา "${sCode}" ในระบบ`, `Student code "${sCode}" not found`),
+          errorReason: t(`ไม่พบนักศึกษา "${sCode}" ในระบบ`, `Student "${sCode}" not found`),
         })
         continue
       }
@@ -384,10 +391,10 @@ export default function Roster() {
               onChange={e => setSelectedStudent(e.target.value)}
               className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
-              <option value="">{t('-- เลือกนักศึกษา --', 'Select student')}</option>
+              <option value="">{t('-- เลือกนักศึกษา (รหัส / อีเมล) --', 'Select student (Code / Email)')}</option>
               {students.map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.name} ({s.code})
+                  {s.code} - {s.email} ({s.name})
                 </option>
               ))}
             </select>
@@ -401,10 +408,10 @@ export default function Roster() {
               onChange={e => setSelectedAdvisor(e.target.value)}
               className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-200/90 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
-              <option value="">{t('-- เลือกอาจารย์ที่ปรึกษา --', 'Select advisor')}</option>
+              <option value="">{t('-- เลือกอาจารย์ที่ปรึกษา (อีเมล / ชื่อ) --', 'Select advisor (Email / Name)')}</option>
               {advisors.map(a => (
                 <option key={a.id} value={a.id}>
-                  {a.name} ({a.department})
+                  {a.email} — {a.name} ({a.department})
                 </option>
               ))}
             </select>
@@ -484,7 +491,8 @@ export default function Roster() {
                 />
                 <div>
                   <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
-                    <span>🟢 {t('อัปเดตและเพิ่มใหม่ (Upsert / Merge)', 'Upsert / Merge')}</span>
+                    <GitMerge className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>{t('อัปเดตและเพิ่มใหม่ (Upsert / Merge)', 'Upsert / Merge')}</span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200 font-extrabold">
                       {t('แนะนำ', 'Recommended')}
                     </span>
@@ -515,8 +523,9 @@ export default function Roster() {
                   className="mt-0.5 text-rose-600 focus:ring-rose-500"
                 />
                 <div>
-                  <div className="font-bold text-slate-900 dark:text-slate-100">
-                    <span>🔴 {t('แทนที่ข้อมูลทั้งหมด (Full Replace / Overwrite)', 'Full Replace / Overwrite')}</span>
+                  <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
+                    <Layers className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                    <span>{t('แทนที่ข้อมูลทั้งหมด (Full Replace / Overwrite)', 'Full Replace / Overwrite')}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                     {t(

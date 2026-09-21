@@ -3,7 +3,7 @@ import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput } from '@/components/ui'
 import type { DocumentType } from '@/types'
-import { FileText } from 'lucide-react'
+import { FileText, PenTool, Fingerprint } from 'lucide-react'
 
 export default function DocumentTypes() {
   const store = useStore()
@@ -36,24 +36,26 @@ export default function DocumentTypes() {
           <button
             type="button"
             onClick={() => store.updateDocumentType(d.id, { signatureMethod: 'wet_signature' })}
-            className={`px-3 py-1.5 transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
               d.signatureMethod === 'wet_signature'
                 ? 'bg-amber-500 text-white'
                 : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:text-amber-700 dark:hover:text-amber-400'
             }`}
           >
-            ✍️ {t('ลายมือจริง', 'Wet Signature')}
+            <PenTool className="h-3 w-3" />
+            <span>{t('ลายมือจริง', 'Wet Signature')}</span>
           </button>
           <button
             type="button"
             onClick={() => store.updateDocumentType(d.id, { signatureMethod: 'e_signature' })}
-            className={`px-3 py-1.5 border-l border-slate-200 dark:border-slate-700 transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 border-l border-slate-200 dark:border-slate-700 transition-colors cursor-pointer flex items-center gap-1.5 ${
               d.signatureMethod === 'e_signature'
                 ? 'bg-sky-600 text-white'
                 : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/30 hover:text-sky-700 dark:hover:text-sky-400'
             }`}
           >
-            🔏 {t('ลายเซ็นดิจิทัล', 'E-Signature')}
+            <Fingerprint className="h-3 w-3" />
+            <span>{t('ลายเซ็นดิจิทัล', 'E-Signature')}</span>
           </button>
         </div>
       ),

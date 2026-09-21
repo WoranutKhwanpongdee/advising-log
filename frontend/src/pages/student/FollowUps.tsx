@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, DataTable, StatusBadge, Button, Modal, Card } from '@/components/ui'
+import { PageHeader, DataTable, StatusBadge, Button, Modal, Card, GoogleCalendarButton } from '@/components/ui'
 import type { FollowUp, FollowUpProgress } from '@/types'
 import { CheckCircle2, ListChecks, TrendingUp, Clock } from 'lucide-react'
 
@@ -94,28 +94,46 @@ export default function FollowUps() {
     {
       key: 'actions',
       header: '',
-      render: (f: FollowUp) => f.status !== 'completed' ? (
-        <div className="flex items-center gap-1.5">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => { setSelectedFollowUp(f); setShowProgressModal(true) }}
-          >
-            <TrendingUp className="h-3.5 w-3.5 mr-1" /> {t('อัปเดตความคืบหน้า', 'Update Progress')}
-          </Button>
-          <Button
-            size="sm"
-            variant="primary"
-            onClick={() => {
-              store.updateFollowUpStatus(f.id, 'completed')
-              store.addAuditLog({ userId: currentUser.id, userName: currentUser.name, userRole: 'student', action: 'followup_completed', description: `Completed follow-up: ${f.task}`, targetId: f.id })
-              addToast('success', t('ดำเนินการเสร็จสิ้น', 'Follow-up Completed'), f.task)
-            }}
-          >
-            <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {t('ทำเสร็จแล้ว', 'Mark Complete')}
-          </Button>
+      render: (f: FollowUp) => (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {f.dueDate && (
+            <GoogleCalendarButton
+              event={{
+                title: `Follow-up Due: ${f.task}`,
+                description: `Advising Action Item: ${f.task}\nDue Date: ${f.dueDate}`,
+                date: f.dueDate,
+                time: '09:00',
+                attendeeEmails: [currentUser.email],
+              }}
+              label={t('เตือนความจำ', 'Set Reminder')}
+              size="sm"
+              variant="outline"
+            />
+          )}
+          {f.status !== 'completed' && (
+            <>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => { setSelectedFollowUp(f); setShowProgressModal(true) }}
+              >
+                <TrendingUp className="h-3.5 w-3.5 mr-1" /> {t('อัปเดต', 'Update')}
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => {
+                  store.updateFollowUpStatus(f.id, 'completed')
+                  store.addAuditLog({ userId: currentUser.id, userName: currentUser.name, userRole: 'student', action: 'followup_completed', description: `Completed follow-up: ${f.task}`, targetId: f.id })
+                  addToast('success', t('ดำเนินการเสร็จสิ้น', 'Follow-up Completed'), f.task)
+                }}
+              >
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {t('เสร็จแล้ว', 'Complete')}
+              </Button>
+            </>
+          )}
         </div>
-      ) : null,
+      ),
     },
   ]
 

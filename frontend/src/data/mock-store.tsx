@@ -21,6 +21,7 @@ import type {
   StudentVoiceResponse,
   StudentDocument,
   User,
+  UserRole,
   StudentAdvisorAssignment,
   AdvisingCategoryConfig,
   DocumentType,
@@ -148,6 +149,7 @@ interface StoreActions {
 
   // Users
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => User
+  bulkAddUsers: (users: Partial<User>[]) => Promise<User[]>
   updateUser: (id: string, updates: Partial<User>) => void
 
   // Roster
@@ -448,6 +450,54 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return newUser
   }, [])
 
+  const bulkAddUsers = useCallback(async (newUsersData: Partial<User>[]): Promise<User[]> => {
+    const timestamp = now()
+    const createdUsers: User[] = newUsersData.map((u, idx) => {
+      const email = (u.email || '').trim()
+      const prefix = email.split('@')[0] || `user_${idx + 1}`
+      const isStu = /^\d/.test(prefix) || email.includes('@student.') || email.includes('@lamduan.')
+      const assignedRole: UserRole = u.role || (isStu ? 'student' : 'advisor')
+
+      let autoName = u.name?.trim()
+      if (!autoName) {
+        if (isStu) {
+          const digitMatch = prefix.match(/^\d+/)
+          autoName = digitMatch ? `Student ${digitMatch[0]}` : `Student ${prefix}`
+        } else {
+          const words = prefix.split(/[._\-\s]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          autoName = words.length > 0 ? words.join(' ') : prefix
+        }
+      }
+
+      const autoCode = u.code || (isStu ? prefix.match(/^\d+/)?.[0] || prefix : `ADV${String(idx + 1).padStart(3, '0')}`)
+
+      return {
+        id: u.id || nextId(`USR_${Date.now()}_${idx}`),
+        code: autoCode,
+        name: autoName,
+        email,
+        role: assignedRole,
+        department: u.department || 'School of Applied Digital Technology (ADT)',
+        phone: u.phone,
+        isActive: u.isActive !== undefined ? u.isActive : true,
+        hasAiAccess: u.hasAiAccess !== undefined ? u.hasAiAccess : assignedRole !== 'student',
+        createdAt: u.createdAt || timestamp,
+      }
+    })
+
+    setUsers(prev => {
+      const existingEmails = new Set(createdUsers.map(u => u.email.toLowerCase()))
+      const filtered = prev.filter(u => !existingEmails.has(u.email.toLowerCase()))
+      return [...filtered, ...createdUsers]
+    })
+
+    try {
+      await api.bulkSaveUsers(createdUsers)
+    } catch (_err) {}
+
+    return createdUsers
+  }, [])
+
   const updateUser = useCallback((id: string, updates: Partial<User>) => {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u))
   }, [])
@@ -541,16 +591,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       seenStudentCodes.add(sCode)
 
-      const student = users.find(u => u.code === sCode && u.role === 'student')
+      const student = users.find(
+        u =>
+          u.role === 'student' &&
+          (u.code.toLowerCase() === sCode.toLowerCase() ||
+            u.email.toLowerCase() === sCode.toLowerCase() ||
+            u.email.toLowerCase().startsWith(sCode.toLowerCase()))
+      )
       if (!student) {
         skippedCount++
-        errors.push(`ไม่พบรหัสนักศึกษา "${sCode}" ในฐานข้อมูล`)
+        errors.push(`ไม่พบนักศึกษา "${sCode}" ในฐานข้อมูล (สามารถใช้รหัสนักศึกษาหรืออีเมล)`)
         preview.push({
           studentCode: sCode,
           studentName: 'ไม่พบในระบบ',
           newAdvisorName: aTarget,
           action: 'error',
-          errorReason: `ไม่พบนักศึกษารหัส ${sCode}`,
+          errorReason: `ไม่พบนักศึกษา "${sCode}"`,
         })
         continue
       }
@@ -772,7 +828,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addAdvisorAssessment,
     addStudentVoiceResponse, markVoiceSurveyCompleted,
     addDocument, updateDocument, updateDocumentStatus, deleteDocument,
-    addUser, updateUser,
+    addUser, bulkAddUsers, updateUser,
     addRosterEntry, updateRosterEntry, batchImportRoster,
     toggleAiApi, toggleUserAiAccess,
     addAiKey, setDefaultAiKey, deleteAiKey, refreshAiKeys,

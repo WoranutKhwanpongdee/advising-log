@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useToast } from '@/contexts/ToastContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal, UserAvatar } from '@/components/ui'
 import type { User, UserRole } from '@/types'
-import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck } from 'lucide-react'
+import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck, User as UserIcon, Users, Info } from 'lucide-react'
 
 export default function UserManagement() {
   const store = useStore()
@@ -16,29 +16,40 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
   const [showRoleDropdown, setShowRoleDropdown] = useState(false)
 
-  // Add User / Pre-register Email Modal State
+  // Add User Modal State (Single & Bulk)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
   const [newEmail, setNewEmail] = useState('')
-  const [newName, setNewName] = useState('')
-  const [newCode, setNewCode] = useState('')
-  const [isCodeCustomized, setIsCodeCustomized] = useState(false)
-  const [newRole, setNewRole] = useState<UserRole>('student')
+  const [newRole, setNewRole] = useState<UserRole>('advisor')
   const [newDept, setNewDept] = useState('School of Applied Digital Technology (ADT)')
+  const [bulkDept, setBulkDept] = useState('School of Applied Digital Technology (ADT)')
+  const [bulkText, setBulkText] = useState('')
+  const [bulkDefaultStaffRole, setBulkDefaultStaffRole] = useState<UserRole>('advisor')
+  const [bulkRoleOverrides, setBulkRoleOverrides] = useState<Record<string, UserRole>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Helper to safely determine code by role & checking database users
-  function getSuggestedCode(role: UserRole, email: string): string {
-    const emailPrefix = email.trim().split('@')[0]
-    
-    // 1. Student: Only extract real digits if present in institutional email (e.g. 6631503001)
-    // Never synthesize or invent fake student ID numbers!
-    if (role === 'student' || /^\d/.test(emailPrefix) || email.includes('@student.') || email.includes('@lamduan.')) {
-      if (/^\d{8,12}/.test(emailPrefix)) {
-        return emailPrefix
-      }
-      return '' // Leave empty so admin provides the student's actual university ID
+  // Helper to derive readable name directly from email
+  function deriveNameFromEmail(email: string): string {
+    const prefix = email.trim().split('@')[0] || ''
+    if (!prefix) return ''
+    if (/^\d/.test(prefix)) {
+      const digitMatch = prefix.match(/^\d+/)
+      return digitMatch ? `Student ${digitMatch[0]}` : `Student ${prefix}`
     }
+    const words = prefix
+      .split(/[._\-\s]+/)
+      .filter(Boolean)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    return words.length > 0 ? words.join(' ') : prefix
+  }
 
-    // 2. Faculty Advisor: Query database for highest existing ADV ID
+  // Helper to derive code automatically without manual user input
+  function deriveCode(role: UserRole, email: string): string {
+    const emailPrefix = email.trim().split('@')[0]
+    if (role === 'student' || /^\d/.test(emailPrefix) || email.includes('@student.') || email.includes('@lamduan.')) {
+      const digitMatch = emailPrefix.match(/^\d+/)
+      return digitMatch ? digitMatch[0] : emailPrefix
+    }
     if (role === 'advisor') {
       const numbers = store.users
         .map(u => {
@@ -49,8 +60,6 @@ export default function UserManagement() {
       const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0
       return `ADV${String(maxNum + 1).padStart(3, '0')}`
     }
-
-    // 3. QA Chair: Query database for highest existing QA ID
     if (role === 'qa_chair') {
       const numbers = store.users
         .map(u => {
@@ -61,8 +70,6 @@ export default function UserManagement() {
       const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0
       return `QA${String(maxNum + 1).padStart(3, '0')}`
     }
-
-    // 4. System Admin: Query database for highest existing ADM ID
     if (role === 'admin') {
       const numbers = store.users
         .map(u => {
@@ -73,94 +80,155 @@ export default function UserManagement() {
       const maxNum = numbers.length > 0 ? Math.max(...numbers) : 0
       return `ADM${String(maxNum + 1).padStart(3, '0')}`
     }
-
-    return emailPrefix ? emailPrefix.toUpperCase() : ''
+    return emailPrefix ? emailPrefix.toUpperCase() : `USR_${Date.now().toString().slice(-4)}`
   }
 
-  // Auto-detect Student ID from email prefix or student code
+  // Auto-detect Student vs Non-Student from email format
+  const emailPrefix = newEmail.trim().split('@')[0]
   const isStudentDetected =
-    /^\d/.test(newEmail.trim().split('@')[0]) ||
-    /^\d/.test(newCode.trim()) ||
+    /^\d/.test(emailPrefix) ||
     newEmail.includes('@student.') ||
     newEmail.includes('@lamduan.')
 
-  const effectiveRole: UserRole = isStudentDetected ? 'student' : newRole
+  const isNonStudentDetected = Boolean(newEmail.trim()) && !isStudentDetected
+  const effectiveRole: UserRole = isNonStudentDetected ? newRole : 'student'
+  const derivedSingleName = deriveNameFromEmail(newEmail)
 
-  // Automatically update code if user has not manually customized it
-  function handleEmailChange(email: string) {
-    setNewEmail(email)
-    if (!isCodeCustomized) {
-      const isStu = /^\d/.test(email.trim().split('@')[0]) || email.includes('@student.') || email.includes('@lamduan.')
-      const r = isStu ? 'student' : newRole
-      setNewCode(getSuggestedCode(r, email))
-    }
-  }
+  // Parse bulk text into valid user objects with live preview
+  const parsedBulkUsers = (() => {
+    if (!bulkText.trim()) return []
+    const lines = bulkText.split('\n').map(l => l.trim()).filter(Boolean)
+    const existingEmails = new Set(store.users.map(u => u.email.toLowerCase()))
 
-  function handleRoleChange(r: UserRole) {
-    setNewRole(r)
-    if (!isCodeCustomized) {
-      setNewCode(getSuggestedCode(r, newEmail))
-    }
-  }
+    return lines.map((line, idx) => {
+      // Split by comma or tab: email, [name], [role], [department]
+      const parts = line.split(/[,\t]/).map(p => p.trim())
+      const email = parts[0] || ''
+      const prefix = email.split('@')[0] || `user_${idx + 1}`
+      const isStu = /^\d/.test(prefix) || email.includes('@student.') || email.includes('@lamduan.')
+
+      const overrideRole = bulkRoleOverrides[email.toLowerCase()]
+      let role: UserRole = isStu ? 'student' : (overrideRole || bulkDefaultStaffRole)
+      let name = parts[1] || deriveNameFromEmail(email) || (isStu ? `Student ${prefix}` : prefix)
+      let department = parts[3] || bulkDept
+
+      if (!isStu && !overrideRole && parts[2]) {
+        const r = parts[2].toLowerCase()
+        if (r.includes('admin')) role = 'admin'
+        else if (r.includes('qa') || r.includes('chair')) role = 'qa_chair'
+        else if (r.includes('advisor') || r.includes('faculty')) role = 'advisor'
+        else department = parts[2]
+      }
+
+      // If user typed department in parts[2] without role
+      if (!isStu && !['admin', 'qa_chair', 'advisor'].includes(role) && parts[2]) {
+        department = parts[2]
+      }
+
+      const code = deriveCode(role, email)
+      const isDuplicate = existingEmails.has(email.toLowerCase())
+
+      return {
+        email,
+        name,
+        role,
+        isStu,
+        code,
+        department: department || bulkDept || 'School of Applied Digital Technology (ADT)',
+        isDuplicate,
+      }
+    }).filter(u => u.email.includes('@'))
+  })()
 
   function openAddModal() {
+    setAddMode('single')
     setNewEmail('')
-    setNewName('')
-    setNewRole('student')
+    setNewRole('advisor')
     setNewDept('School of Applied Digital Technology (ADT)')
-    setIsCodeCustomized(false)
-    setNewCode('')
+    setBulkDept('School of Applied Digital Technology (ADT)')
+    setBulkText('')
+    setBulkDefaultStaffRole('advisor')
+    setBulkRoleOverrides({})
     setShowAddModal(true)
   }
 
-  function handleAddUser(e: React.FormEvent) {
+  async function handleAddSingleUser(e: React.FormEvent) {
     e.preventDefault()
-    if (!newEmail.trim() || !newName.trim()) {
-      addToast('error', t('กรุณากรอกอีเมลและชื่อ-นามสกุล', 'Please enter email and full name'))
-      return
-    }
-
-    // Student ID must be present
-    if (effectiveRole === 'student' && !newCode.trim()) {
-      addToast('error', t('กรุณาระบุรหัสนักศึกษา (Student ID)', 'Please enter student ID code'))
+    if (!newEmail.trim()) {
+      addToast('error', t('กรุณากรอกอีเมลมหาวิทยาลัย', 'Please enter institutional email'))
       return
     }
 
     const email = newEmail.trim().toLowerCase()
-
-    // Check if duplicate
     const exists = store.users.some(u => u.email.toLowerCase() === email)
     if (exists) {
       addToast('warning', t('อีเมลนี้ได้รับการลงทะเบียนในระบบแล้ว', 'This email is already registered in the system'))
       return
     }
 
-    const generatedCode = newCode.trim() || (effectiveRole === 'student' ? email.split('@')[0] : getSuggestedCode(effectiveRole, email))
+    const autoCode = deriveCode(effectiveRole, email)
+    const finalName = derivedSingleName || emailPrefix
     const generatedId = `${effectiveRole.toUpperCase().slice(0, 3)}_${Date.now().toString().slice(-6)}`
 
     const newUser: User = {
       id: generatedId,
-      code: generatedCode,
-      name: newName.trim(),
+      code: autoCode,
+      name: finalName,
       email,
       role: effectiveRole,
-      department: newDept,
+      department: newDept || 'School of Applied Digital Technology (ADT)',
       isActive: true,
       hasAiAccess: effectiveRole !== 'student',
       createdAt: new Date().toISOString().split('T')[0],
     }
 
-    store.addUser(newUser)
-    addToast(
-      'success',
-      t('ลงทะเบียนผู้ใช้สำเร็จ', 'User Registered Successfully'),
-      t(`เพิ่มและลงทะเบียนอีเมล ${email} (${effectiveRole}) สำเร็จแล้ว`, `User email ${email} (${effectiveRole}) successfully registered`)
-    )
-    setShowAddModal(false)
-    setNewEmail('')
-    setNewName('')
-    setNewCode('')
-    setNewRole('student')
+    setIsSubmitting(true)
+    try {
+      store.addUser(newUser)
+      addToast(
+        'success',
+        t('ลงทะเบียนผู้ใช้สำเร็จ', 'User Registered Successfully'),
+        t(`ลงทะเบียน ${email} (${effectiveRole}) เรียบร้อยแล้ว`, `User email ${email} (${effectiveRole}) registered`)
+      )
+      setShowAddModal(false)
+      setNewEmail('')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleBulkSubmit() {
+    const validUsers = parsedBulkUsers.filter(u => !u.isDuplicate)
+    if (validUsers.length === 0) {
+      addToast('warning', t('ไม่มีรายชื่อใหม่ที่จะนำเข้า', 'No new users to import'))
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const usersToInsert = validUsers.map(u => ({
+        code: u.code,
+        name: u.name,
+        email: u.email.toLowerCase(),
+        role: u.role,
+        department: u.department,
+        isActive: true,
+        hasAiAccess: u.role !== 'student',
+      }))
+
+      await store.bulkAddUsers(usersToInsert)
+      addToast(
+        'success',
+        t('นำเข้าผู้ใช้งานสำเร็จ', 'Bulk Import Successful'),
+        t(`ลงทะเบียนผู้ใช้งานใหม่จำนวน ${validUsers.length} คน เรียบร้อยแล้ว`, `Successfully registered ${validUsers.length} new users into the system.`)
+      )
+      setShowAddModal(false)
+      setBulkText('')
+    } catch (err: any) {
+      addToast('error', t('เกิดข้อผิดพลาดในการนำเข้า', 'Import Failed'), err.message || 'Error importing users')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const roleOptions: { value: UserRole | 'all'; labelTh: string; labelEn: string }[] = [
@@ -374,139 +442,296 @@ export default function UserManagement() {
         emptyMessage={t('ไม่พบข้อมูลผู้ใช้งานที่ตรงกับเงื่อนไข', 'No users match the search and filter criteria.')}
       />
 
-      {/* Add User / Pre-register Email Modal */}
+      {/* Add User / Pre-register Email Modal (Single & Bulk Import) */}
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title={t('เพิ่มผู้ใช้งาน / ลงทะเบียนอีเมลใหม่', 'Add User / Pre-Register Google Email')}
+        title={t('เพิ่มและลงทะเบียนผู้ใช้งานใหม่ (User Registration)', 'User & Institutional Account Registration')}
+        size="lg"
       >
-        <form onSubmit={handleAddUser} className="space-y-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t(
-              'ผู้ใช้งานที่มีอีเมลตรงกับที่ระบุในรายการนี้เท่านั้นจึงจะสามารถเข้าสู่ระบบผ่าน Google OAuth ได้',
-              'Only users whose institutional emails are registered here will be permitted to log in via Google SSO.'
-            )}
-          </p>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-              {t('อีเมลมหาวิทยาลัย (Google Email) *', 'University Email Address *')}
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="e.g. 6631503099@lamduan.mfu.ac.th or advisor@mfu.ac.th"
-              value={newEmail}
-              onChange={e => handleEmailChange(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-            />
+        <div className="space-y-4">
+          {/* Mode Switcher Tabs */}
+          <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200/70 dark:border-slate-700/60">
+            <button
+              type="button"
+              onClick={() => setAddMode('single')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                addMode === 'single'
+                  ? 'bg-white dark:bg-slate-900 text-sky-700 dark:text-sky-300 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <UserIcon className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+              <span>{t('ลงทะเบียนทีละคน (Single User)', 'Single User Registration')}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddMode('bulk')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                addMode === 'bulk'
+                  ? 'bg-white dark:bg-slate-900 text-sky-700 dark:text-sky-300 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <Users className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+              <span>{t('นำเข้าหลายคนพร้อมกัน (Bulk Import)', 'Bulk Import / Paste Roster')}</span>
+            </button>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-              {t('ชื่อ-นามสกุล *', 'Full Name *')}
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Somchai Jaidee"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-            />
-          </div>
+          {/* TAB 1: SINGLE USER FORM */}
+          {addMode === 'single' && (
+            <form onSubmit={handleAddSingleUser} className="space-y-4 pt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                {t(
+                  'ผู้ใช้งานที่มีอีเมลตรงกับที่ระบุในรายการนี้เท่านั้นจึงจะสามารถเข้าสู่ระบบผ่าน Google OAuth ได้ โดยระบบจะตรวจหารหัสนักศึกษาและกำหนดบทบาทให้อัตโนมัติ',
+                  'Only registered institutional emails will be permitted to log in via Google SSO. Student roles are auto-detected.'
+                )}
+              </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-                  {t('รหัสประจำตัว (Code) *', 'User / Student Code *')}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                  {t('อีเมล (Google Email) *', 'Email Address *')}
                 </label>
-                {!isCodeCustomized && newCode && (
-                  <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold flex items-center gap-0.5">
-                    ⚡ {t('สร้างอัตโนมัติ', 'Auto-generated')}
-                  </span>
-                )}
-              </div>
-              <div className="relative">
                 <input
-                  type="text"
+                  type="email"
                   required
-                  placeholder="e.g. 6631503099 or ADV004"
-                  value={newCode}
-                  onChange={e => {
-                    setNewCode(e.target.value)
-                    setIsCodeCustomized(true)
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
+                  placeholder="e.g. 6631503099@lamduan.mfu.ac.th or advisor@mfu.ac.th"
+                  value={newEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
-                {isCodeCustomized && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCodeCustomized(false)
-                      setNewCode(getSuggestedCode(effectiveRole, newEmail))
-                    }}
-                    className="absolute right-2 top-2 px-2 py-0.5 text-[10px] text-sky-600 hover:text-sky-700 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/60 rounded-md cursor-pointer transition-colors"
-                    title={t('สร้างรหัสใหม่อัตโนมัติ', 'Auto-regenerate code')}
-                  >
-                    ↻ {t('รีเซ็ต', 'Reset')}
-                  </button>
-                )}
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                {t('บทบาทในระบบ *', 'System Role *')}
-              </label>
-              {isStudentDetected ? (
-                <div className="px-3.5 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-xs font-bold text-sky-800 dark:text-sky-300 flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-                  <span>{t('นักศึกษา (ตรวจพบรหัส นศ. อัตโนมัติ)', 'Student (Auto-detected from ID)')}</span>
+              {isNonStudentDetected ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                      {t('บทบาทในระบบ *', 'System Role *')}
+                    </label>
+                    <select
+                      value={newRole}
+                      onChange={e => setNewRole(e.target.value as UserRole)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
+                    >
+                      <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>
+                      <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA Chair)', 'QA Chair / Program Chair')}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                      {t('สำนักวิชา / ส่วนงาน', 'Department')}
+                    </label>
+                    <input
+                      type="text"
+                      value={newDept}
+                      onChange={e => setNewDept(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
                 </div>
               ) : (
-                <select
-                  value={newRole}
-                  onChange={e => handleRoleChange(e.target.value as UserRole)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                >
-                  <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>
-                  <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA)', 'QA Chair')}</option>
-                </select>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                    {t('สำนักวิชา / ส่วนงาน', 'Department')}
+                  </label>
+                  <input
+                    type="text"
+                    value={newDept}
+                    onChange={e => setNewDept(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
               )}
+
+              {/* Dynamic Auto-Derived Info Preview */}
+              {newEmail.includes('@') && (
+                <div className="p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-800/60 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                    <span className="font-semibold">{t('รหัสประจำตัว (Code):', 'User Code:')}</span>
+                    <span className="font-mono font-bold text-sky-700 dark:text-sky-300">
+                      {deriveCode(effectiveRole, newEmail)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                    <span className="font-semibold">{t('ชื่อที่สร้างเบื้องต้น:', 'Initial Display Name:')}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                      {derivedSingleName}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-sky-100 dark:border-sky-900/40 flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+                    <span>
+                      {t(
+                        'ชื่อจริงและรูปโปรไฟล์จะอัปเดตตรงตาม Google Account โดยอัตโนมัติเมื่อผู้ใช้ล็อกอินครั้งแรก',
+                        'Official name & picture will automatically sync with Google Account upon first login.'
+                      )}
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  {t('ยกเลิก', 'Cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="font-bold"
+                >
+                  <UserPlus className="h-4 w-4 mr-1.5" />
+                  {isSubmitting ? t('กำลังบันทึก...', 'Saving...') : t('ลงทะเบียนผู้ใช้', 'Register User')}
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {/* TAB 2: BULK IMPORT / ROSTER PASTE */}
+          {addMode === 'bulk' && (
+            <div className="space-y-4 pt-1">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                    {t('วางรายชื่ออีเมล (เพียงแค่วางอีเมล 1 บรรทัดต่อ 1 คน หรือรูปแบบ CSV) *', 'Paste Emails (1 email per line or CSV) *')}
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {t('สร้างชื่อ, รหัส และบทบาทให้อัตโนมัติจากอีเมล', 'Name, code & role auto-derived from email')}
+                  </span>
+                </div>
+                <textarea
+                  rows={5}
+                  value={bulkText}
+                  onChange={e => setBulkText(e.target.value)}
+                  placeholder={`6631501001@lamduan.mfu.ac.th\n6631501002@lamduan.mfu.ac.th\nprasit.k@mfu.ac.th\nsomchai.jaidee@mfu.ac.th\nchair.qa@mfu.ac.th, qa_chair`}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              </div>
+
+              {/* Bulk Default Department Input */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                  {t('สำนักวิชา / ส่วนงาน (Department)', 'Department')}
+                </label>
+                <input
+                  type="text"
+                  value={bulkDept}
+                  onChange={e => setBulkDept(e.target.value)}
+                  placeholder="School of Applied Digital Technology (ADT)"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              </div>
+
+              {/* Live Parsed Preview Table */}
+              {parsedBulkUsers.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      {t('ตรวจสอบข้อมูลก่อนนำเข้า (Live Preview)', 'Live Preview')}
+                    </span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                      {parsedBulkUsers.filter(u => !u.isDuplicate).length} {t('คนพร้อมนำเข้า', 'users ready')}
+                    </span>
+                  </div>
+
+                  {/* Batch Role Selector for Non-Students */}
+                  {parsedBulkUsers.some(u => !u.isStu) && (
+                    <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                        {t('บทบาทเริ่มต้นสำหรับอาจารย์/บุคลากร:', 'Default Role for Staff/Faculty:')}
+                      </span>
+                      <select
+                        value={bulkDefaultStaffRole}
+                        onChange={e => {
+                          const newDef = e.target.value as UserRole
+                          setBulkDefaultStaffRole(newDef)
+                          setBulkRoleOverrides({})
+                        }}
+                        className="px-2.5 py-1 rounded-lg border border-amber-300 dark:border-amber-800 bg-white dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                      >
+                        <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>
+                        <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA Chair)', 'QA Chair / Program Chair')}</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 divide-y divide-slate-200/60 dark:divide-slate-800">
+                    {parsedBulkUsers.map((u, i) => (
+                      <div key={i} className="p-2.5 flex items-center justify-between gap-3 text-xs">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
+                            {u.name} <span className="font-mono text-slate-400 font-normal">({u.email})</span>
+                          </p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                            {u.department} <span className="font-mono text-slate-400">• Code: {u.code}</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {u.isStu ? (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                              Student
+                            </span>
+                          ) : (
+                            <select
+                              value={u.role}
+                              onChange={e => {
+                                const val = e.target.value as UserRole
+                                setBulkRoleOverrides(prev => ({
+                                  ...prev,
+                                  [u.email.toLowerCase()]: val,
+                                }))
+                              }}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold border cursor-pointer focus:outline-none focus:ring-1 focus:ring-sky-500 ${
+                                u.role === 'qa_chair'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                                  : 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800'
+                              }`}
+                            >
+                              <option value="advisor">Advisor</option>
+                              <option value="qa_chair">QA Chair</option>
+                            </select>
+                          )}
+                          {u.isDuplicate && (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
+                              {t('มีในระบบแล้ว', 'Duplicate')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  {t('ยกเลิก', 'Cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleBulkSubmit}
+                  disabled={isSubmitting || parsedBulkUsers.filter(u => !u.isDuplicate).length === 0}
+                  className="font-bold"
+                >
+                  <UserPlus className="h-4 w-4 mr-1.5" />
+                  {isSubmitting
+                    ? t('กำลังนำเข้า...', 'Importing...')
+                    : `${t('นำเข้าผู้ใช้งานทั้งหมด', 'Register All')} (${parsedBulkUsers.filter(u => !u.isDuplicate).length})`}
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-              {t('สำนักวิชา / ส่วนงาน', 'Department')}
-            </label>
-            <input
-              type="text"
-              value={newDept}
-              onChange={e => setNewDept(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowAddModal(false)}
-            >
-              {t('ยกเลิก', 'Cancel')}
-            </Button>
-            <Button
-              size="sm"
-              type="submit"
-            >
-              <UserPlus className="h-4 w-4 mr-1.5" />
-              {t('ลงทะเบียนผู้ใช้', 'Register User')}
-            </Button>
-          </div>
-        </form>
+          )}
+        </div>
       </Modal>
     </div>
   )

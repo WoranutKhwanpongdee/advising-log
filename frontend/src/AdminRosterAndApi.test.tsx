@@ -319,4 +319,142 @@ describe('Admin API Control & CSV Roster Import', () => {
     expect(activeRoster[0].studentId).toBe('STU001')
   })
 
+  // -------------------------------------------------------------
+  // PART 4: User Registration (Auto Student Role & Bulk Import)
+  // -------------------------------------------------------------
+  it('adds multiple users via bulkAddUsers with auto student role detection and default ADT department', async () => {
+    let storeRef: any
+    function TestComponent() {
+      storeRef = useStore()
+      return <div data-testid="users-count">{storeRef.users.length}</div>
+    }
+
+    renderWithProviders(<TestComponent />)
+
+    const initialCount = storeRef.users.length
+
+    await act(async () => {
+      await storeRef.bulkAddUsers([
+        {
+          code: '6631509999',
+          name: 'New Test Student',
+          email: '6631509999@lamduan.mfu.ac.th',
+          role: 'student',
+          department: 'School of Applied Digital Technology (ADT)',
+        },
+        {
+          code: 'ADV099',
+          name: 'New Test Advisor',
+          email: 'new.adv@mfu.ac.th',
+          role: 'advisor',
+          department: 'School of Applied Digital Technology (ADT)',
+        },
+      ])
+    })
+
+    expect(storeRef.users.length).toBe(initialCount + 2)
+
+    const addedStudent = storeRef.users.find((u: any) => u.email === '6631509999@lamduan.mfu.ac.th')
+    expect(addedStudent).toBeDefined()
+    expect(addedStudent.role).toBe('student')
+    expect(addedStudent.department).toBe('School of Applied Digital Technology (ADT)')
+
+    const addedAdvisor = storeRef.users.find((u: any) => u.email === 'new.adv@mfu.ac.th')
+    expect(addedAdvisor).toBeDefined()
+    expect(addedAdvisor.role).toBe('advisor')
+    expect(addedAdvisor.department).toBe('School of Applied Digital Technology (ADT)')
+  })
+
+  it('correctly auto-derives full names from student and faculty email addresses', async () => {
+    let storeRef: any
+    function TestComponent() {
+      storeRef = useStore()
+      return <div data-testid="users-count">{storeRef.users.length}</div>
+    }
+
+    renderWithProviders(<TestComponent />)
+
+    await act(async () => {
+      await storeRef.bulkAddUsers([
+        {
+          email: '6631508888@lamduan.mfu.ac.th',
+          role: 'student',
+        },
+        {
+          email: 'somchai.jaidee@mfu.ac.th',
+          role: 'advisor',
+        },
+      ])
+    })
+
+    const student = storeRef.users.find((u: any) => u.email === '6631508888@lamduan.mfu.ac.th')
+    expect(student).toBeDefined()
+    expect(student.code).toBe('6631508888')
+    expect(student.name).toBe('Student 6631508888')
+
+    const advisor = storeRef.users.find((u: any) => u.email === 'somchai.jaidee@mfu.ac.th')
+    expect(advisor).toBeDefined()
+    expect(advisor.name).toBe('Somchai Jaidee')
+  })
+
+  it('renders system role selection in Single User modal ONLY when email is detected as non-student', () => {
+    renderWithProviders(<UserManagement />)
+
+    // Open Add User modal
+    const openAddModalBtn = screen.getByRole('button', { name: /เพิ่มผู้ใช้ \/ ลงทะเบียนอีเมล/i })
+    act(() => {
+      fireEvent.click(openAddModalBtn)
+    })
+
+    const emailInput = screen.getByPlaceholderText(/6631503099@lamduan.mfu.ac.th or advisor@mfu.ac.th/i)
+
+    // Initially (empty email): Role field MUST NOT be present
+    expect(screen.queryByLabelText(/บทบาทในระบบ/i)).not.toBeInTheDocument()
+
+    // Type a student email: Role field MUST NOT be present
+    act(() => {
+      fireEvent.change(emailInput, { target: { value: '6631503099@lamduan.mfu.ac.th' } })
+    })
+    expect(screen.queryByLabelText(/บทบาทในระบบ/i)).not.toBeInTheDocument()
+
+    // Type a non-student faculty email: Role field MUST appear
+    act(() => {
+      fireEvent.change(emailInput, { target: { value: 'prasit.k@mfu.ac.th' } })
+    })
+    expect(screen.getByText(/บทบาทในระบบ \*/i)).toBeInTheDocument()
+  })
+
+  it('allows changing batch default role and overriding individual roles in bulk import preview', () => {
+    renderWithProviders(<UserManagement />)
+
+    // Open Add User modal and switch to Bulk tab
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /เพิ่มผู้ใช้ \/ ลงทะเบียนอีเมล/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /นำเข้าหลายคนพร้อมกัน/i }))
+    })
+
+    const textarea = screen.getByPlaceholderText(/6631501001@lamduan.mfu.ac.th/i)
+
+    // Paste a student and two faculty members
+    act(() => {
+      fireEvent.change(textarea, {
+        target: {
+          value: '6631503099@lamduan.mfu.ac.th\nprof.somchai@mfu.ac.th\nhead.qa@mfu.ac.th',
+        },
+      })
+    })
+
+    // Student has locked Student badge
+    expect(screen.getByText('Student')).toBeInTheDocument()
+
+    // Non-student batch role selector should be rendered
+    expect(screen.getByText(/บทบาทเริ่มต้นสำหรับอาจารย์\/บุคลากร:/i)).toBeInTheDocument()
+
+    // Individual dropdowns exist for non-students
+    const roleSelects = screen.getAllByRole('combobox')
+    expect(roleSelects.length).toBeGreaterThan(0)
+  })
+
 })
