@@ -397,4 +397,64 @@ describe('Admin API Control & CSV Roster Import', () => {
     expect(advisor.name).toBe('Somchai Jaidee')
   })
 
+  it('renders system role selection in Single User modal ONLY when email is detected as non-student', () => {
+    renderWithProviders(<UserManagement />)
+
+    // Open Add User modal
+    const openAddModalBtn = screen.getByRole('button', { name: /เพิ่มผู้ใช้ \/ ลงทะเบียนอีเมล/i })
+    act(() => {
+      fireEvent.click(openAddModalBtn)
+    })
+
+    const emailInput = screen.getByPlaceholderText(/6631503099@lamduan.mfu.ac.th or advisor@mfu.ac.th/i)
+
+    // Initially (empty email): Role field MUST NOT be present
+    expect(screen.queryByLabelText(/บทบาทในระบบ/i)).not.toBeInTheDocument()
+
+    // Type a student email: Role field MUST NOT be present
+    act(() => {
+      fireEvent.change(emailInput, { target: { value: '6631503099@lamduan.mfu.ac.th' } })
+    })
+    expect(screen.queryByLabelText(/บทบาทในระบบ/i)).not.toBeInTheDocument()
+
+    // Type a non-student faculty email: Role field MUST appear
+    act(() => {
+      fireEvent.change(emailInput, { target: { value: 'prasit.k@mfu.ac.th' } })
+    })
+    expect(screen.getByText(/บทบาทในระบบ \*/i)).toBeInTheDocument()
+  })
+
+  it('allows changing batch default role and overriding individual roles in bulk import preview', () => {
+    renderWithProviders(<UserManagement />)
+
+    // Open Add User modal and switch to Bulk tab
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /เพิ่มผู้ใช้ \/ ลงทะเบียนอีเมล/i }))
+    })
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /นำเข้าหลายคนพร้อมกัน/i }))
+    })
+
+    const textarea = screen.getByPlaceholderText(/6631501001@lamduan.mfu.ac.th/i)
+
+    // Paste a student and two faculty members
+    act(() => {
+      fireEvent.change(textarea, {
+        target: {
+          value: '6631503099@lamduan.mfu.ac.th\nprof.somchai@mfu.ac.th\nhead.qa@mfu.ac.th',
+        },
+      })
+    })
+
+    // Student has locked Student badge
+    expect(screen.getByText('Student')).toBeInTheDocument()
+
+    // Non-student batch role selector should be rendered
+    expect(screen.getByText(/บทบาทเริ่มต้นสำหรับอาจารย์\/บุคลากร:/i)).toBeInTheDocument()
+
+    // Individual dropdowns exist for non-students
+    const roleSelects = screen.getAllByRole('combobox')
+    expect(roleSelects.length).toBeGreaterThan(0)
+  })
+
 })

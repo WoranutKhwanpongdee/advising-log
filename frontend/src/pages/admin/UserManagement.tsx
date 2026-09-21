@@ -22,7 +22,10 @@ export default function UserManagement() {
   const [newEmail, setNewEmail] = useState('')
   const [newRole, setNewRole] = useState<UserRole>('advisor')
   const [newDept, setNewDept] = useState('School of Applied Digital Technology (ADT)')
+  const [bulkDept, setBulkDept] = useState('School of Applied Digital Technology (ADT)')
   const [bulkText, setBulkText] = useState('')
+  const [bulkDefaultStaffRole, setBulkDefaultStaffRole] = useState<UserRole>('advisor')
+  const [bulkRoleOverrides, setBulkRoleOverrides] = useState<Record<string, UserRole>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Helper to derive readable name directly from email
@@ -80,14 +83,15 @@ export default function UserManagement() {
     return emailPrefix ? emailPrefix.toUpperCase() : `USR_${Date.now().toString().slice(-4)}`
   }
 
-  // Auto-detect Student from email format
+  // Auto-detect Student vs Non-Student from email format
   const emailPrefix = newEmail.trim().split('@')[0]
   const isStudentDetected =
     /^\d/.test(emailPrefix) ||
     newEmail.includes('@student.') ||
     newEmail.includes('@lamduan.')
 
-  const effectiveRole: UserRole = isStudentDetected ? 'student' : newRole
+  const isNonStudentDetected = Boolean(newEmail.trim()) && !isStudentDetected
+  const effectiveRole: UserRole = isNonStudentDetected ? newRole : 'student'
   const derivedSingleName = deriveNameFromEmail(newEmail)
 
   // Parse bulk text into valid user objects with live preview
@@ -103,15 +107,17 @@ export default function UserManagement() {
       const prefix = email.split('@')[0] || `user_${idx + 1}`
       const isStu = /^\d/.test(prefix) || email.includes('@student.') || email.includes('@lamduan.')
 
-      let role: UserRole = isStu ? 'student' : 'advisor'
+      const overrideRole = bulkRoleOverrides[email.toLowerCase()]
+      let role: UserRole = isStu ? 'student' : (overrideRole || bulkDefaultStaffRole)
       let name = parts[1] || deriveNameFromEmail(email) || (isStu ? `Student ${prefix}` : prefix)
-      let department = parts[3] || parts[2] || 'School of Applied Digital Technology (ADT)'
+      let department = parts[3] || bulkDept
 
-      if (!isStu && parts[2]) {
+      if (!isStu && !overrideRole && parts[2]) {
         const r = parts[2].toLowerCase()
         if (r.includes('admin')) role = 'admin'
         else if (r.includes('qa') || r.includes('chair')) role = 'qa_chair'
         else if (r.includes('advisor') || r.includes('faculty')) role = 'advisor'
+        else department = parts[2]
       }
 
       // If user typed department in parts[2] without role
@@ -126,8 +132,9 @@ export default function UserManagement() {
         email,
         name,
         role,
+        isStu,
         code,
-        department: department || 'School of Applied Digital Technology (ADT)',
+        department: department || bulkDept || 'School of Applied Digital Technology (ADT)',
         isDuplicate,
       }
     }).filter(u => u.email.includes('@'))
@@ -138,7 +145,10 @@ export default function UserManagement() {
     setNewEmail('')
     setNewRole('advisor')
     setNewDept('School of Applied Digital Technology (ADT)')
+    setBulkDept('School of Applied Digital Technology (ADT)')
     setBulkText('')
+    setBulkDefaultStaffRole('advisor')
+    setBulkRoleOverrides({})
     setShowAddModal(true)
   }
 
@@ -480,7 +490,7 @@ export default function UserManagement() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                  {t('อีเมลมหาวิทยาลัย (Institutional Google Email) *', 'University Email Address *')}
+                  {t('อีเมล (Google Email) *', 'Email Address *')}
                 </label>
                 <input
                   type="email"
@@ -492,7 +502,7 @@ export default function UserManagement() {
                 />
               </div>
 
-              {!isStudentDetected ? (
+              {isNonStudentDetected ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
@@ -505,7 +515,6 @@ export default function UserManagement() {
                     >
                       <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>
                       <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA Chair)', 'QA Chair / Program Chair')}</option>
-                      <option value="admin">{t('ผู้ดูแลระบบ (Admin)', 'System Admin')}</option>
                     </select>
                   </div>
 
@@ -592,16 +601,72 @@ export default function UserManagement() {
                     {t('วางรายชื่ออีเมล (เพียงแค่วางอีเมล 1 บรรทัดต่อ 1 คน หรือรูปแบบ CSV) *', 'Paste Emails (1 email per line or CSV) *')}
                   </label>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    {t('ชื่อ, รหัส, บทบาท, สำนักวิชา ADT สร้างให้อัตโนมัติ', 'Name, Code, Role, ADT Dept auto-derived')}
+                    {t('สร้างชื่อ, รหัส และบทบาทให้อัตโนมัติจากอีเมล', 'Name, code & role auto-derived from email')}
                   </span>
                 </div>
                 <textarea
-                  rows={6}
+                  rows={5}
                   value={bulkText}
                   onChange={e => setBulkText(e.target.value)}
                   placeholder={`6631501001@lamduan.mfu.ac.th\n6631501002@lamduan.mfu.ac.th\nprasit.k@mfu.ac.th\nsomchai.jaidee@mfu.ac.th\nchair.qa@mfu.ac.th, qa_chair`}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
+              </div>
+
+              {/* Bulk Default Department Selector & Quick Toggles */}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                    {t('สำนักวิชา / ส่วนงาน (Default Department) *', 'Default Department *')}
+                  </label>
+                  <span className="text-[10px] text-slate-400">
+                    {t('นำไปใช้กับทุกคนในรายการที่ไม่ได้ระบุสำนักวิชาเฉพาะ', 'Applied to all imported users without custom dept')}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={bulkDept}
+                    onChange={e => setBulkDept(e.target.value)}
+                    placeholder="School of Applied Digital Technology (ADT)"
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setBulkDept('School of Applied Digital Technology (ADT)')}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                        bulkDept === 'School of Applied Digital Technology (ADT)'
+                          ? 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+                      }`}
+                    >
+                      ADT (Default)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBulkDept('School of Information Technology')}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                        bulkDept === 'School of Information Technology'
+                          ? 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+                      }`}
+                    >
+                      IT
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBulkDept('School of Liberal Arts')}
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                        bulkDept === 'School of Liberal Arts'
+                          ? 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
+                      }`}
+                    >
+                      Liberal Arts
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Live Parsed Preview Table */}
@@ -616,6 +681,28 @@ export default function UserManagement() {
                     </span>
                   </div>
 
+                  {/* Batch Role Selector for Non-Students */}
+                  {parsedBulkUsers.some(u => !u.isStu) && (
+                    <div className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                        {t('บทบาทเริ่มต้นสำหรับอาจารย์/บุคลากร:', 'Default Role for Staff/Faculty:')}
+                      </span>
+                      <select
+                        value={bulkDefaultStaffRole}
+                        onChange={e => {
+                          const newDef = e.target.value as UserRole
+                          setBulkDefaultStaffRole(newDef)
+                          setBulkRoleOverrides({})
+                        }}
+                        className="px-2.5 py-1 rounded-lg border border-amber-300 dark:border-amber-800 bg-white dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                      >
+                        <option value="advisor">{t('อาจารย์ที่ปรึกษา (Advisor)', 'Faculty Advisor')}</option>
+                        <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA Chair)', 'QA Chair / Program Chair')}</option>
+                      </select>
+                    </div>
+                  )}
+
                   <div className="max-h-48 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 divide-y divide-slate-200/60 dark:divide-slate-800">
                     {parsedBulkUsers.map((u, i) => (
                       <div key={i} className="p-2.5 flex items-center justify-between gap-3 text-xs">
@@ -624,23 +711,34 @@ export default function UserManagement() {
                             {u.name} <span className="font-mono text-slate-400 font-normal">({u.email})</span>
                           </p>
                           <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                            {u.department}
+                            {u.department} <span className="font-mono text-slate-400">• Code: {u.code}</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                              u.role === 'student'
-                                ? 'bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300'
-                                : u.role === 'admin'
-                                ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300'
-                                : u.role === 'qa_chair'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                            }`}
-                          >
-                            {u.role === 'student' ? 'Student' : u.role === 'qa_chair' ? 'QA Chair' : u.role === 'admin' ? 'Admin' : 'Advisor'}
-                          </span>
+                          {u.isStu ? (
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                              Student
+                            </span>
+                          ) : (
+                            <select
+                              value={u.role}
+                              onChange={e => {
+                                const val = e.target.value as UserRole
+                                setBulkRoleOverrides(prev => ({
+                                  ...prev,
+                                  [u.email.toLowerCase()]: val,
+                                }))
+                              }}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold border cursor-pointer focus:outline-none focus:ring-1 focus:ring-sky-500 ${
+                                u.role === 'qa_chair'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                                  : 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800'
+                              }`}
+                            >
+                              <option value="advisor">Advisor</option>
+                              <option value="qa_chair">QA Chair</option>
+                            </select>
+                          )}
                           {u.isDuplicate && (
                             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
                               {t('มีในระบบแล้ว', 'Duplicate')}
