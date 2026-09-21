@@ -136,6 +136,7 @@ interface StoreActions {
 
   // Advisor Assessments
   addAdvisorAssessment: (a: Omit<AdvisorExitAssessment, 'id' | 'createdAt'>) => AdvisorExitAssessment
+  updateAdvisorAssessmentResolution: (exitCaseId: string, resolution: string) => void
 
   // Student Voice Responses
   addStudentVoiceResponse: (svr: Omit<StudentVoiceResponse, 'id' | 'createdAt'>) => StudentVoiceResponse
@@ -441,6 +442,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const newA: AdvisorExitAssessment = { ...a, id: nextId('AEA'), createdAt: now() }
     setAdvisorAssessments(prev => [newA, ...prev])
     return newA
+  }, [])
+
+  const updateAdvisorAssessmentResolution = useCallback((exitCaseId: string, resolution: string) => {
+    setAdvisorAssessments(prev => {
+      const exists = prev.some(a => a.exitCaseId === exitCaseId)
+      if (exists) {
+        return prev.map(a => a.exitCaseId === exitCaseId ? { ...a, resolution } : a)
+      } else {
+        return [{
+          id: nextId('AEA'),
+          exitCaseId,
+          advisorId: '',
+          assessment: 'Direct committee review',
+          contributingFactors: '',
+          actionsTaken: '',
+          referralsMade: '',
+          followUpAttempts: '',
+          recommendation: '',
+          resolution,
+          createdAt: now(),
+        }, ...prev]
+      }
+    })
   }, [])
 
   const markVoiceSurveyCompleted = useCallback((studentId: string) => {
@@ -909,7 +933,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addEarlyWarning, updateEarlyWarningStatus,
     addEarlyWarningFollowUp, updateEarlyWarningFollowUpStatus,
     addExitCase, updateExitCaseStatus,
-    addAdvisorAssessment,
+    addAdvisorAssessment, updateAdvisorAssessmentResolution,
     addStudentVoiceResponse, markVoiceSurveyCompleted,
     addDocument, updateDocument, updateDocumentStatus, deleteDocument,
     addUser, bulkAddUsers, updateUser, deleteUser,

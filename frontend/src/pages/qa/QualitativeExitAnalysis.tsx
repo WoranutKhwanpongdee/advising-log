@@ -125,7 +125,7 @@ export default function QualitativeExitAnalysis() {
   const { currentUser } = useAuth()
   const store = useStore()
   const { addToast } = useToast()
-  const { t, language, getExitReasonLabel } = useLanguage()
+  const { t, language, getExitReasonLabel, getExitTypeLabel } = useLanguage()
   const { isDark } = useTheme()
 
   // Filter states
@@ -1627,8 +1627,8 @@ export default function QualitativeExitAnalysis() {
               </div>
               <div>
                 <span className="text-slate-400 block font-medium">{t('ประเภทคำร้อง', 'Exit Type')}</span>
-                <p className="font-bold text-slate-900 dark:text-slate-100 mt-0.5 capitalize">
-                  {drilldownCase.exitType.replace(/_/g, ' ')}
+                <p className="font-bold text-slate-900 dark:text-slate-100 mt-0.5">
+                  {getExitTypeLabel(drilldownCase.exitType)}
                 </p>
               </div>
               <div>

@@ -84,6 +84,13 @@ export const REFERRAL_DESTINATIONS: { value: ReferralDestination; group: Referra
 
 export type ExitType = 'withdrawal' | 'leave_of_absence' | 'transfer' | 'dropout'
 
+export const EXIT_TYPES: { value: ExitType; label: string; labelEn: string; labelTh: string }[] = [
+  { value: 'withdrawal', label: 'Permanent Withdrawal', labelEn: 'Permanent Withdrawal', labelTh: 'ขอลาออกถาวร' },
+  { value: 'leave_of_absence', label: 'Leave of Absence', labelEn: 'Leave of Absence', labelTh: 'ขอลาพักการศึกษา' },
+  { value: 'transfer', label: 'Institution Transfer', labelEn: 'Institution Transfer', labelTh: 'ขอโอนย้ายสถาบัน' },
+  { value: 'dropout', label: 'Dropout', labelEn: 'Dropout', labelTh: 'พ้นสภาพนักศึกษา' },
+]
+
 export type ExitReasonCode =
   | 'financial'
   | 'academic'

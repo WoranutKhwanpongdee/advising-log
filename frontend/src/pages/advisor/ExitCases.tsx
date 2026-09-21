@@ -15,7 +15,7 @@ export default function ExitCases() {
   const { currentUser } = useAuth()
   const store = useStore()
   const { addToast } = useToast()
-  const { t, getExitReasonLabel, getCategoryLabel } = useLanguage()
+  const { t, getExitReasonLabel, getCategoryLabel, getExitTypeLabel } = useLanguage()
   const [selectedCase, setSelectedCase] = useState<ExitCase | null>(null)
   const [showAssessment, setShowAssessment] = useState(false)
   const [assessment, setAssessment] = useState('')
@@ -44,8 +44,8 @@ export default function ExitCases() {
       key: 'type',
       header: t('ประเภทคำร้อง', 'Exit Type'),
       render: (e: ExitCase) => (
-        <span className="text-xs font-semibold capitalize text-slate-800 dark:text-slate-200">
-          {e.exitType.replace(/_/g, ' ')}
+        <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+          {getExitTypeLabel(e.exitType)}
         </span>
       ),
     },
@@ -114,7 +114,7 @@ export default function ExitCases() {
       {
         date: selectedCase.createdAt,
         title: t('ยื่นคำร้องขอลาออก/ลาพัก', 'Exit Case Created'),
-        description: `${selectedCase.exitType.replace(/_/g, ' ')} · ${getExitReasonLabel(selectedCase.reasonCode)}`,
+        description: `${getExitTypeLabel(selectedCase.exitType)} · ${getExitReasonLabel(selectedCase.reasonCode)}`,
         status: 'open',
       },
     ]
@@ -149,7 +149,7 @@ export default function ExitCases() {
               </div>
               <div>
                 <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('ประเภท', 'Exit Type')}</span>
-                <p className="font-semibold capitalize text-slate-900 dark:text-slate-100 mt-0.5">{selectedCase.exitType.replace(/_/g, ' ')}</p>
+                <p className="font-semibold text-slate-900 dark:text-slate-100 mt-0.5">{getExitTypeLabel(selectedCase.exitType)}</p>
               </div>
               <div>
                 <span className="text-slate-400 dark:text-slate-400 block font-medium">{t('สาเหตุ', 'Reason')}</span>

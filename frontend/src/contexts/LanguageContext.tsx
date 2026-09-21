@@ -4,7 +4,7 @@
 // ============================================================
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { ADVISING_CATEGORIES, REFERRAL_DESTINATIONS, EXIT_REASON_CODES, EARLY_WARNING_TYPES } from '@/types'
+import { ADVISING_CATEGORIES, REFERRAL_DESTINATIONS, EXIT_REASON_CODES, EARLY_WARNING_TYPES, EXIT_TYPES } from '@/types'
 
 export type Language = 'th' | 'en'
 
@@ -16,6 +16,7 @@ interface LanguageContextType {
   getCategoryLabel: (value: string) => string
   getReferralLabel: (value: string) => string
   getExitReasonLabel: (value: string) => string
+  getExitTypeLabel: (value: string) => string
   getWarningTypeLabel: (value: string) => string
 }
 
@@ -73,6 +74,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return language === 'th' ? item.labelTh : item.labelEn
   }
 
+  function getExitTypeLabel(value: string): string {
+    const item = EXIT_TYPES.find(e => e.value === value)
+    if (!item) return value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    return language === 'th' ? item.labelTh : item.labelEn
+  }
+
   function getWarningTypeLabel(value: string): string {
     const item = EARLY_WARNING_TYPES.find(w => w.value === value)
     if (!item) return value
@@ -88,6 +95,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       getCategoryLabel,
       getReferralLabel,
       getExitReasonLabel,
+      getExitTypeLabel,
       getWarningTypeLabel,
     }}>
       {children}
