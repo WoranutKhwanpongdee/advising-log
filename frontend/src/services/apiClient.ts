@@ -72,6 +72,13 @@ class ApiClient {
     })
   }
 
+  async bulkSaveUsers(users: Partial<User>[]) {
+    return this.request<{ success: boolean; count: number; users: User[] }>('/api/users/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ users }),
+    })
+  }
+
   // --- Student-Advisor Roster ---
   async getRoster() {
     return this.request<{ roster: StudentAdvisorAssignment[] }>('/api/roster')

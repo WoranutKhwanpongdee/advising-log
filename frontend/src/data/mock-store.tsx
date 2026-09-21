@@ -148,6 +148,7 @@ interface StoreActions {
 
   // Users
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => User
+  bulkAddUsers: (users: Omit<User, 'id' | 'createdAt'>[]) => Promise<User[]>
   updateUser: (id: string, updates: Partial<User>) => void
 
   // Roster
@@ -446,6 +447,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const newUser: User = { ...user, id: nextId('USR'), createdAt: now() }
     setUsers(prev => [...prev, newUser])
     return newUser
+  }, [])
+
+  const bulkAddUsers = useCallback(async (newUsersData: Omit<User, 'id' | 'createdAt'>[]): Promise<User[]> => {
+    const timestamp = now()
+    const createdUsers: User[] = newUsersData.map((u, idx) => ({
+      ...u,
+      id: nextId(`USR_${Date.now()}_${idx}`),
+      createdAt: timestamp,
+    }))
+
+    setUsers(prev => {
+      const existingEmails = new Set(createdUsers.map(u => u.email.toLowerCase()))
+      const filtered = prev.filter(u => !existingEmails.has(u.email.toLowerCase()))
+      return [...filtered, ...createdUsers]
+    })
+
+    try {
+      await api.bulkSaveUsers(createdUsers)
+    } catch (_err) {}
+
+    return createdUsers
   }, [])
 
   const updateUser = useCallback((id: string, updates: Partial<User>) => {
@@ -772,7 +794,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addAdvisorAssessment,
     addStudentVoiceResponse, markVoiceSurveyCompleted,
     addDocument, updateDocument, updateDocumentStatus, deleteDocument,
-    addUser, updateUser,
+    addUser, bulkAddUsers, updateUser,
     addRosterEntry, updateRosterEntry, batchImportRoster,
     toggleAiApi, toggleUserAiAccess,
     addAiKey, setDefaultAiKey, deleteAiKey, refreshAiKeys,

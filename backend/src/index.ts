@@ -285,13 +285,18 @@ app.post('/api/users', async (c) => {
 
   const body = await c.req.json()
   const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
-  const assignedRole = body.role === 'admin' && body.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : body.role
+  const emailPrefix = (body.email || '').trim().split('@')[0]
+  const isStudent = /^\d/.test(emailPrefix) || (body.email || '').includes('@student.') || (body.email || '').includes('@lamduan.')
+  const assignedRole = isStudent
+    ? 'student'
+    : (body.role === 'admin' && body.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : body.role || 'advisor')
+  const autoCode = body.code || (isStudent ? emailPrefix : `STAFF_${Date.now().toString().slice(-4)}`)
 
   const newUser = {
     id: body.id || `USER_${Date.now()}`,
-    code: body.code,
-    name: body.name,
-    email: body.email,
+    code: autoCode,
+    name: body.name || emailPrefix,
+    email: (body.email || '').trim(),
     role: assignedRole,
     department: body.department || 'School of Applied Digital Technology (ADT)',
     phone: body.phone || null,
@@ -305,6 +310,48 @@ app.post('/api/users', async (c) => {
     set: newUser,
   })
   return c.json({ success: true, user: newUser })
+})
+
+app.post('/api/users/bulk', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json<{ users: any[] }>()
+  const userList = Array.isArray(body?.users) ? body.users : []
+  const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+
+  const insertedUsers = []
+  for (const item of userList) {
+    if (!item.email || !item.email.includes('@')) continue
+    const emailPrefix = item.email.trim().split('@')[0]
+    const isStudent = /^\d/.test(emailPrefix) || item.email.includes('@student.') || item.email.includes('@lamduan.')
+    const assignedRole = isStudent
+      ? 'student'
+      : (item.role === 'admin' && item.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : item.role || 'advisor')
+
+    const autoCode = item.code || (isStudent ? emailPrefix : `STAFF_${Date.now().toString().slice(-4)}`)
+
+    const userObj = {
+      id: item.id || `USER_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      code: autoCode,
+      name: item.name || emailPrefix,
+      email: item.email.trim(),
+      role: assignedRole,
+      department: item.department || 'School of Applied Digital Technology (ADT)',
+      phone: item.phone || null,
+      isActive: item.isActive !== undefined ? item.isActive : true,
+      hasAiAccess: item.hasAiAccess !== undefined ? item.hasAiAccess : false,
+      createdAt: item.createdAt || new Date().toISOString().split('T')[0],
+    }
+
+    await database.insert(schema.users).values(userObj).onConflictDoUpdate({
+      target: schema.users.id,
+      set: userObj,
+    })
+    insertedUsers.push(userObj)
+  }
+
+  return c.json({ success: true, count: insertedUsers.length, users: insertedUsers })
 })
 
 app.patch('/api/users/:id', async (c) => {
