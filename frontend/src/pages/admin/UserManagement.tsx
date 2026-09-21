@@ -20,7 +20,6 @@ export default function UserManagement() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
   const [newEmail, setNewEmail] = useState('')
-  const [newName, setNewName] = useState('')
   const [newRole, setNewRole] = useState<UserRole>('advisor')
   const [newDept, setNewDept] = useState('School of Applied Digital Technology (ADT)')
   const [bulkText, setBulkText] = useState('')
@@ -137,7 +136,6 @@ export default function UserManagement() {
   function openAddModal() {
     setAddMode('single')
     setNewEmail('')
-    setNewName('')
     setNewRole('advisor')
     setNewDept('School of Applied Digital Technology (ADT)')
     setBulkText('')
@@ -159,7 +157,7 @@ export default function UserManagement() {
     }
 
     const autoCode = deriveCode(effectiveRole, email)
-    const finalName = newName.trim() || derivedSingleName || emailPrefix
+    const finalName = derivedSingleName || emailPrefix
     const generatedId = `${effectiveRole.toUpperCase().slice(0, 3)}_${Date.now().toString().slice(-6)}`
 
     const newUser: User = {
@@ -184,7 +182,6 @@ export default function UserManagement() {
       )
       setShowAddModal(false)
       setNewEmail('')
-      setNewName('')
     } finally {
       setIsSubmitting(false)
     }
@@ -495,32 +492,6 @@ export default function UserManagement() {
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {t('ชื่อ-นามสกุล (ไม่บังคับ - สร้างจากอีเมลอัตโนมัติ)', 'Full Name (Optional - Auto-derived from email)')}
-                  </label>
-                  {derivedSingleName && (
-                    <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold">
-                      {t('สร้างอัตโนมัติ:', 'Auto-derived:')} {derivedSingleName}
-                    </span>
-                  )}
-                </div>
-                <input
-                  type="text"
-                  placeholder={derivedSingleName ? `e.g. ${derivedSingleName}` : 'e.g. Somchai Jaidee or Dr. Prasit Kumar'}
-                  value={newName}
-                  onChange={e => setNewName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-                <p className="text-[10px] text-slate-400 mt-1">
-                  {t(
-                    'หากเว้นว่าง ระบบจะสร้างชื่อจากอีเมลให้อัตโนมัติ และจะอัปเดตเป็นชื่อจริงจาก Google Account เมื่อผู้ใช้เข้าสู่ระบบครั้งแรก',
-                    'If left blank, name is derived from email and will auto-sync with verified Google Profile upon first login.'
-                  )}
-                </p>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
@@ -557,15 +528,32 @@ export default function UserManagement() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                <Info className="h-4 w-4 text-sky-600 dark:text-sky-400 flex-shrink-0" />
-                <span>
-                  {t(
-                    'รหัสประจำตัว (Code) และชื่อจะถูกสร้างให้อัตโนมัติจากอีเมล ไม่จำเป็นต้องกรอกแยก',
-                    'User Code and Display Name are derived automatically from the email address.'
-                  )}
-                </span>
-              </div>
+              {/* Dynamic Auto-Derived Info Preview */}
+              {newEmail.includes('@') && (
+                <div className="p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200/80 dark:border-sky-800/60 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                    <span className="font-semibold">{t('รหัสประจำตัว (Code):', 'User Code:')}</span>
+                    <span className="font-mono font-bold text-sky-700 dark:text-sky-300">
+                      {deriveCode(effectiveRole, newEmail)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                    <span className="font-semibold">{t('ชื่อที่สร้างเบื้องต้น:', 'Initial Display Name:')}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100">
+                      {derivedSingleName}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 pt-1 border-t border-sky-100 dark:border-sky-900/40 flex items-center gap-1.5">
+                    <Info className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+                    <span>
+                      {t(
+                        'ชื่อจริงและรูปโปรไฟล์จะอัปเดตตรงตาม Google Account โดยอัตโนมัติเมื่อผู้ใช้ล็อกอินครั้งแรก',
+                        'Official name & picture will automatically sync with Google Account upon first login.'
+                      )}
+                    </span>
+                  </p>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <Button
