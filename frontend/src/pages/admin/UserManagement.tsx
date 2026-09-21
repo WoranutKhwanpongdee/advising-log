@@ -613,60 +613,18 @@ export default function UserManagement() {
                 />
               </div>
 
-              {/* Bulk Default Department Selector & Quick Toggles */}
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-2">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {t('สำนักวิชา / ส่วนงาน (Default Department) *', 'Default Department *')}
-                  </label>
-                  <span className="text-[10px] text-slate-400">
-                    {t('นำไปใช้กับทุกคนในรายการที่ไม่ได้ระบุสำนักวิชาเฉพาะ', 'Applied to all imported users without custom dept')}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="text"
-                    value={bulkDept}
-                    onChange={e => setBulkDept(e.target.value)}
-                    placeholder="School of Applied Digital Technology (ADT)"
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setBulkDept('School of Applied Digital Technology (ADT)')}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
-                        bulkDept === 'School of Applied Digital Technology (ADT)'
-                          ? 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
-                      }`}
-                    >
-                      ADT (Default)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBulkDept('School of Information Technology')}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
-                        bulkDept === 'School of Information Technology'
-                          ? 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
-                      }`}
-                    >
-                      IT
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBulkDept('School of Liberal Arts')}
-                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
-                        bulkDept === 'School of Liberal Arts'
-                          ? 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-700'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750'
-                      }`}
-                    >
-                      Liberal Arts
-                    </button>
-                  </div>
-                </div>
+              {/* Bulk Default Department Input */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                  {t('สำนักวิชา / ส่วนงาน (Department)', 'Department')}
+                </label>
+                <input
+                  type="text"
+                  value={bulkDept}
+                  onChange={e => setBulkDept(e.target.value)}
+                  placeholder="School of Applied Digital Technology (ADT)"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
               </div>
 
               {/* Live Parsed Preview Table */}
