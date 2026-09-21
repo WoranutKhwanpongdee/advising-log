@@ -401,6 +401,39 @@ app.patch('/api/users/:id', async (c) => {
   return c.json({ success: true })
 })
 
+app.delete('/api/users/:id', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  const targetUser = await database.select().from(schema.users).where(eq(schema.users.id, id)).get()
+  if (!targetUser) {
+    return c.json({ error: 'User not found' }, 404)
+  }
+
+  // Protect Super Admin from deletion
+  const superAdminEmail = (c.env?.SUPER_ADMIN_EMAIL || 'se.advisinglog@gmail.com').toLowerCase().trim()
+  if (
+    targetUser.id === 'ADM_SE_GOOGLE' ||
+    targetUser.code === 'ADM-SUPER' ||
+    targetUser.email?.toLowerCase().trim() === superAdminEmail
+  ) {
+    return c.json({ success: false, error: 'Cannot delete Master Super Admin account' }, 400)
+  }
+
+  // Clean up any student-advisor assignments involving this user
+  await database.delete(schema.studentAdvisorAssignments).where(
+    or(
+      eq(schema.studentAdvisorAssignments.studentId, id),
+      eq(schema.studentAdvisorAssignments.advisorId, id)
+    )
+  )
+
+  // Delete the user record
+  await database.delete(schema.users).where(eq(schema.users.id, id))
+  return c.json({ success: true, deletedId: id })
+})
+
 app.get('/api/roster', async (c) => {
   const database = db(c)
   if (!database) return c.json({ roster: [] })

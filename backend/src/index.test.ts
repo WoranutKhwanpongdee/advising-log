@@ -180,4 +180,12 @@ describe('Backend Hono API', () => {
     // Either 400 (validation) or 503 (database offline in detached unit test)
     expect([400, 503]).toContain(res.status)
   })
+
+  it('DELETE /api/users/:id handles deletion safely and protects superadmin', async () => {
+    const res = await app.request('/api/users/ADM_SE_GOOGLE', {
+      method: 'DELETE',
+    })
+    // Either 400 (superadmin protected), 404 (not found), or 503 (detached unit test db)
+    expect([400, 404, 503]).toContain(res.status)
+  })
 })

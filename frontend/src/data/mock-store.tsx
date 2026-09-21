@@ -151,6 +151,7 @@ interface StoreActions {
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => User
   bulkAddUsers: (users: Partial<User>[]) => Promise<User[]>
   updateUser: (id: string, updates: Partial<User>) => void
+  deleteUser: (id: string) => Promise<{ success: boolean; error?: string }>
 
   // Roster
   addRosterEntry: (entry: Omit<StudentAdvisorAssignment, 'id' | 'assignedAt'>) => void
@@ -204,34 +205,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [exitCases, setExitCases] = useState<ExitCase[]>([...mockExitCases])
   const [advisorAssessments, setAdvisorAssessments] = useState<AdvisorExitAssessment[]>([...mockAdvisorAssessments])
   const [studentVoiceResponses, setStudentVoiceResponses] = useState<StudentVoiceResponse[]>([...mockStudentVoiceResponses])
-  const [completedVoiceStudents, setCompletedVoiceStudents] = useState<string[]>(() => {
-    try {
-      const raw = localStorage.getItem('advising_log_voice_survey_completed_students')
-      return raw ? JSON.parse(raw) : []
-    } catch {
-      return []
-    }
-  })
+  const [completedVoiceStudents, setCompletedVoiceStudents] = useState<string[]>([])
   const [documents, setDocuments] = useState<StudentDocument[]>([...mockStudentDocuments])
   const [categoryConfigs, setCategoryConfigs] = useState<AdvisingCategoryConfig[]>([...mockCategoryConfigs])
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([...mockDocumentTypes])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([...mockAuditLogs])
   const [aiKeys, setAiKeys] = useState<AiApiKey[]>([])
-  const [systemApiConfig, setSystemApiConfig] = useState<SystemApiConfig>(() => {
-    const saved = localStorage.getItem('advising_log_system_api_config')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch {}
-    }
-    return {
-      isAiApiEnabled: true,
-      provider: 'Google Gemini 1.5 Flash',
-      model: 'gemini-1.5-flash',
-      lastToggledAt: new Date().toISOString(),
-      lastToggledBy: 'Admin (System)',
-      notes: 'Active for Higher Ed QA retention analysis',
-    }
+  const [systemApiConfig, setSystemApiConfig] = useState<SystemApiConfig>({
+    isAiApiEnabled: true,
+    provider: 'Google Gemini 1.5 Flash',
+    model: 'gemini-1.5-flash',
+    lastToggledAt: new Date().toISOString(),
+    lastToggledBy: 'Admin (System)',
+    notes: 'Active for Higher Ed QA retention analysis',
   })
 
   // --- Background Backend Sync on Mount (Real Data from Cloudflare D1) ---
@@ -258,15 +244,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         api.getAiKeys(),
       ])
       if (!isMounted) return
-      if (uRes && Array.isArray(uRes.users)) setUsers(uRes.users)
-      if (rosRes && Array.isArray(rosRes.roster)) setRoster(rosRes.roster)
-      if (rRes && Array.isArray(rRes.requests)) setRequests(rRes.requests)
-      if (aptRes && Array.isArray(aptRes.appointments)) setAppointments(aptRes.appointments)
-      if (fRes && Array.isArray(fRes.followUps)) setFollowUps(fRes.followUps)
-      if (sRes && Array.isArray(sRes.sessions)) setSessions(sRes.sessions)
-      if (eRes && Array.isArray(eRes.exitCases)) setExitCases(eRes.exitCases)
-      if (vRes && Array.isArray(vRes.surveys)) setStudentVoiceResponses(vRes.surveys)
-      if (aRes && Array.isArray(aRes.logs)) setAuditLogs(aRes.logs)
+      if (uRes && Array.isArray(uRes.users) && uRes.users.length > 0) {
+        setUsers(uRes.users)
+        if (rosRes && Array.isArray(rosRes.roster)) {
+          setRoster(rosRes.roster)
+        }
+      } else if (rosRes && Array.isArray(rosRes.roster) && rosRes.roster.length > 0) {
+        setRoster(rosRes.roster)
+      }
+      if (rRes && Array.isArray(rRes.requests) && rRes.requests.length > 0) setRequests(rRes.requests)
+      if (aptRes && Array.isArray(aptRes.appointments) && aptRes.appointments.length > 0) setAppointments(aptRes.appointments)
+      if (fRes && Array.isArray(fRes.followUps) && fRes.followUps.length > 0) setFollowUps(fRes.followUps)
+      if (sRes && Array.isArray(sRes.sessions) && sRes.sessions.length > 0) setSessions(sRes.sessions)
+      if (eRes && Array.isArray(eRes.exitCases) && eRes.exitCases.length > 0) setExitCases(eRes.exitCases)
+      if (vRes && Array.isArray(vRes.surveys) && vRes.surveys.length > 0) setStudentVoiceResponses(vRes.surveys)
+      if (aRes && Array.isArray(aRes.logs) && aRes.logs.length > 0) setAuditLogs(aRes.logs)
       if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
     }
     syncFromBackend()
@@ -444,9 +436,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setDocuments(prev => prev.filter(d => d.id !== id))
   }, [])
 
-  const addUser = useCallback((user: Omit<User, 'id' | 'createdAt'>): User => {
-    const newUser: User = { ...user, id: nextId('USR'), createdAt: now() }
+  const addUser = useCallback((user: Omit<User, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): User => {
+    const newUser: User = { ...user, id: user.id || nextId('USR'), createdAt: user.createdAt || now() }
     setUsers(prev => [...prev, newUser])
+    api.saveUser(newUser).catch(() => {})
     return newUser
   }, [])
 
@@ -502,12 +495,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u))
   }, [])
 
+  const deleteUser = useCallback(async (id: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.deleteUser(id)
+      if (res && res.success === false) {
+        return { success: false, error: res.error || 'Failed to delete user' }
+      }
+      setUsers(prev => prev.filter(u => u.id !== id))
+      setRoster(prev => prev.filter(r => r.studentId !== id && r.advisorId !== id))
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Failed to delete user' }
+    }
+  }, [])
+
   const addRosterEntry = useCallback((entry: Omit<StudentAdvisorAssignment, 'id' | 'assignedAt'>) => {
-    setRoster(prev => [...prev, { ...entry, id: nextId('R'), assignedAt: now() }])
+    const newEntry: StudentAdvisorAssignment = { ...entry, id: nextId('R'), assignedAt: now() }
+    setRoster(prev => [...prev, newEntry])
+    api.saveRosterEntry(newEntry).catch(() => {})
   }, [])
 
   const updateRosterEntry = useCallback((studentId: string, newAdvisorId: string) => {
-    setRoster(prev => prev.map(r => r.studentId === studentId && r.isActive ? { ...r, advisorId: newAdvisorId } : r))
+    const entryData = {
+      studentId,
+      advisorId: newAdvisorId,
+      assignedAt: now(),
+      isActive: true,
+    }
+    setRoster(prev => {
+      const exists = prev.some(r => r.studentId === studentId && r.isActive)
+      if (exists) {
+        return prev.map(r => (r.studentId === studentId && r.isActive ? { ...r, advisorId: newAdvisorId, assignedAt: now() } : r))
+      } else {
+        const newEntry: StudentAdvisorAssignment = {
+          id: nextId('R'),
+          ...entryData,
+        }
+        return [newEntry, ...prev]
+      }
+    })
+    api.saveRosterEntry(entryData).catch(() => {})
   }, [])
 
   const addCategory = useCallback((cat: Omit<AdvisingCategoryConfig, 'id'>) => {
@@ -634,6 +661,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
 
       validBatch.push({ student, advisor, rawEntry: entry })
+    }
+
+    // Persist imported batch to backend D1 database
+    for (const item of validBatch) {
+      api.saveRosterEntry({
+        studentId: item.student.id,
+        advisorId: item.advisor.id,
+        assignedAt: now(),
+        isActive: true,
+      }).catch(() => {})
     }
 
     if (mode === 'replace') {
@@ -828,7 +865,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addAdvisorAssessment,
     addStudentVoiceResponse, markVoiceSurveyCompleted,
     addDocument, updateDocument, updateDocumentStatus, deleteDocument,
-    addUser, bulkAddUsers, updateUser,
+    addUser, bulkAddUsers, updateUser, deleteUser,
     addRosterEntry, updateRosterEntry, batchImportRoster,
     toggleAiApi, toggleUserAiAccess,
     addAiKey, setDefaultAiKey, deleteAiKey, refreshAiKeys,

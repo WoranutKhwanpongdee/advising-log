@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useToast } from '@/contexts/ToastContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal, UserAvatar } from '@/components/ui'
 import type { User, UserRole } from '@/types'
-import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck, User as UserIcon, Users, Info } from 'lucide-react'
+import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck, User as UserIcon, Users, Info, Trash2, AlertTriangle } from 'lucide-react'
 
 export default function UserManagement() {
   const store = useStore()
@@ -15,6 +15,10 @@ export default function UserManagement() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
   const [showRoleDropdown, setShowRoleDropdown] = useState(false)
+
+  // Delete User State
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Add User Modal State (Single & Bulk)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -321,20 +325,30 @@ export default function UserManagement() {
           )
         }
         return (
-          <Button
-            size="sm"
-            variant={u.isActive ? 'secondary' : 'primary'}
-            onClick={() => {
-              store.updateUser(u.id, { isActive: !u.isActive })
-              addToast(
-                'info',
-                u.isActive ? t('ระงับการใช้งานบัญชี', 'Account Deactivated') : t('เปิดใช้งานบัญชี', 'Account Activated'),
-                t(`บัญชีของ ${u.name} (${u.code}) ถูก${u.isActive ? 'ระงับการใช้งาน' : 'เปิดใช้งาน'}แล้ว`, `User account for ${u.name} has been ${u.isActive ? 'deactivated' : 'activated'}.`)
-              )
-            }}
-          >
-            {u.isActive ? t('ปิดการใช้งาน', 'Deactivate') : t('เปิดใช้งาน', 'Activate')}
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              size="sm"
+              variant={u.isActive ? 'secondary' : 'primary'}
+              onClick={() => {
+                store.updateUser(u.id, { isActive: !u.isActive })
+                addToast(
+                  'info',
+                  u.isActive ? t('ระงับการใช้งานบัญชี', 'Account Deactivated') : t('เปิดใช้งานบัญชี', 'Account Activated'),
+                  t(`บัญชีของ ${u.name} (${u.code}) ถูก${u.isActive ? 'ระงับการใช้งาน' : 'เปิดใช้งาน'}แล้ว`, `User account for ${u.name} has been ${u.isActive ? 'deactivated' : 'activated'}.`)
+                )
+              }}
+            >
+              {u.isActive ? t('ปิดการใช้งาน', 'Deactivate') : t('เปิดใช้งาน', 'Activate')}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setUserToDelete(u)}
+              title={t('ลบบัญชีผู้ใช้ถาวร', 'Delete Account Permanently')}
+              className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
         )
       },
     },
@@ -732,6 +746,88 @@ export default function UserManagement() {
             </div>
           )}
         </div>
+      </Modal>
+
+      {/* Delete User Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(userToDelete)}
+        onClose={() => !isDeleting && setUserToDelete(null)}
+        title={t('ยืนยันการลบบัญชีผู้ใช้ถาวร', 'Confirm Permanent Account Deletion')}
+        size="md"
+      >
+        {userToDelete && (
+          <div className="space-y-4 pt-1">
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200">
+              <AlertTriangle className="h-5 w-5 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
+              <div className="text-xs space-y-1">
+                <p className="font-bold">
+                  {t('การดำเนินการนี้ไม่สามารถย้อนกลับได้', 'This action cannot be undone.')}
+                </p>
+                <p className="text-rose-700 dark:text-rose-300 leading-relaxed">
+                  {t(
+                    'ข้อมูลบัญชีผู้ใช้และการจับคู่อาจารย์ที่ปรึกษาที่เกี่ยวข้องจะถูกลบออกจากฐานข้อมูลอย่างถาวร',
+                    'The user account and associated advisor-student roster pairings will be permanently deleted from the database.'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 dark:text-slate-400">{t('ชื่อ-นามสกุล', 'Name')}:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{userToDelete.name}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 dark:text-slate-400">{t('อีเมล', 'Email')}:</span>
+                <span className="font-mono text-slate-700 dark:text-slate-200">{userToDelete.email}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 dark:text-slate-400">{t('รหัสประจำตัว / บทบาท', 'Code / Role')}:</span>
+                <span className="font-mono text-slate-700 dark:text-slate-200">{userToDelete.code} ({userToDelete.role})</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setUserToDelete(null)}
+                disabled={isDeleting}
+              >
+                {t('ยกเลิก', 'Cancel')}
+              </Button>
+              <Button
+                size="sm"
+                disabled={isDeleting}
+                onClick={async () => {
+                  if (!userToDelete) return
+                  setIsDeleting(true)
+                  try {
+                    const res = await store.deleteUser(userToDelete.id)
+                    if (res && res.success === false) {
+                      addToast('error', t('ไม่สามารถลบบัญชีได้', 'Failed to delete user'), res.error)
+                    } else {
+                      addToast(
+                        'success',
+                        t('ลบบัญชีผู้ใช้สำเร็จ', 'Account Deleted Successfully'),
+                        t(`ลบบัญชี ${userToDelete.name} (${userToDelete.email}) ออกจากระบบแล้ว`, `User ${userToDelete.name} has been removed.`)
+                      )
+                      setUserToDelete(null)
+                    }
+                  } catch (err: any) {
+                    addToast('error', t('เกิดข้อผิดพลาด', 'Error'), err.message || 'Deletion failed')
+                  } finally {
+                    setIsDeleting(false)
+                  }
+                }}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-bold cursor-pointer"
+              >
+                <Trash2 className="h-4 w-4 mr-1.5" />
+                {isDeleting ? t('กำลังลบ...', 'Deleting...') : t('ยืนยันลบบัญชีถาวร', 'Delete Account')}
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   )

@@ -79,6 +79,12 @@ class ApiClient {
     })
   }
 
+  async deleteUser(id: string) {
+    return this.request<{ success: boolean; deletedId?: string; error?: string }>('/api/users/' + encodeURIComponent(id), {
+      method: 'DELETE',
+    })
+  }
+
   // --- Student-Advisor Roster ---
   async getRoster() {
     return this.request<{ roster: StudentAdvisorAssignment[] }>('/api/roster')

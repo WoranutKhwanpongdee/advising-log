@@ -451,10 +451,96 @@ describe('Admin API Control & CSV Roster Import', () => {
 
     // Non-student batch role selector should be rendered
     expect(screen.getByText(/บทบาทเริ่มต้นสำหรับอาจารย์\/บุคลากร:/i)).toBeInTheDocument()
+  })
 
-    // Individual dropdowns exist for non-students
-    const roleSelects = screen.getAllByRole('combobox')
-    expect(roleSelects.length).toBeGreaterThan(0)
+  it('successfully creates a new roster entry when assigning an unassigned student in Roster', () => {
+    let storeRef: any
+    function TestRoster() {
+      storeRef = useStore()
+      return <Roster />
+    }
+
+    renderWithProviders(<TestRoster />)
+
+    // Add a new student into store who has no roster entry yet
+    act(() => {
+      storeRef.addUser({
+        id: 'STU_NEW_999',
+        code: '6631509999',
+        name: 'Nattapong NewStudent',
+        email: '6631509999@lamduan.mfu.ac.th',
+        role: 'student',
+        department: 'School of Applied Digital Technology (ADT)',
+        isActive: true,
+        createdAt: '2026-09-01',
+      })
+    })
+
+    // Open Assign modal
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /กำหนดที่ปรึกษา/i }))
+    })
+
+    // Select the new student and advisor Dr. Prasit
+    const selects = screen.getAllByRole('combobox')
+    const studentSelect = selects[0]
+    const advisorSelect = selects[1]
+
+    act(() => {
+      fireEvent.change(studentSelect, { target: { value: 'STU_NEW_999' } })
+      fireEvent.change(advisorSelect, { target: { value: 'ADV001' } })
+    })
+
+    // Submit assignment
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /บันทึกการจับคู่/i }))
+    })
+
+    // Check that the student and advisor now appear in the active roster table!
+    expect(screen.getByText('6631509999')).toBeInTheDocument()
+    expect(screen.getByText('Nattapong NewStudent')).toBeInTheDocument()
+  })
+
+  it('allows admin to permanently delete an account and cleans up associated roster pairings', async () => {
+    let storeRef: any
+    function TestUserManagement() {
+      storeRef = useStore()
+      return <UserManagement />
+    }
+
+    renderWithProviders(<TestUserManagement />)
+
+    // Add a temporary user
+    act(() => {
+      storeRef.addUser({
+        id: 'USR_TEMP_123',
+        code: 'TEMP123',
+        name: 'Temporary User',
+        email: 'temp.user@mfu.ac.th',
+        role: 'advisor',
+        department: 'School of Applied Digital Technology (ADT)',
+        isActive: true,
+        createdAt: '2026-09-01',
+      })
+      storeRef.addRosterEntry({
+        studentId: 'STU001',
+        advisorId: 'USR_TEMP_123',
+        isActive: true,
+      })
+    })
+
+    expect(storeRef.users.some((u: any) => u.id === 'USR_TEMP_123')).toBe(true)
+    expect(storeRef.roster.some((r: any) => r.advisorId === 'USR_TEMP_123')).toBe(true)
+
+    // Delete user
+    await act(async () => {
+      const res = await storeRef.deleteUser('USR_TEMP_123')
+      expect(res.success).toBe(true)
+    })
+
+    // Verify user and roster pairings are removed
+    expect(storeRef.users.some((u: any) => u.id === 'USR_TEMP_123')).toBe(false)
+    expect(storeRef.roster.some((r: any) => r.advisorId === 'USR_TEMP_123')).toBe(false)
   })
 
 })

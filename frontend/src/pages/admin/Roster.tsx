@@ -44,14 +44,17 @@ export default function Roster() {
   const [importTab, setImportTab] = useState<'input' | 'preview'>('input')
 
   const activeRoster = store.roster.filter(r => r.isActive).filter(r => {
-    if (!search) return true
+    if (!search.trim()) return true
     const student = store.users.find(u => u.id === r.studentId)
     const advisor = store.users.find(u => u.id === r.advisorId)
-    const s = search.toLowerCase()
+    const s = search.trim().toLowerCase()
     return (
-      student?.name.toLowerCase().includes(s) ||
-      student?.code.toLowerCase().includes(s) ||
-      advisor?.name.toLowerCase().includes(s)
+      (student?.name && student.name.toLowerCase().includes(s)) ||
+      (student?.code && student.code.toLowerCase().includes(s)) ||
+      (student?.email && student.email.toLowerCase().includes(s)) ||
+      (advisor?.name && advisor.name.toLowerCase().includes(s)) ||
+      (advisor?.email && advisor.email.toLowerCase().includes(s)) ||
+      (advisor?.code && advisor.code.toLowerCase().includes(s))
     )
   })
 
