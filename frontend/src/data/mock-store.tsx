@@ -231,7 +231,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true
     async function syncFromBackend() {
-      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes, kRes] = await Promise.all([
+      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes, kRes, ewRes] = await Promise.all([
         api.getUsers(),
         api.getRoster(),
         api.getRequests(),
@@ -242,24 +242,33 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         api.getStudentVoice(),
         api.getAuditLogs(),
         api.getAiKeys(),
+        api.getEarlyWarnings(),
       ])
       if (!isMounted) return
       if (uRes && Array.isArray(uRes.users) && uRes.users.length > 0) {
         setUsers(uRes.users)
-        if (rosRes && Array.isArray(rosRes.roster)) {
-          setRoster(rosRes.roster)
-        }
-      } else if (rosRes && Array.isArray(rosRes.roster) && rosRes.roster.length > 0) {
-        setRoster(rosRes.roster)
+        if (rosRes && Array.isArray(rosRes.roster)) setRoster(rosRes.roster)
+        if (rRes && Array.isArray(rRes.requests)) setRequests(rRes.requests)
+        if (aptRes && Array.isArray(aptRes.appointments)) setAppointments(aptRes.appointments)
+        if (fRes && Array.isArray(fRes.followUps)) setFollowUps(fRes.followUps)
+        if (sRes && Array.isArray(sRes.sessions)) setSessions(sRes.sessions)
+        if (eRes && Array.isArray(eRes.exitCases)) setExitCases(eRes.exitCases)
+        if (vRes && Array.isArray(vRes.surveys)) setStudentVoiceResponses(vRes.surveys)
+        if (aRes && Array.isArray(aRes.logs)) setAuditLogs(aRes.logs)
+        if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
+        if (ewRes && Array.isArray(ewRes.earlyWarnings)) setEarlyWarnings(ewRes.earlyWarnings)
+      } else {
+        if (rosRes && Array.isArray(rosRes.roster) && rosRes.roster.length > 0) setRoster(rosRes.roster)
+        if (rRes && Array.isArray(rRes.requests) && rRes.requests.length > 0) setRequests(rRes.requests)
+        if (aptRes && Array.isArray(aptRes.appointments) && aptRes.appointments.length > 0) setAppointments(aptRes.appointments)
+        if (fRes && Array.isArray(fRes.followUps) && fRes.followUps.length > 0) setFollowUps(fRes.followUps)
+        if (sRes && Array.isArray(sRes.sessions) && sRes.sessions.length > 0) setSessions(sRes.sessions)
+        if (eRes && Array.isArray(eRes.exitCases) && eRes.exitCases.length > 0) setExitCases(eRes.exitCases)
+        if (vRes && Array.isArray(vRes.surveys) && vRes.surveys.length > 0) setStudentVoiceResponses(vRes.surveys)
+        if (aRes && Array.isArray(aRes.logs) && aRes.logs.length > 0) setAuditLogs(aRes.logs)
+        if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
+        if (ewRes && Array.isArray(ewRes.earlyWarnings) && ewRes.earlyWarnings.length > 0) setEarlyWarnings(ewRes.earlyWarnings)
       }
-      if (rRes && Array.isArray(rRes.requests) && rRes.requests.length > 0) setRequests(rRes.requests)
-      if (aptRes && Array.isArray(aptRes.appointments) && aptRes.appointments.length > 0) setAppointments(aptRes.appointments)
-      if (fRes && Array.isArray(fRes.followUps) && fRes.followUps.length > 0) setFollowUps(fRes.followUps)
-      if (sRes && Array.isArray(sRes.sessions) && sRes.sessions.length > 0) setSessions(sRes.sessions)
-      if (eRes && Array.isArray(eRes.exitCases) && eRes.exitCases.length > 0) setExitCases(eRes.exitCases)
-      if (vRes && Array.isArray(vRes.surveys) && vRes.surveys.length > 0) setStudentVoiceResponses(vRes.surveys)
-      if (aRes && Array.isArray(aRes.logs) && aRes.logs.length > 0) setAuditLogs(aRes.logs)
-      if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
     }
     syncFromBackend()
     return () => { isMounted = false }
@@ -364,6 +373,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addEarlyWarning = useCallback((ew: Omit<EarlyWarningCase, 'id' | 'createdAt'>): EarlyWarningCase => {
     const newEw: EarlyWarningCase = { ...ew, id: nextId('EW'), createdAt: now() }
     setEarlyWarnings(prev => [newEw, ...prev])
+    api.saveEarlyWarning(newEw).catch(() => {})
     return newEw
   }, [])
 
@@ -384,11 +394,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addExitCase = useCallback((ec: Omit<ExitCase, 'id' | 'createdAt' | 'updatedAt'>): ExitCase => {
     const newEc: ExitCase = { ...ec, id: nextId('EX'), createdAt: now(), updatedAt: now() }
     setExitCases(prev => [newEc, ...prev])
+    api.createExitCase(newEc).catch(() => {})
     return newEc
   }, [])
 
   const updateExitCaseStatus = useCallback((id: string, status: ExitCase['status']) => {
     setExitCases(prev => prev.map(e => e.id === id ? { ...e, status, updatedAt: now() } : e))
+    api.updateExitCase(id, { status }).catch(() => {})
   }, [])
 
   const addAdvisorAssessment = useCallback((a: Omit<AdvisorExitAssessment, 'id' | 'createdAt'>): AdvisorExitAssessment => {
@@ -415,6 +427,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (svr.studentId) {
       markVoiceSurveyCompleted(svr.studentId)
     }
+    api.submitStudentVoice(newSvr).catch(() => {})
     return newSvr
   }, [markVoiceSurveyCompleted])
 

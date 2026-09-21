@@ -193,33 +193,33 @@ export default function QADashboard() {
         }
       />
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-2 overflow-x-auto">
+      {/* Modern Segmented Navigation Tabs */}
+      <div className="p-1.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 flex items-center gap-1.5 overflow-x-auto shadow-2xs backdrop-blur-md">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'overview'
-              ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-slate-800 text-sky-700 dark:text-sky-300 shadow-sm border border-slate-200/60 dark:border-slate-700/60'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50'
           }`}
         >
-          <BarChart3 className="h-4 w-4" />
+          <BarChart3 className="h-4 w-4 text-sky-500" />
           <span>{t('ภาพรวมระบบและตัวชี้วัด', 'General Metrics & Workload')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('exit_qualitative')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'exit_qualitative'
-              ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-slate-800 text-sky-700 dark:text-sky-300 shadow-sm border border-slate-200/60 dark:border-slate-700/60'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50'
           }`}
         >
-          <Brain className="h-4 w-4" />
+          <Brain className="h-4 w-4 text-purple-500" />
           <span>{t('วิเคราะห์เจาะลึกทำไมลาออก / พักการศึกษา (Qualitative)', 'Why Resign / Leave (Qualitative)')}</span>
-          <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-extrabold border border-rose-200/60 dark:border-rose-800/60">
+          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-300 font-extrabold border border-rose-200/60 dark:border-rose-800/60">
             {totalExitCases}
           </span>
         </button>
@@ -227,15 +227,15 @@ export default function QADashboard() {
         <button
           type="button"
           onClick={() => setActiveTab('student_voice')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'student_voice'
-              ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-slate-800 text-sky-700 dark:text-sky-300 shadow-sm border border-slate-200/60 dark:border-slate-700/60'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50'
           }`}
         >
-          <MessageSquareHeart className="h-4 w-4" />
+          <MessageSquareHeart className="h-4 w-4 text-emerald-500" />
           <span>{t('เสียงของนักศึกษา (กรณีลาออก/พักการศึกษา)', 'Student Voice — Resignation/Leave')}</span>
-          <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-sky-200/40 text-sky-900 dark:text-sky-100 font-extrabold">
+          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-extrabold border border-emerald-200/60 dark:border-emerald-800/60">
             {totalVoiceResponses}
           </span>
         </button>
@@ -259,28 +259,36 @@ export default function QADashboard() {
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('สัดส่วนหัวข้อการขอคำปรึกษา', 'Advising Distribution by Topic')}
               </h3>
-              <div className="h-[28rem] sm:h-[30rem]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 16 }} barCategoryGap={12}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                    <XAxis type="number" hide />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: chartTheme.axis }} tickLine={false} axisLine={false} width={210} interval={0} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: chartTheme.tooltipBg,
-                        borderColor: chartTheme.tooltipBorder,
-                        color: chartTheme.tooltipText,
-                        borderRadius: '8px',
-                        fontSize: '11px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                      }}
-                      itemStyle={{ color: chartTheme.tooltipText }}
-                      formatter={(value, _name, item) => [`${value} ${t('คำร้อง', 'requests')} (${item.payload.percentage}%)`, t('จำนวน', 'Count')]}
-                    />
-                    <Bar dataKey="count" fill="#0284c7" radius={[0, 6, 6, 0]} barSize={24} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {categoryData.length > 0 ? (
+                <div className="h-[28rem] sm:h-[30rem]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryData} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 16 }} barCategoryGap={12}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                      <XAxis type="number" hide />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: chartTheme.axis }} tickLine={false} axisLine={false} width={210} interval={0} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: chartTheme.tooltipBg,
+                          borderColor: chartTheme.tooltipBorder,
+                          color: chartTheme.tooltipText,
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                        }}
+                        itemStyle={{ color: chartTheme.tooltipText }}
+                        formatter={(value, _name, item) => [`${value} ${t('คำร้อง', 'requests')} (${item.payload.percentage}%)`, t('จำนวน', 'Count')]}
+                      />
+                      <Bar dataKey="count" fill="#0284c7" radius={[0, 6, 6, 0]} barSize={24} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-72 text-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30">
+                  <BarChart3 className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-2" />
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('ยังไม่มีข้อมูลคำร้องในฐานข้อมูล', 'No Advising Requests Recorded Yet')}</p>
+                  <p className="text-xs text-slate-400 mt-1 max-w-sm">{t('เมื่อนักศึกษายื่นคำร้องขอคำปรึกษา ระบบจะวิเคราะห์สัดส่วนหัวข้อที่นี่แบบ Real-time', 'When students submit advising requests, distribution analytics will display here automatically in real-time.')}</p>
+                </div>
+              )}
             </Card>
 
             {/* Exit Reason Distribution */}
@@ -292,55 +300,47 @@ export default function QADashboard() {
                 <span className="inline-flex items-center rounded-full border border-sky-100 dark:border-sky-900/50 bg-sky-50 dark:bg-sky-950/35 px-3 py-1 text-[11px] font-bold text-sky-700 dark:text-sky-300 whitespace-nowrap">
                   {t(`${exitTotal} เคส`, `${exitTotal} total`)}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('exit_qualitative')}
-                  className="hidden"
-                >
-                  <span>{t('วิเคราะห์เจาะลึกเชิงคุณภาพ', 'Explore Qualitative')}</span>
-                  <ArrowRight className="h-3 w-3" />
-                </button>
               </div>
               <div className="flex-1">
                 {exitData.length > 0 ? (
                   <div className="flex h-full min-h-[25rem] flex-col">
                     <div className="relative h-56 sm:h-60">
                       <ResponsiveContainer width="100%" height="100%">
-                    <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-                      <Pie
-                        data={exitData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={58}
-                        outerRadius={92}
-                        paddingAngle={3}
-                        stroke={isDark ? '#0f172a' : '#ffffff'}
-                        strokeWidth={4}
-                      >
-                        {exitData.map((_, i) => (
-                          <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: chartTheme.tooltipBg,
-                          borderColor: chartTheme.tooltipBorder,
-                          color: chartTheme.tooltipText,
-                          borderRadius: '8px',
-                          fontSize: '12px',
-                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                        }}
-                        itemStyle={{ color: chartTheme.tooltipText }}
-                        formatter={(value, name) => {
-                          const count = Number(value || 0)
-                          const percentage = exitTotal > 0 ? Math.round((count / exitTotal) * 100) : 0
-                          return [`${count} (${percentage}%)`, name]
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                        <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+                          <Pie
+                            data={exitData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={58}
+                            outerRadius={92}
+                            paddingAngle={3}
+                            stroke={isDark ? '#0f172a' : '#ffffff'}
+                            strokeWidth={4}
+                          >
+                            {exitData.map((_, i) => (
+                              <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: chartTheme.tooltipBg,
+                              borderColor: chartTheme.tooltipBorder,
+                              color: chartTheme.tooltipText,
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                            }}
+                            itemStyle={{ color: chartTheme.tooltipText }}
+                            formatter={(value, name) => {
+                              const count = Number(value || 0)
+                              const percentage = exitTotal > 0 ? Math.round((count / exitTotal) * 100) : 0
+                              return [`${count} (${percentage}%)`, name]
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                         <div className="text-center">
                           <div className="text-2xl font-black leading-none text-slate-950 dark:text-white">{exitTotal}</div>
@@ -384,14 +384,18 @@ export default function QADashboard() {
                     <button
                       type="button"
                       onClick={() => setActiveTab('exit_qualitative')}
-                      className="mt-3 inline-flex items-center justify-center gap-1 rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-100 dark:border-sky-900/50 dark:bg-sky-950/35 dark:text-sky-300 dark:hover:bg-sky-950/60 cursor-pointer"
+                      className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-xl border border-sky-100 bg-sky-50/70 px-3 py-2 text-[11px] font-bold text-sky-700 transition-colors hover:bg-sky-100 dark:border-sky-900/50 dark:bg-sky-950/35 dark:text-sky-300 dark:hover:bg-sky-950/60 cursor-pointer"
                     >
-                      <span>{t('วิเคราะห์เจาะลึกเชิงคุณภาพ', 'Explore Qualitative')}</span>
+                      <span>{t('วิเคราะห์เจาะลึกเชิงคุณภาพด้วย AI', 'Explore Qualitative AI Analysis')}</span>
                       <ArrowRight className="h-3 w-3" />
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-xs text-slate-400">{t('ไม่มีข้อมูลเคสขอลาออกบันทึกไว้', 'No exit case data recorded')}</div>
+                  <div className="flex flex-col items-center justify-center h-72 text-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30">
+                    <UserX className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-2" />
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{t('ไม่มีข้อมูลเคสขอลาออก/ลาพัก', 'No Departure Cases Recorded')}</p>
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm">{t('ทุกชั้นปีมีสถานะปกติ ไม่พบนักศึกษาขอยื่นเรื่องลาออกในระบบ D1', 'All cohorts are in good standing with zero withdrawal filings.')}</p>
+                  </div>
                 )}
               </div>
             </Card>
@@ -402,30 +406,37 @@ export default function QADashboard() {
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
             </h3>
-            <div className="h-52 sm:h-60">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={advisorWorkload}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} />
-                  <YAxis tick={{ fontSize: 10, fill: chartTheme.axis }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: chartTheme.tooltipBg,
-                      borderColor: chartTheme.tooltipBorder,
-                      color: chartTheme.tooltipText,
-                      borderRadius: '8px',
-                      fontSize: '11px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                    }}
-                    itemStyle={{ color: chartTheme.tooltipText }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 10, color: chartTheme.axis }} />
-                  <Bar dataKey="students" fill="#0284c7" name={t('นักศึกษาในความดูแล', 'Assigned Advisees')} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="requests" fill="#38bdf8" name={t('คำร้องที่ได้รับ', 'Student Requests')} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="sessions" fill="#64748b" name={t('ครั้งที่ให้คำปรึกษาสำเร็จ', 'Completed Sessions')} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {advisorWorkload.length > 0 ? (
+              <div className="h-52 sm:h-60">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={advisorWorkload}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} />
+                    <YAxis tick={{ fontSize: 10, fill: chartTheme.axis }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: chartTheme.tooltipBg,
+                        borderColor: chartTheme.tooltipBorder,
+                        color: chartTheme.tooltipText,
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      }}
+                      itemStyle={{ color: chartTheme.tooltipText }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 10, color: chartTheme.axis }} />
+                    <Bar dataKey="students" fill="#0284c7" name={t('นักศึกษาในความดูแล', 'Assigned Advisees')} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="requests" fill="#38bdf8" name={t('คำร้องที่ได้รับ', 'Student Requests')} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="sessions" fill="#64748b" name={t('ครั้งที่ให้คำปรึกษาสำเร็จ', 'Completed Sessions')} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-48 text-center p-6 border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30">
+                <CalendarClock className="h-8 w-8 text-slate-300 dark:text-slate-600 mb-2" />
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">{t('ไม่มีข้อมูลอาจารย์ที่ปรึกษาที่ลงทะเบียน', 'No Faculty Advisors Registered')}</p>
+              </div>
+            )}
           </Card>
         </>
       )}

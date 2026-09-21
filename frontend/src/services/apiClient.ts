@@ -13,6 +13,7 @@ import type {
   FollowUpProgress,
   ExitCase,
   StudentVoiceResponse,
+  EarlyWarningCase,
   AuditLog,
   AiApiKey,
 } from '@/types'
@@ -201,6 +202,18 @@ class ApiClient {
     return this.request<{ success: boolean; survey: StudentVoiceResponse }>('/api/student-voice', {
       method: 'POST',
       body: JSON.stringify(survey),
+    })
+  }
+
+  // --- Early Warnings ---
+  async getEarlyWarnings() {
+    return this.request<{ earlyWarnings: EarlyWarningCase[] }>('/api/early-warnings')
+  }
+
+  async saveEarlyWarning(ew: Partial<EarlyWarningCase>) {
+    return this.request<{ success: boolean; earlyWarning: EarlyWarningCase }>('/api/early-warnings', {
+      method: 'POST',
+      body: JSON.stringify(ew),
     })
   }
 

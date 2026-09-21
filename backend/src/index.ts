@@ -753,7 +753,66 @@ app.post('/api/student-voice', async (c) => {
 })
 
 // ============================================================
-// 6. Audit Logs & Referrals
+// 6. Early Warnings & Indicators
+// ============================================================
+app.get('/api/early-warnings', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ earlyWarnings: [] })
+  const list = await database.select().from(schema.earlyWarnings).orderBy(desc(schema.earlyWarnings.createdAt))
+  const formatted = list.map(item => {
+    let extra: any = {}
+    try {
+      extra = JSON.parse(item.indicators || '{}')
+    } catch {}
+    return {
+      id: item.id,
+      studentId: item.studentId,
+      advisorId: extra.advisorId || 'ADV001',
+      warningType: extra.warningType || 'academic_risk',
+      severity: item.riskLevel || extra.severity || 'medium',
+      description: item.notes || extra.description || '',
+      dateDetected: extra.dateDetected || item.createdAt,
+      recommendedAction: extra.recommendedAction || '',
+      followUpDate: extra.followUpDate || '',
+      status: item.status,
+      createdAt: item.createdAt,
+    }
+  })
+  return c.json({ earlyWarnings: formatted })
+})
+
+app.post('/api/early-warnings', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const record = {
+    id: body.id || `EW${Date.now()}`,
+    studentId: body.studentId,
+    riskLevel: (body.severity === 'critical' ? 'critical' : body.severity === 'high' ? 'high' : body.severity === 'low' ? 'low' : 'medium') as any,
+    indicators: JSON.stringify({
+      advisorId: body.advisorId,
+      warningType: body.warningType,
+      severity: body.severity,
+      description: body.description,
+      dateDetected: body.dateDetected,
+      recommendedAction: body.recommendedAction,
+      followUpDate: body.followUpDate,
+    }),
+    status: body.status || 'active',
+    notes: body.description || '',
+    createdAt: body.createdAt || new Date().toISOString().split('T')[0],
+  }
+
+  await database.insert(schema.earlyWarnings).values(record).onConflictDoUpdate({
+    target: schema.earlyWarnings.id,
+    set: record,
+  })
+  return c.json({ success: true, earlyWarning: body }, 201)
+})
+
+// ============================================================
+// 7. Audit Logs & Referrals
 // ============================================================
 app.get('/api/audit-logs', async (c) => {
   const database = db(c)
