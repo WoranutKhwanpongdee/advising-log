@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useToast } from '@/contexts/ToastContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal, UserAvatar } from '@/components/ui'
 import type { User, UserRole } from '@/types'
-import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck, User as UserIcon, Users, GraduationCap, Info } from 'lucide-react'
+import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck, User as UserIcon, Users, Info } from 'lucide-react'
 
 export default function UserManagement() {
   const store = useStore()
@@ -492,17 +492,12 @@ export default function UserManagement() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                    {t('บทบาทในระบบ *', 'System Role *')}
-                  </label>
-                  {isStudentDetected ? (
-                    <div className="px-3.5 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-xs font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-sky-600 dark:text-sky-400 flex-shrink-0" />
-                      <span>{t('นักศึกษา (ตรวจพบรหัสนักศึกษาอัตโนมัติ)', 'Student (Auto-detected from ID)')}</span>
-                    </div>
-                  ) : (
+              {!isStudentDetected ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                      {t('บทบาทในระบบ *', 'System Role *')}
+                    </label>
                     <select
                       value={newRole}
                       onChange={e => setNewRole(e.target.value as UserRole)}
@@ -512,9 +507,21 @@ export default function UserManagement() {
                       <option value="qa_chair">{t('ประกันคุณภาพ/ประธานหลักสูตร (QA Chair)', 'QA Chair / Program Chair')}</option>
                       <option value="admin">{t('ผู้ดูแลระบบ (Admin)', 'System Admin')}</option>
                     </select>
-                  )}
-                </div>
+                  </div>
 
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+                      {t('สำนักวิชา / ส่วนงาน', 'Department')}
+                    </label>
+                    <input
+                      type="text"
+                      value={newDept}
+                      onChange={e => setNewDept(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                </div>
+              ) : (
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
                     {t('สำนักวิชา / ส่วนงาน', 'Department')}
@@ -526,7 +533,7 @@ export default function UserManagement() {
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   />
                 </div>
-              </div>
+              )}
 
               {/* Dynamic Auto-Derived Info Preview */}
               {newEmail.includes('@') && (
