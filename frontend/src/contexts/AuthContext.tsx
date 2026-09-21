@@ -139,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const newUser: User = existingUser ? {
           ...existingUser,
+          name: (existingUser.name.startsWith('Student ') || existingUser.name.includes('@') || existingUser.name === userCode) && name ? name : existingUser.name,
           code: isAuthorizedAdmin ? 'ADM-SUPER' : existingUser.code,
           avatar: picture || existingUser.avatar,
         } : {

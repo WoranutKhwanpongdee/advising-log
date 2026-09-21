@@ -239,10 +239,19 @@ app.post('/api/auth/google', async (c) => {
       }
     }
 
+    // Update real profile name and picture from Google OAuth
+    if (name && (user.name.startsWith('Student ') || user.name.includes('@') || user.name === codePrefix)) {
+      try {
+        await database.update(schema.users).set({ name, avatar: picture || null }).where(eq(schema.users.id, user.id))
+        user = { ...user, name }
+      } catch (_e) {}
+    }
+
     return c.json({
       success: true,
       user: {
         ...user,
+        name: name || user.name,
         avatar: picture || null,
         advisor: assignedAdvisor,
       },
