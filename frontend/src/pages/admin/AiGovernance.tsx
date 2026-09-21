@@ -8,27 +8,24 @@ import {
   Search,
   Eye,
   EyeOff,
-  CheckCircle2,
-  XCircle,
   Clock,
   Cpu,
   Lock,
   Layers,
   ScrollText,
   Zap,
+  Plus,
+  Trash2,
+  Star,
+  Sparkles,
 } from 'lucide-react'
-import { PageHeader, Button, DataTable, StatusBadge, UserAvatar } from '@/components/ui'
+import { PageHeader, Button, DataTable, StatusBadge, UserAvatar, Modal } from '@/components/ui'
 import { useStore } from '@/data/mock-store'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import {
-  getStoredGeminiKey,
-  setStoredGeminiKey,
-  clearStoredGeminiKey,
-  testAiConnection,
-} from '@/services/aiService'
-import type { User } from '@/types'
+import api from '@/services/apiClient'
+import type { User, AiApiKey } from '@/types'
 
 export default function AiGovernance() {
   const store = useStore()
@@ -38,11 +35,14 @@ export default function AiGovernance() {
 
   const [activeTab, setActiveTab] = useState<'overview' | 'personnel' | 'audit'>('overview')
 
-  // API Key local state
-  const [apiKeyInput, setApiKeyInput] = useState(getStoredGeminiKey())
-  const [showKey, setShowKey] = useState(false)
-  const [isTesting, setIsTesting] = useState(false)
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string; provider?: string } | null>(null)
+  // Multi-Key Management Modal & State
+  const [showAddKeyModal, setShowAddKeyModal] = useState(false)
+  const [newKeyName, setNewKeyName] = useState('')
+  const [newKeyValue, setNewKeyValue] = useState('')
+  const [newKeyIsDefault, setNewKeyIsDefault] = useState(false)
+  const [showKeyPassword, setShowKeyPassword] = useState(false)
+  const [isSavingKey, setIsSavingKey] = useState(false)
+  const [testingKeyId, setTestingKeyId] = useState<string | null>(null)
 
   // Personnel filter state (strictly faculty/staff - excluding students!)
   const [personnelSearch, setPersonnelSearch] = useState('')
@@ -68,43 +68,92 @@ export default function AiGovernance() {
     )
   }
 
-  // Save API Key
-  const handleSaveApiKey = () => {
-    setStoredGeminiKey(apiKeyInput)
-    setTestResult(null)
-    addToast(
-      'success',
-      t('บันทึก API Key เรียบร้อย', 'API Key Saved'),
-      t('กุญแจเชื่อมต่อระบบ AI ได้รับการบันทึกใน Local Storage แล้ว', 'AI connection key has been safely updated.')
-    )
+  // Open Add Key Modal
+  const handleOpenAddKeyModal = () => {
+    setNewKeyName('')
+    setNewKeyValue('')
+    setNewKeyIsDefault(store.aiKeys.length === 0)
+    setShowKeyPassword(false)
+    setShowAddKeyModal(true)
   }
 
-  // Clear API Key
-  const handleClearApiKey = () => {
-    clearStoredGeminiKey()
-    setApiKeyInput('')
-    setTestResult(null)
-    addToast(
-      'info',
-      t('ล้าง API Key แล้ว', 'API Key Removed'),
-      t('ระบบจะสลับไปใช้ Offline Smart Intelligence Engine สำหรับการประเมินจำลอง', 'Switched back to local intelligent engine.')
-    )
-  }
+  // Add Key Submit
+  const handleAddKeySubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newKeyValue.trim()) {
+      addToast('error', t('กรุณาระบุ Gemini API Key', 'Please enter a Gemini API Key'))
+      return
+    }
 
-  // Test Connection
-  const handleTestConnection = async () => {
-    setIsTesting(true)
-    setTestResult(null)
+    setIsSavingKey(true)
     try {
-      const res = await testAiConnection(apiKeyInput)
-      setTestResult(res)
-      if (res.success) {
-        addToast('success', t('ทดสอบการเชื่อมต่อสำเร็จ', 'Connection Test Passed'), res.message)
-      } else {
-        addToast('error', t('การเชื่อมต่อล้มเหลว', 'Connection Failed'), res.message)
-      }
+      const name = newKeyName.trim() || `Gemini Key ${new Date().toISOString().split('T')[0]}`
+      await store.addAiKey(name, newKeyValue.trim(), newKeyIsDefault)
+      addToast(
+        'success',
+        t('เพิ่มและบันทึก API Key สำเร็จ', 'API Key Added & Saved'),
+        t(`บันทึกกุญแจ "${name}" ลงในฐานข้อมูล Cloudflare D1 เรียบร้อยแล้ว`, `Saved key "${name}" to Cloudflare D1 database.`)
+      )
+      setShowAddKeyModal(false)
+      setNewKeyName('')
+      setNewKeyValue('')
+    } catch (err: any) {
+      addToast('error', t('บันทึกล้มเหลว', 'Save Failed'), err.message || 'Error saving API key')
     } finally {
-      setIsTesting(false)
+      setIsSavingKey(false)
+    }
+  }
+
+  // Set Default Key
+  const handleSetDefaultKey = async (key: AiApiKey) => {
+    try {
+      await store.setDefaultAiKey(key.id)
+      addToast(
+        'success',
+        t('เปลี่ยนกุญแจหลักสำเร็จ', 'Default Key Updated'),
+        t(`ตั้งค่า "${key.name}" เป็นกุญแจหลัก (Default) เรียบร้อยแล้ว`, `Set "${key.name}" as the active default key.`)
+      )
+    } catch (err: any) {
+      addToast('error', t('ตั้งค่าล้มเหลว', 'Update Failed'), err.message || 'Error updating default key')
+    }
+  }
+
+  // Delete Key
+  const handleDeleteKey = async (key: AiApiKey) => {
+    try {
+      await store.deleteAiKey(key.id)
+      addToast(
+        'info',
+        t('ลบกุญแจแล้ว', 'API Key Removed'),
+        t(`ลบ "${key.name}" ออกจากฐานข้อมูล Cloudflare D1 เรียบร้อยแล้ว`, `Deleted "${key.name}" from D1 database.`)
+      )
+    } catch (err: any) {
+      addToast('error', t('ลบล้มเหลว', 'Delete Failed'), err.message || 'Error deleting API key')
+    }
+  }
+
+  // Test Individual Key
+  const handleTestKey = async (key: AiApiKey) => {
+    setTestingKeyId(key.id)
+    try {
+      const res = await api.testAiKey(key.id)
+      if (res && res.success) {
+        addToast(
+          'success',
+          t('ทดสอบการเชื่อมต่อสำเร็จ', 'Connection Test Passed'),
+          t(`กุญแจ "${key.name}" เชื่อมต่อ Google Gemini 1.5 Flash ได้สมบูรณ์`, `Key "${key.name}" connected to Gemini 1.5 Flash successfully.`)
+        )
+      } else {
+        addToast(
+          'error',
+          t('การเชื่อมต่อล้มเหลว', 'Connection Failed'),
+          res?.message || t('ไม่สามารถเชื่อมต่อ Google Gemini ด้วยกุญแจนี้ได้', 'Could not connect to Google Gemini with this key.')
+        )
+      }
+    } catch (err: any) {
+      addToast('error', t('ทดสอบล้มเหลว', 'Test Error'), err.message || 'Network error')
+    } finally {
+      setTestingKeyId(null)
     }
   }
 
@@ -273,93 +322,143 @@ export default function AiGovernance() {
             </div>
           </div>
 
-          {/* Configuration Grid: API Key & Model Specs */}
+          {/* Configuration Grid: Multi-Key API Management & Model Specs */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Column 1 & 2: API Credentials & Connection */}
+            {/* Column 1 & 2: Multi-Key API Management */}
             <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-[#0e1424] border border-slate-200/70 dark:border-slate-800/80 shadow-premium space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-500/12 text-sky-600 dark:text-sky-300 ring-1 ring-sky-200/70 dark:ring-sky-500/25 flex items-center justify-center shadow-xs">
                     <KeyRound className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {t('กุญแจเชื่อมต่อโมเดลภาษา (Google Gemini API Credentials)', 'LLM Gateway Credentials')}
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <span>{t('การจัดการกุญแจโมเดลภาษา (Multi-Key Management)', 'Multi-Key AI Gateway')}</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800/50">
+                        {store.aiKeys.length} {t('กุญแจในระบบ', 'Keys in D1')}
+                      </span>
                     </h3>
                     <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                      {provider} ({model})
+                      {provider} ({model}) · {t('บันทึกปลอดภัยใน Cloudflare D1', 'Securely stored in Cloudflare D1')}
                     </span>
                   </div>
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                  {t('เชื่อมต่อภายนอก', 'External')}
-                </span>
+
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleOpenAddKeyModal}
+                  className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 cursor-pointer shadow-xs"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>{t('เพิ่ม API Key ใหม่', 'Add New API Key')}</span>
+                </Button>
               </div>
 
-              <div className="space-y-4">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  {t('Gemini API Key ส่วนกลางของหลักสูตร', 'Central Gemini API Key')}
-                </label>
-                <div className="relative">
-                  <input
-                    type={showKey ? 'text' : 'password'}
-                    value={apiKeyInput}
-                    onChange={e => setApiKeyInput(e.target.value)}
-                    placeholder="AIzaSy..."
-                    className="w-full pl-4 pr-12 py-3 rounded-xl text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-hidden focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-mono text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowKey(!showKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Button variant="primary" onClick={handleSaveApiKey} className="text-sm px-4 py-2">
-                      <Lock className="h-4 w-4 mr-1.5" />
-                      {t('บันทึกกุญแจเชื่อมต่อ', 'Save API Key')}
-                    </Button>
-                    {apiKeyInput && (
-                      <Button variant="secondary" onClick={handleClearApiKey} className="text-sm px-4 py-2 text-rose-600 dark:text-rose-400">
-                        {t('ล้างค่า', 'Clear')}
-                      </Button>
-                    )}
-                  </div>
-
-                  <Button
-                    variant="secondary"
-                    onClick={handleTestConnection}
-                    disabled={isTesting || !isEnabled}
-                    className="text-sm px-4 py-2 font-bold cursor-pointer"
-                  >
-                    <Zap className={`h-4 w-4 mr-2 text-sky-500 ${isTesting ? 'animate-spin' : ''}`} />
-                    {isTesting ? t('กำลังทดสอบ...', 'Testing...') : t('ทดสอบการเชื่อมต่อ (Test Connection)', 'Test Connection')}
-                  </Button>
-                </div>
-
-                {/* Connection Status Box */}
-                {testResult && (
-                  <div
-                    className={`p-4 rounded-xl border text-sm flex items-start gap-3 transition-all ${
-                      testResult.success
-                        ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-200'
-                        : 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/80 text-rose-800 dark:text-rose-200'
-                    }`}
-                  >
-                    {testResult.success ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-rose-600 mt-0.5 flex-shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <p className="font-bold">{testResult.success ? t('เชื่อมต่อสำเร็จ', 'Verified Successfully') : t('ไม่สามารถเชื่อมต่อได้', 'Connection Failed')}</p>
-                      <p className="text-xs opacity-90 mt-1">{testResult.message}</p>
+              {/* Keys List */}
+              <div className="space-y-3">
+                {store.aiKeys.length === 0 ? (
+                  <div className="p-8 text-center rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-800 space-y-3">
+                    <div className="h-12 w-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center mx-auto">
+                      <KeyRound className="h-6 w-6" />
                     </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-1">
+                        {t('ยังไม่มีการบันทึก Gemini API Key ในฐานข้อมูล', 'No Gemini API Keys Added Yet')}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                        {t(
+                          'เพิ่ม Gemini API Key ของคุณเพื่อเปิดใช้งานการวิเคราะห์เชิงคุณภาพอัตโนมัติ (AUN-QA) กุญแจแรกที่เพิ่มจะถูกตั้งเป็นกุญแจหลัก (Default) โดยอัตโนมัติ',
+                          'Add your Gemini API Key to enable live AI synthesis. The first key you add will automatically become the active default.'
+                        )}
+                      </p>
+                    </div>
+                    <Button variant="primary" size="sm" onClick={handleOpenAddKeyModal} className="text-xs font-bold px-4 py-2">
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      {t('เพิ่ม API Key แรก', 'Add First API Key')}
+                    </Button>
                   </div>
+                ) : (
+                  store.aiKeys.map(k => (
+                    <div
+                      key={k.id}
+                      className={`p-4 rounded-xl border transition-all duration-200 ${
+                        k.isDefault
+                          ? 'bg-sky-50/40 dark:bg-sky-950/20 border-sky-300 dark:border-sky-800/80 shadow-xs ring-1 ring-sky-200/50 dark:ring-sky-500/20'
+                          : 'bg-slate-50/70 dark:bg-slate-900/40 border-slate-200/70 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                              k.isDefault
+                                ? 'bg-sky-500 text-white shadow-xs'
+                                : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                            }`}
+                          >
+                            <KeyRound className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{k.name}</span>
+                              {k.isDefault ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-500/20 px-2 py-0.5 rounded-md border border-sky-200/80 dark:border-sky-500/30">
+                                  <Sparkles className="h-3 w-3 text-sky-500" />
+                                  {t('กุญแจหลักที่ใช้งานอยู่ (Active Default)', 'Active Default')}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                                  {t('กุญแจสำรอง', 'Secondary')}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="font-mono text-[11px] text-slate-600 dark:text-slate-300 font-semibold bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/60 dark:border-slate-700">
+                                {k.maskedKey}
+                              </span>
+                              <span className="text-[10px] text-slate-400">• {k.model || 'gemini-1.5-flash'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 self-end sm:self-center">
+                          {!k.isDefault && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleSetDefaultKey(k)}
+                              className="text-[11px] font-bold px-2.5 py-1 text-sky-600 hover:text-sky-700 dark:text-sky-400 cursor-pointer"
+                            >
+                              <Star className="h-3.5 w-3.5 mr-1" />
+                              {t('ตั้งเป็นกุญแจหลัก', 'Use as Default')}
+                            </Button>
+                          )}
+
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleTestKey(k)}
+                            disabled={testingKeyId === k.id}
+                            className="text-[11px] font-bold px-2.5 py-1 cursor-pointer"
+                          >
+                            <Zap className={`h-3.5 w-3.5 mr-1 text-sky-500 ${testingKeyId === k.id ? 'animate-spin' : ''}`} />
+                            {testingKeyId === k.id ? t('ทดสอบ...', 'Testing...') : t('ทดสอบ', 'Test')}
+                          </Button>
+
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleDeleteKey(k)}
+                            className="text-[11px] font-bold px-2.5 py-1 text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
 
@@ -371,8 +470,8 @@ export default function AiGovernance() {
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   {t(
-                    'ข้อมูลเคสที่ส่งไปวิเคราะห์กับ LLM จะถูกนิรนาม (De-identified) โดยอัตโนมัติ โดยระบบจะไม่ส่งชื่อจริง นามสกุล เลขบัตรประชาชน หรือเบอร์โทรศัพท์ของนักศึกษาออกไปยังภายนอกเด็ดขาด',
-                    'All outbound prompts are strictly stripped of PII. Names, national IDs, and contact numbers are replaced with anonymous tokens.'
+                    'ข้อมูลเคสที่ส่งไปวิเคราะห์กับ LLM จะถูกนิรนาม (De-identified) โดยอัตโนมัติ โดยระบบจะไม่ส่งชื่อจริง นามสกุล เลขบัตรประชาชน หรือเบอร์โทรศัพท์ของนักศึกษาออกไปยังภายนอกเด็ดขาด กุญแจ API ทั้งหมดถูกเข้ารหัสและบันทึกใน Cloudflare D1 บนเซิร์ฟเวอร์',
+                    'All outbound prompts are strictly stripped of PII. API keys are stored securely server-side in Cloudflare D1 and accessed directly by backend workers.'
                   )}
                 </p>
               </div>
@@ -690,6 +789,84 @@ export default function AiGovernance() {
           </div>
         </div>
       )}
+
+      {/* ============================================================ */}
+      {/* ADD API KEY MODAL */}
+      {/* ============================================================ */}
+      <Modal
+        isOpen={showAddKeyModal}
+        onClose={() => setShowAddKeyModal(false)}
+        title={t('เพิ่ม Google Gemini API Key ใหม่', 'Add New Google Gemini API Key')}
+      >
+        <form onSubmit={handleAddKeySubmit} className="space-y-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            {t(
+              'กุญแจ API จะถูกเข้ารหัสและบันทึกโดยตรงลงในฐานข้อมูล Cloudflare D1 บนเซิร์ฟเวอร์ และจะพร้อมใช้งานสำหรับคณาจารย์และฝ่ายประกันคุณภาพที่ได้รับสิทธิ์ทันที',
+              'The API key is encrypted and stored in Cloudflare D1 on the server. Authorized faculty and QA team can immediately use it.'
+            )}
+          </p>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+              {t('ชื่อเรียก / คำอธิบายกุญแจ (Key Name) *', 'Key Label / Description *')}
+            </label>
+            <input
+              type="text"
+              required
+              placeholder={t('เช่น กุญแจหลักสำนักวิชา, Research Gemini 1.5', 'e.g. Primary Faculty Key, Backup Flash Key')}
+              value={newKeyName}
+              onChange={e => setNewKeyName(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
+              {t('Google Gemini API Key (Secret) *', 'Google Gemini API Key (Secret) *')}
+            </label>
+            <div className="relative">
+              <input
+                type={showKeyPassword ? 'text' : 'password'}
+                required
+                placeholder="AIzaSy..."
+                value={newKeyValue}
+                onChange={e => setNewKeyValue(e.target.value)}
+                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKeyPassword(!showKeyPassword)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+              >
+                {showKeyPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="checkbox"
+              id="setAsDefaultCheckbox"
+              checked={newKeyIsDefault}
+              onChange={e => setNewKeyIsDefault(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+            />
+            <label htmlFor="setAsDefaultCheckbox" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+              {t('ตั้งเป็นกุญแจหลักทันที (Set as Active Default Key)', 'Set as Active Default Key')}
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button variant="secondary" size="sm" onClick={() => setShowAddKeyModal(false)}>
+              {t('ยกเลิก', 'Cancel')}
+            </Button>
+            <Button variant="primary" size="sm" type="submit" disabled={isSavingKey} className="font-bold">
+              <Lock className="h-3.5 w-3.5 mr-1" />
+              {isSavingKey ? t('กำลังบันทึก...', 'Saving...') : t('บันทึกลงฐานข้อมูล D1', 'Save to Cloudflare D1')}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

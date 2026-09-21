@@ -163,4 +163,21 @@ describe('Backend Hono API', () => {
     const data = await res.json() as { followUps: any[] }
     expect(Array.isArray(data.followUps)).toBe(true)
   })
+
+  it('GET /api/ai/keys returns safe empty array when DB binding is detached in unit test', async () => {
+    const res = await app.request('/api/ai/keys')
+    expect(res.status).toBe(200)
+    const data = await res.json() as { keys: any[] }
+    expect(Array.isArray(data.keys)).toBe(true)
+  })
+
+  it('POST /api/ai/keys validates required key string', async () => {
+    const res = await app.request('/api/ai/keys', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Empty Key Test' }),
+    })
+    // Either 400 (validation) or 503 (database offline in detached unit test)
+    expect([400, 503]).toContain(res.status)
+  })
 })

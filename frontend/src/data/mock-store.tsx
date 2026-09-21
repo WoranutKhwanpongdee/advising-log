@@ -28,6 +28,7 @@ import type {
   SystemApiConfig,
   RosterImportEntry,
   RosterImportResult,
+  AiApiKey,
 } from '@/types'
 import {
   mockRequests,
@@ -86,6 +87,7 @@ interface StoreState {
   documentTypes: DocumentType[]
   auditLogs: AuditLog[]
   systemApiConfig: SystemApiConfig
+  aiKeys: AiApiKey[]
 }
 
 interface StoreActions {
@@ -156,6 +158,10 @@ interface StoreActions {
   // System & API Configuration
   toggleAiApi: (enabled: boolean, adminName?: string) => void
   toggleUserAiAccess: (userId: string, enabled: boolean, adminName?: string) => void
+  addAiKey: (name: string, key: string, isDefault?: boolean) => Promise<void>
+  setDefaultAiKey: (id: string) => Promise<void>
+  deleteAiKey: (id: string) => Promise<void>
+  refreshAiKeys: () => Promise<void>
 
   // Categories
   addCategory: (cat: Omit<AdvisingCategoryConfig, 'id'>) => void
@@ -208,6 +214,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [categoryConfigs, setCategoryConfigs] = useState<AdvisingCategoryConfig[]>([...mockCategoryConfigs])
   const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([...mockDocumentTypes])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([...mockAuditLogs])
+  const [aiKeys, setAiKeys] = useState<AiApiKey[]>([])
   const [systemApiConfig, setSystemApiConfig] = useState<SystemApiConfig>(() => {
     const saved = localStorage.getItem('advising_log_system_api_config')
     if (saved) {
@@ -226,10 +233,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   })
 
   // --- Background Backend Sync on Mount (Real Data from Cloudflare D1) ---
+  const refreshAiKeys = useCallback(async () => {
+    const kRes = await api.getAiKeys()
+    if (kRes && Array.isArray(kRes.keys)) {
+      setAiKeys(kRes.keys)
+    }
+  }, [])
+
   useEffect(() => {
     let isMounted = true
     async function syncFromBackend() {
-      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes] = await Promise.all([
+      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes, kRes] = await Promise.all([
         api.getUsers(),
         api.getRoster(),
         api.getRequests(),
@@ -239,6 +253,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         api.getExitCases(),
         api.getStudentVoice(),
         api.getAuditLogs(),
+        api.getAiKeys(),
       ])
       if (!isMounted) return
       if (uRes && Array.isArray(uRes.users)) setUsers(uRes.users)
@@ -250,6 +265,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (eRes && Array.isArray(eRes.exitCases)) setExitCases(eRes.exitCases)
       if (vRes && Array.isArray(vRes.surveys)) setStudentVoiceResponses(vRes.surveys)
       if (aRes && Array.isArray(aRes.logs)) setAuditLogs(aRes.logs)
+      if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
     }
     syncFromBackend()
     return () => { isMounted = false }
@@ -686,10 +702,61 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [users])
 
+  const addAiKey = useCallback(async (name: string, key: string, isDefault?: boolean) => {
+    // 1. Send to backend D1 database
+    const res = await api.addAiKey(name, key, isDefault)
+    if (res && res.key) {
+      // Re-sync all keys from backend
+      await refreshAiKeys()
+    } else {
+      // Fallback local state if offline
+      setAiKeys(prev => {
+        const makeDefault = prev.length === 0 || Boolean(isDefault)
+        const updated = makeDefault ? prev.map(k => ({ ...k, isDefault: false })) : [...prev]
+        const masked = key.length > 8 ? `${key.substring(0, 6)}...${key.substring(key.length - 4)}` : '••••••••'
+        return [
+          {
+            id: `KEY_${Date.now()}`,
+            name: name || `Gemini Key ${now()}`,
+            maskedKey: masked,
+            isDefault: makeDefault,
+            provider: 'Google Gemini',
+            model: 'gemini-1.5-flash',
+            status: 'active' as const,
+            createdAt: now(),
+            lastTestedAt: null,
+          },
+          ...updated,
+        ]
+      })
+    }
+  }, [refreshAiKeys])
+
+  const setDefaultAiKey = useCallback(async (id: string) => {
+    // 1. Send to backend
+    await api.setDefaultAiKey(id)
+    // 2. Update local state
+    setAiKeys(prev => prev.map(k => ({ ...k, isDefault: k.id === id })))
+  }, [])
+
+  const deleteAiKey = useCallback(async (id: string) => {
+    // 1. Send to backend
+    await api.deleteAiKey(id)
+    // 2. Update local state
+    setAiKeys(prev => {
+      const target = prev.find(k => k.id === id)
+      const remaining = prev.filter(k => k.id !== id)
+      if (target?.isDefault && remaining.length > 0) {
+        remaining[0] = { ...remaining[0], isDefault: true }
+      }
+      return remaining
+    })
+  }, [])
+
   const store: Store = {
     users, roster, requests, appointments, sessions, followUps, referrals,
     notifications, earlyWarnings, earlyWarningFollowUps, followUpProgress, requestProgress, exitCases, advisorAssessments, studentVoiceResponses, completedVoiceStudents, documents,
-    categoryConfigs, documentTypes, auditLogs, systemApiConfig,
+    categoryConfigs, documentTypes, auditLogs, systemApiConfig, aiKeys,
     addRequest, updateRequestStatus,
     addAppointment, updateAppointmentStatus,
     confirmAppointment, declineAppointment,
@@ -708,6 +775,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addUser, updateUser,
     addRosterEntry, updateRosterEntry, batchImportRoster,
     toggleAiApi, toggleUserAiAccess,
+    addAiKey, setDefaultAiKey, deleteAiKey, refreshAiKeys,
     addCategory, updateCategory,
     addDocumentType, updateDocumentType,
     addAuditLog,
