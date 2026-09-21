@@ -11,6 +11,7 @@ export interface GoogleLoginResult {
   user?: User
   error?: string
   message?: string
+  email?: string
 }
 
 interface AuthState {
@@ -62,13 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ credential }),
       })
 
-      const data = await res.json() as { success: boolean; user?: User; error?: string; message?: string }
+      const data = await res.json() as { success: boolean; user?: User; error?: string; message?: string; email?: string }
       if (res.ok && data.success && data.user) {
         setCurrentUser(data.user)
         localStorage.setItem('advising_log_auth_user', JSON.stringify(data.user))
         return { success: true, user: data.user }
       } else if (data.message || data.error) {
-        return { success: false, error: data.error, message: data.message }
+        return { success: false, error: data.error, message: data.message, email: data.email }
       }
     } catch (_err) {
       // Backend offline fallback: Decode client-side directly
@@ -110,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             success: false,
             error: 'USER_NOT_REGISTERED',
             message: `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ (${email}) ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อเพิ่มรายชื่อเข้าสู่ระบบ`,
+            email,
           }
         }
 

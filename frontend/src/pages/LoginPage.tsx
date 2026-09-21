@@ -16,7 +16,6 @@ import {
   AlertCircle,
   ShieldCheck,
   Building2,
-  Calendar,
   Users,
   Compass,
   Award,
@@ -36,7 +35,7 @@ export default function LoginPage() {
   const { language, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
 
-  const [error, setError] = useState('')
+  const [authError, setAuthError] = useState<{ code?: string; message?: string; email?: string } | null>(null)
   const [loading, setLoading] = useState(false)
 
   function redirectForRole(role: string) {
@@ -47,10 +46,54 @@ export default function LoginPage() {
     else navigate('/')
   }
 
+  function getErrorMessage(): string {
+    if (!authError) return ''
+    const { code, message, email } = authError
+    const userEmail = email ? ` (${email})` : ''
+
+    if (code === 'USER_NOT_REGISTERED' || (message && message.includes('ยังไม่ได้รับการเพิ่มหรือลงทะเบียน'))) {
+      return t(
+        `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ${userEmail} ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อลงทะเบียนเข้าสู่ระบบก่อน`,
+        `Sign in failed: Your account${userEmail} has not been added or registered by an Administrator (Admin). Please contact your School office or Administrator to register before signing in.`
+      )
+    }
+
+    if (code === 'DOMAIN_RESTRICTED' || (message && message.includes('ไม่อนุญาตให้เข้าใช้งาน'))) {
+      return t(
+        'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือให้อาจารย์/ผู้ดูแลระบบลงทะเบียนอีเมลภายนอกของคุณเข้าสู่ระบบก่อน',
+        'Access restricted: Please use an authorized Mae Fah Luang University email (@mfu.ac.th or @lamduan.mfu.ac.th), or contact an Administrator to whitelist your external email.'
+      )
+    }
+
+    if (code === 'ACCOUNT_DEACTIVATED' || (message && message.includes('ถูกระงับการใช้งาน'))) {
+      return t(
+        'บัญชีผู้ใช้งานนี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ',
+        'This user account has been temporarily deactivated. Please contact the system administrator.'
+      )
+    }
+
+    if (code === 'STUDENT_NOT_ASSIGNED' || (message && message.includes('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา'))) {
+      return t(
+        `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ${userEmail} ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา กรุณาติดต่ออาจารย์ที่ปรึกษาหรือสำนักวิชาเพื่อเพิ่มรายชื่อเข้าสู่ระบบ`,
+        `Sign in failed: Your account${userEmail} has not been assigned to a faculty advisor. Please contact your advisor or School office.`
+      )
+    }
+
+    if (code === 'GOOGLE_CONNECT_ERROR') {
+      return t('เกิดข้อผิดพลาดในการเชื่อมต่อ Google', 'Error connecting to Google OAuth service.')
+    }
+
+    if (code === 'GOOGLE_AUTH_FAILED') {
+      return t('การยืนยันตัวตนกับ Google ล้มเหลว', 'Google Authentication Failed')
+    }
+
+    return message || t('ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'Failed to sign in with Google account.')
+  }
+
   // Account-Chooser Sign In (prompts Google Account Picker every time via prompt: select_account)
   const handleGoogleSelectAccount = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setError('')
+      setAuthError(null)
       setLoading(true)
       try {
         const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -60,6 +103,7 @@ export default function LoginPage() {
           throw new Error('Failed to fetch user profile')
         }
         const userInfo = await userInfoRes.json()
+        const userEmail = (userInfo.email || '').toLowerCase().trim()
 
         // Escape unicode characters to ASCII sequences so btoa / atob decode cleanly without Latin1 errors
         const safeJson = JSON.stringify(userInfo).replace(
@@ -75,16 +119,20 @@ export default function LoginPage() {
         if (result.success && result.user) {
           redirectForRole(result.user.role)
         } else {
-          setError(result.message || t('ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'Failed to sign in with Google account.'))
+          setAuthError({
+            code: result.error || 'AUTH_FAILED',
+            message: result.message,
+            email: result.email || userEmail,
+          })
         }
       } catch {
         setLoading(false)
-        setError(t('เกิดข้อผิดพลาดในการเชื่อมต่อ Google', 'Error connecting to Google OAuth service.'))
+        setAuthError({ code: 'GOOGLE_CONNECT_ERROR' })
       }
     },
     onError: () => {
       setLoading(false)
-      setError(t('การยืนยันตัวตนกับ Google ล้มเหลว', 'Google Authentication Failed'))
+      setAuthError({ code: 'GOOGLE_AUTH_FAILED' })
     },
     prompt: 'select_account',
   })
@@ -199,10 +247,7 @@ export default function LoginPage() {
 
         {/* Bottom: Institutional Compliance Note */}
         <div className="pt-6 border-t border-white/20 flex items-center justify-between text-xs text-sky-100">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-sky-200" />
-            <span className="font-semibold">{t('ภาคการศึกษา 1/2569 · มฟล.', 'Semester 1 / 2026 · MFU')}</span>
-          </div>
+          <span className="font-semibold text-white/90">Mae Fah Luang University</span>
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white">
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
             <span>PDPA & SIS Compliant</span>
@@ -227,17 +272,6 @@ export default function LoginPage() {
             </span>
           </div>
 
-          {/* Academic Term Indicator (REG MFU Style from TopBar) */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 shadow-2xs">
-            <Calendar className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              {t('ภาคการศึกษา 1/2569', 'Semester 1 / 2026')}
-            </span>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
-            <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 px-2 py-0.5 rounded border border-sky-100 dark:border-sky-500/25">
-              MFU SIS
-            </span>
-          </div>
 
           {/* Controls: Language switch & Theme toggle */}
           <div className="flex items-center gap-2 ml-auto">
@@ -338,17 +372,17 @@ export default function LoginPage() {
                   </svg>
                 )}
                 <span>
-                  {t('ลงชื่อเข้าใช้ด้วย Google (เลือกบัญชี)', 'Sign in with Google')}
+                  {t('ลงชื่อเข้าใช้ด้วย Google', 'Sign in with Google')}
                 </span>
               </button>
 
               {/* Error Alert Box */}
-              {error && (
+              {authError && (
                 <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2.5">
                   <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
                   <div className="space-y-0.5">
                     <p className="font-semibold">{t('ไม่สามารถเข้าสู่ระบบได้', 'Authentication Failed')}</p>
-                    <p className="text-[11px] text-rose-700 dark:text-rose-300/90">{error}</p>
+                    <p className="text-[11px] text-rose-700 dark:text-rose-300/90 leading-relaxed">{getErrorMessage()}</p>
                   </div>
                 </div>
               )}
