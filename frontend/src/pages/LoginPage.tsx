@@ -1,6 +1,8 @@
 // ============================================================
-// AdvisingLog — Premium University Login Page
-// Modern Split-Screen Glassmorphism with Google SSO & Security Badges
+// AdvisingLog — University Login Page
+// Left: Pure Solid Sky-600 (The exact blue from the active language selector: bg-sky-600 text-white)
+// Right: Clean Focused Sign-In Workspace (bg-slate-50 / dark:bg-[#0b0f19])
+// Zero AI-Slop · Flat, Crisp & Vibrant MFU Brand Blue
 // ============================================================
 
 import { useState } from 'react'
@@ -11,13 +13,14 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { ThemeToggle } from '@/components/ui'
 import {
   GraduationCap,
-  Sparkles,
-  ShieldCheck,
-  Lock,
   AlertCircle,
+  ShieldCheck,
   Building2,
-  Users2,
-  TrendingUp,
+  Calendar,
+  Users,
+  Compass,
+  Award,
+  Lock,
 } from 'lucide-react'
 
 // Map each role to its default route
@@ -44,7 +47,7 @@ export default function LoginPage() {
     else navigate('/')
   }
 
-  // Account-Chooser Sign In (forces Google Account Picker every time via prompt: select_account)
+  // Account-Chooser Sign In (prompts Google Account Picker every time via prompt: select_account)
   const handleGoogleSelectAccount = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setError('')
@@ -59,7 +62,10 @@ export default function LoginPage() {
         const userInfo = await userInfoRes.json()
 
         // Escape unicode characters to ASCII sequences so btoa / atob decode cleanly without Latin1 errors
-        const safeJson = JSON.stringify(userInfo).replace(/[\u007f-\uffff]/g, c => '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4))
+        const safeJson = JSON.stringify(userInfo).replace(
+          /[\u007f-\uffff]/g,
+          (c) => '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4)
+        )
         const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }))
         const payload = btoa(safeJson)
         const syntheticJwt = `${header}.${payload}.signature`
@@ -84,127 +90,169 @@ export default function LoginPage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#060a12] flex flex-col lg:flex-row text-slate-900 dark:text-slate-100 selection:bg-sky-500/20 selection:text-sky-900 dark:selection:text-sky-200">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 selection:bg-sky-500/20 selection:text-sky-900 dark:selection:text-sky-200">
       
       {/* ------------------------------------------------------------- */}
-      {/* Left / Hero Showcase Panel (Desktop) */}
+      {/* Left Panel: Exact bg-sky-600 (Matching the active Language button) */}
       {/* ------------------------------------------------------------- */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative overflow-hidden bg-gradient-to-br from-[#060c18] via-[#09152e] to-[#0f244a] text-white p-12 xl:p-16 flex-col justify-between border-r border-sky-900/30">
-        {/* Background glow orbs & geometric elements */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-sky-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-sky-600/10 blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 bg-dot-pattern opacity-10 pointer-events-none" />
-
-        {/* Top brand */}
-        <div className="relative z-10">
+      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 bg-sky-600 dark:bg-[#072444] text-white flex-col justify-between p-12 xl:p-16 border-r border-sky-500 dark:border-sky-900/60 relative">
+        
+        {/* Top: University & Brand Identity */}
+        <div className="space-y-5">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white flex items-center justify-center shadow-lg shadow-sky-500/30 ring-4 ring-sky-500/20">
-              <GraduationCap className="h-7 w-7" />
+            <div className="h-10 w-10 rounded-xl bg-white text-sky-600 flex items-center justify-center shadow-md ring-4 ring-white/20">
+              <GraduationCap className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-white block leading-none" aria-label="AdvisingLog">
-                Advising<span className="text-sky-400">Log</span>
-              </h1>
-              <span className="text-[11px] font-semibold text-sky-200/70 uppercase tracking-widest mt-1 block">
-                Academic Advisory & Quality Assurance
+              <span className="text-xl font-bold tracking-tight text-white block leading-tight">
+                Advising<span className="text-sky-200">Log</span>
+              </span>
+              <span className="text-[10px] text-sky-100/90 font-semibold uppercase tracking-wider block">
+                Academic Advisory & QA Portal
               </span>
             </div>
           </div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/25 text-white text-xs font-semibold backdrop-blur-xs shadow-2xs">
+            <Building2 className="h-3.5 w-3.5 text-sky-200" />
+            <span>{t('สำนักวิชาเทคโนโลยีดิจิทัลประยุกต์ · มหาวิทยาลัยแม่ฟ้าหลวง', 'School of Applied Digital Technology · Mae Fah Luang University')}</span>
+          </div>
         </div>
 
-        {/* Center: Value Propositions & High-Impact Cards */}
-        <div className="relative z-10 my-auto py-12 max-w-xl space-y-8">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-xs font-bold backdrop-blur-md shadow-inner">
-              <Sparkles className="h-3.5 w-3.5 text-sky-400" />
-              <span>{t('ระบบบริหารการให้คำปรึกษาทางวิชาการ มฟล.', 'Mae Fah Luang University Academic Portal')}</span>
-            </div>
-            <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight tracking-tight">
+        {/* Center: Academic Scope & 3 Clean Translucent Cards */}
+        <div className="my-auto py-8 space-y-6 max-w-xl">
+          <div className="space-y-2.5">
+            <h2 className="text-2xl xl:text-3xl font-bold tracking-tight text-white leading-snug">
               {t(
-                'ยกระดับการดูแลนักศึกษา และการประกันคุณภาพการศึกษาแบบครบวงจร',
-                'Empowering Student Success, Faculty Advisory & AUN-QA Quality Assurance'
+                'ระบบบริหารการให้คำปรึกษาทางวิชาการ และการประกันคุณภาพการศึกษา',
+                'Academic Advising Management & AUN-QA Quality Assurance System'
               )}
             </h2>
-            <p className="text-sm xl:text-base text-sky-100/75 leading-relaxed font-normal">
+            <p className="text-sm text-sky-100/90 leading-relaxed font-normal">
               {t(
-                'แพลตฟอร์มศูนย์กลางสำหรับการนัดหมาย ให้คำปรึกษา ติดตามผลนักศึกษา และวิเคราะห์สถิติการคงอยู่ของนักศึกษาด้วยระบบ AI อัจฉริยะ',
-                'Institutional platform for academic advising records, follow-up tracking, early risk interventions, and qualitative AI retention insights.'
+                'แพลตฟอร์มศูนย์กลางสำหรับการบันทึกการให้คำปรึกษา การดูแลช่วยเหลือนักศึกษา และรวบรวมข้อมูลสถิติตามเกณฑ์มาตรฐาน AUN-QA',
+                'Institutional platform for advisory session logs, early risk intervention, and educational quality assurance analytics.'
               )}
             </p>
           </div>
 
-          {/* Feature Badges Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center">
-                  <Users2 className="h-5 w-5" />
+          {/* 3 Translucent Clean Cards with White Borders */}
+          <div className="space-y-3">
+            <div className="p-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-xs transition-colors flex items-start gap-3.5">
+              <div className="h-9 w-9 rounded-lg bg-white/20 text-white flex items-center justify-center flex-shrink-0 border border-white/30 shadow-2xs">
+                <Users className="h-4.5 w-4.5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-white">
+                    {t('การดูแลและให้คำปรึกษารายบุคคล', 'Individual Student Advising')}
+                  </h3>
+                  <span className="text-[10px] font-bold text-sky-100 bg-white/20 px-1.5 py-0.5 rounded border border-white/25">
+                    SIS
+                  </span>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">{t('จัดสรรอาจารย์ที่ปรึกษา', 'Advisor Cohorts')}</h4>
-                  <p className="text-[11px] text-sky-200/60 mt-0.5">{t('จัดการรายชื่อ นศ. ในความดูแล', 'Direct advisee roster management')}</p>
-                </div>
+                <p className="text-[11px] text-sky-100/85 leading-relaxed">
+                  {t('บันทึกผลการเข้าพบ จัดการนัดหมาย และติดตามความก้าวหน้าของนักศึกษาในความดูแลอย่างเป็นระบบ', 'Structured session logs, appointment scheduling, and individual advisee progress tracking.')}
+                </p>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5" />
+            <div className="p-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-xs transition-colors flex items-start gap-3.5">
+              <div className="h-9 w-9 rounded-lg bg-white/20 text-white flex items-center justify-center flex-shrink-0 border border-white/30 shadow-2xs">
+                <Compass className="h-4.5 w-4.5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-white">
+                    {t('ระบบช่วยเหลือและส่งต่อหน่วยงาน', 'Early Support & Case Referrals')}
+                  </h3>
+                  <span className="text-[10px] font-bold text-emerald-200 bg-emerald-500/30 px-1.5 py-0.5 rounded border border-emerald-300/30">
+                    Care
+                  </span>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">{t('ประกันคุณภาพ AUN-QA', 'AUN-QA Criteria')}</h4>
-                  <p className="text-[11px] text-sky-200/60 mt-0.5">{t('วิเคราะห์สถิติและการคงอยู่', 'Retention & student voice analytics')}</p>
+                <p className="text-[11px] text-sky-100/85 leading-relaxed">
+                  {t('แจ้งเตือนภาวะเสี่ยงทางการเรียน ประสานงานหน่วยงานสนับสนุน และดูแลเคสอย่างต่อเนื่อง', 'Academic risk monitoring, inter-departmental referrals, and proactive case follow-up.')}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-xs transition-colors flex items-start gap-3.5">
+              <div className="h-9 w-9 rounded-lg bg-white/20 text-white flex items-center justify-center flex-shrink-0 border border-white/30 shadow-2xs">
+                <Award className="h-4.5 w-4.5" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-white">
+                    {t('การประกันคุณภาพตามเกณฑ์ AUN-QA', 'AUN-QA Criteria 3 Alignment')}
+                  </h3>
+                  <span className="text-[10px] font-bold text-sky-100 bg-white/20 px-1.5 py-0.5 rounded border border-white/25">
+                    QA
+                  </span>
                 </div>
+                <p className="text-[11px] text-sky-100/85 leading-relaxed">
+                  {t('สถิติการคงอยู่ การวิเคราะห์เสียงของนักศึกษา และรายงานสำหรับการตรวจประเมินคุณภาพ', 'Student retention analytics, student voice insights, and audit-ready accreditation reporting.')}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Institutional Info */}
-        <div className="relative z-10 pt-6 border-t border-sky-900/40 flex items-center justify-between text-xs text-sky-200/60 font-medium">
+        {/* Bottom: Institutional Compliance Note */}
+        <div className="pt-6 border-t border-white/20 flex items-center justify-between text-xs text-sky-100">
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-sky-400" />
-            <span>School of Applied Digital Technology (ADT)</span>
+            <Calendar className="h-3.5 w-3.5 text-sky-200" />
+            <span className="font-semibold">{t('ภาคการศึกษา 1/2569 · มฟล.', 'Semester 1 / 2026 · MFU')}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px]">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            <span>{t('ความปลอดภัยมาตรฐาน PDPA', 'PDPA & SIS Compliant')}</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white">
+            <ShieldCheck className="h-4 w-4 text-emerald-300" />
+            <span>PDPA & SIS Compliant</span>
           </div>
         </div>
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* Right / Interactive Auth Panel */}
+      {/* Right Panel: Focused Minimalist Sign-In Workspace */}
       {/* ------------------------------------------------------------- */}
-      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 max-w-xl mx-auto w-full relative">
+      <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-14 bg-slate-50 dark:bg-[#0b0f19]">
         
-        {/* Top Actions: Language switcher & Theme toggle */}
-        <div className="flex items-center justify-between pb-6 sm:pb-8">
-          {/* Mobile Logo Branding (Shown on small screens) */}
-          <div className="flex lg:hidden items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-md shadow-sky-600/20">
+        {/* Top Actions: Mobile Brand + Language & Theme Controls */}
+        <div className="flex items-center justify-between pb-6">
+          {/* Mobile Logo Branding (shown on mobile/tablet) */}
+          <div className="flex lg:hidden items-center gap-2.5">
+            <div className="h-8 w-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs">
               <GraduationCap className="h-5 w-5" />
             </div>
-            <span className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
+            <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Advising<span className="text-sky-600 dark:text-sky-400">Log</span>
             </span>
           </div>
 
+          {/* Academic Term Indicator (REG MFU Style from TopBar) */}
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 shadow-2xs">
+            <Calendar className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              {t('ภาคการศึกษา 1/2569', 'Semester 1 / 2026')}
+            </span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <span className="text-[11px] font-semibold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/12 px-2 py-0.5 rounded border border-sky-100 dark:border-sky-500/25">
+              MFU SIS
+            </span>
+          </div>
+
+          {/* Controls: Language switch & Theme toggle */}
           <div className="flex items-center gap-2 ml-auto">
             {/* Language switch */}
-            <div className="flex items-center text-[11px] font-bold bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+            <div className="flex items-center text-[11px] font-bold bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-xl border border-slate-200/70 dark:border-slate-700/60 shadow-2xs">
               <button
                 type="button"
                 onClick={() => setLanguage('th')}
                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                   language === 'th'
                     ? 'bg-sky-600 text-white shadow-xs font-bold'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium'
                 }`}
               >
-                ไทย
+                TH
               </button>
               <button
                 type="button"
@@ -212,7 +260,7 @@ export default function LoginPage() {
                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                   language === 'en'
                     ? 'bg-sky-600 text-white shadow-xs font-bold'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium'
                 }`}
               >
                 EN
@@ -220,56 +268,57 @@ export default function LoginPage() {
             </div>
 
             {/* Theme toggle */}
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs p-0.5">
+            <div className="bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/70 dark:border-slate-700/60 p-0.5">
               <ThemeToggle />
             </div>
           </div>
         </div>
 
-        {/* Main Form Area */}
-        <div className="my-auto space-y-6">
-          {/* Header */}
-          <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-              {t('เข้าสู่ระบบ', 'Sign in to AdvisingLog')}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              {t(
-                'กรุณาใช้บัญชี Google สถาบันเพื่อเข้าสู่ระบบงานให้คำปรึกษา',
-                'Please use your institutional university account to access academic advising.'
-              )}
-            </p>
-          </div>
-
-          {/* Primary Google SSO Section */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-none space-y-4 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 via-sky-400 to-indigo-500" />
+        {/* Center: Sign-In Card (With Signature Interior Top Sky-Line) */}
+        <div className="my-auto max-w-md w-full mx-auto space-y-6">
+          <div className="bg-white dark:bg-[#0e1424] border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-xs p-6 sm:p-8 space-y-6 relative overflow-hidden">
+            {/* Signature Top Sky Blue Bar (Matching Advisor Cohort Banner & Dashboard Cards) */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-sky-600" />
             
-            <div className="flex items-center justify-between pb-1">
-              <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
-                  {t('ยืนยันตัวตนด้วย Google Single Sign-On', 'Institutional Google SSO')}
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {t('รองรับอีเมล @mfu.ac.th และ @lamduan.mfu.ac.th', 'Accepts @mfu.ac.th, @student.mfu.ac.th, @lamduan.mfu.ac.th')}
-                </span>
+            {/* Card Header */}
+            <div className="text-center space-y-3 pt-1">
+              <div className="inline-flex h-12 w-12 rounded-2xl bg-sky-600 text-white items-center justify-center shadow-md shadow-sky-600/25 ring-4 ring-sky-50 dark:ring-sky-950/50">
+                <GraduationCap className="h-6 w-6" />
               </div>
-              <span className="h-2 w-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100 dark:ring-emerald-950/60" />
+
+              <div className="space-y-1">
+                <h1
+                  className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
+                  aria-label="AdvisingLog"
+                >
+                  Advising<span className="text-sky-600 dark:text-sky-400">Log</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
+                  {t(
+                    'ระบบงานอาจารย์ที่ปรึกษาและสนับสนุนนักศึกษา',
+                    'Student Academic Advisory & Quality Assurance'
+                  )}
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/25 text-[11px] font-semibold text-sky-700 dark:text-sky-300">
+                <Building2 className="h-3 w-3 text-sky-600 dark:text-sky-400" />
+                <span>Mae Fah Luang University</span>
+              </div>
             </div>
 
-            {/* Google OAuth Button Container */}
-            <div className="space-y-3">
-              {/* Primary Account-Chooser Button: Always prompts Google to let user select any account */}
+            {/* Google Single Sign-On Action */}
+            <div className="space-y-3 pt-1">
               <button
                 type="button"
                 onClick={() => handleGoogleSelectAccount()}
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/90 active:bg-slate-100 text-slate-800 dark:text-slate-100 font-semibold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 shadow-sm hover:shadow transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-slate-800/90 hover:bg-sky-50/40 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-medium text-sm border border-slate-300 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="h-5 w-5 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="h-4 w-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -289,29 +338,55 @@ export default function LoginPage() {
                   </svg>
                 )}
                 <span>
-                  {t('ลงชื่อเข้าใช้ด้วย Google (เลือกบัญชีได้)', 'Sign in with Google (Choose Account)')}
+                  {t('ลงชื่อเข้าใช้ด้วย Google (เลือกบัญชี)', 'Sign in with Google')}
                 </span>
               </button>
 
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span>{t('เปิดหน้าต่างให้เลือกบัญชี Google ทุกครั้ง ไม่ล็อคบัญชีเริ่มต้น', 'Opens account chooser every time so you can pick any account')}</span>
+              {/* Error Alert Box */}
+              {error && (
+                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2.5">
+                  <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
+                  <div className="space-y-0.5">
+                    <p className="font-semibold">{t('ไม่สามารถเข้าสู่ระบบได้', 'Authentication Failed')}</p>
+                    <p className="text-[11px] text-rose-700 dark:text-rose-300/90">{error}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Allowed Domains Section */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <span>{t('บัญชีอีเมลที่รองรับ', 'Authorized University Accounts')}</span>
+                <span className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-semibold">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <span>Google Workspace</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-800/60">
+                  <span className="text-[10px] uppercase font-bold text-sky-800 dark:text-sky-300 block tracking-wider">
+                    {t('นักศึกษา', 'Student')}
+                  </span>
+                  <span className="font-mono text-[11px] text-sky-900 dark:text-sky-200 block font-semibold mt-0.5">
+                    @lamduan.mfu.ac.th
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800">
+                  <span className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 block tracking-wider">
+                    {t('อาจารย์ / บุคลากร', 'Faculty / Staff')}
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-700 dark:text-slate-300 block font-semibold mt-0.5">
+                    @mfu.ac.th
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Error Alert Box */}
-            {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/80 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2.5 animate-[fadeIn_0.2s_ease-out]">
-                <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
-                <div className="space-y-1">
-                  <p className="font-bold">{t('ไม่สามารถเข้าสู่ระบบได้', 'Authentication Denied')}</p>
-                  <p className="text-[11px] leading-relaxed text-rose-700 dark:text-rose-300/90">{error}</p>
-                </div>
-              </div>
-            )}
-
             {/* Policy badge */}
-            <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800/80 font-medium">
+            <div className="pt-1 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800/80">
               <span className="flex items-center gap-1.5">
                 <Lock className="h-3 w-3 text-slate-400" />
                 {t('ระบบความปลอดภัยระดับสถาบัน', 'Secure Encrypted SSO')}
@@ -321,12 +396,28 @@ export default function LoginPage() {
               </span>
             </div>
           </div>
+
+          {/* Privacy & Quality Standards */}
+          <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+            <span>AUN-QA Criteria 3</span>
+            <span className="text-slate-300 dark:text-slate-700">·</span>
+            <span>PDPA Compliant</span>
+            <span className="text-slate-300 dark:text-slate-700">·</span>
+            <span>Google Education</span>
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="pt-8 text-center text-[11px] text-slate-400 dark:text-slate-500 space-y-1 font-medium">
-          <p>© 2026 Mae Fah Luang University · School of Applied Digital Technology</p>
-          <p>{t('ระบบงานให้คำปรึกษาและประกันคุณภาพการศึกษาตามเกณฑ์ AUN-QA', 'University Academic Advisory & AUN-QA Quality Assurance System')}</p>
+        <div className="pt-6 text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
+          <p className="font-medium">
+            © 2026 School of Applied Digital Technology · Mae Fah Luang University
+          </p>
+          <p className="text-[11px]">
+            {t(
+              'ระบบงานให้คำปรึกษาทางวิชาการและระบบสารสนเทศเพื่อการประกันคุณภาพ',
+              'Academic Advisory Management and Quality Assurance Information System'
+            )}
+          </p>
         </div>
       </div>
     </div>
