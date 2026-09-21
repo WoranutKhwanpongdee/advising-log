@@ -31,7 +31,7 @@ import {
 } from 'recharts'
 import QualitativeExitAnalysis from './QualitativeExitAnalysis'
 
-const PIE_COLORS = ['#0284c7', '#38bdf8', '#7dd3fc', '#cbd5e1', '#94a3b8', '#64748b', '#f59e0b', '#ef4444']
+const PIE_COLORS = ['#0284c7', '#38bdf8', '#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#f59e0b', '#10b981']
 
 
 type VoiceScoreTone = 'sky' | 'emerald' | 'violet'
@@ -365,19 +365,32 @@ export default function QADashboard() {
                             ))}
                           </Pie>
                           <Tooltip
-                            contentStyle={{
-                              backgroundColor: chartTheme.tooltipBg,
-                              borderColor: chartTheme.tooltipBorder,
-                              color: chartTheme.tooltipText,
-                              borderRadius: '8px',
-                              fontSize: '12px',
-                              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                            }}
-                            itemStyle={{ color: chartTheme.tooltipText }}
-                            formatter={(value, name) => {
-                              const count = Number(value || 0)
+                            content={({ active, payload }) => {
+                              if (!active || !payload || !payload.length) return null
+                              const item = payload[0]
+                              const count = Number(item.value || 0)
                               const percentage = exitTotal > 0 ? Math.round((count / exitTotal) * 100) : 0
-                              return [`${count} (${percentage}%)`, name]
+                              return (
+                                <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-slate-900/95 p-3 shadow-xl backdrop-blur-md min-w-[190px] text-xs">
+                                  <div className="flex items-center gap-2 mb-1.5 border-b border-slate-100 dark:border-slate-800 pb-1">
+                                    <span
+                                      className="h-2.5 w-2.5 rounded-full shrink-0 shadow-xs"
+                                      style={{ backgroundColor: item.payload?.fill || (item as any).color }}
+                                    />
+                                    <span className="font-bold text-slate-900 dark:text-slate-100 truncate">
+                                      {item.name}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-3 text-[11px]">
+                                    <span className="text-slate-500 dark:text-slate-400">
+                                      {t('จำนวนและสัดส่วน', 'Count & Share')}
+                                    </span>
+                                    <span className="font-bold font-mono text-sky-600 dark:text-sky-400">
+                                      {count} {t('เคส', 'cases')} ({percentage}%)
+                                    </span>
+                                  </div>
+                                </div>
+                              )
                             }}
                           />
                         </PieChart>
