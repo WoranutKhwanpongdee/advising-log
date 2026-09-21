@@ -5,7 +5,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, StatCard, Card, StatusBadge, EmptyState, Button, StudentProfileBanner } from '@/components/ui'
+import { PageHeader, StatCard, Card, StatusBadge, EmptyState, Button, StudentProfileBanner, GoogleCalendarButton } from '@/components/ui'
 import { Calendar, Clock, ListChecks, FileEdit, ArrowRight, BookOpen, CheckCircle2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -122,13 +122,27 @@ export default function StudentDashboard() {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => navigate(upcomingAppointment.requestId ? `/student/history/${upcomingAppointment.requestId}` : '/student/history')}
-                  >
-                    {t('ดูรายละเอียด', 'View Details')}
-                  </Button>
+                  <div className="flex items-center gap-2 self-end sm:self-center flex-wrap">
+                    <GoogleCalendarButton
+                      event={{
+                        title: `Advising Meeting: ${currentUser.name} & ${upcomingAdvisor?.name || 'Advisor'}`,
+                        description: `Advising Topic: ${upcomingReq ? getCategoryLabel(upcomingReq.category) : 'Academic Consultation'}\nLocation: ${upcomingAppointment.location}\nDate: ${upcomingAppointment.scheduledDate} ${upcomingAppointment.scheduledTime}`,
+                        location: upcomingAppointment.location,
+                        date: upcomingAppointment.scheduledDate,
+                        time: upcomingAppointment.scheduledTime,
+                        attendeeEmails: [currentUser.email, upcomingAdvisor?.email || ''],
+                      }}
+                      size="sm"
+                      variant="secondary"
+                    />
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => navigate(upcomingAppointment.requestId ? `/student/history/${upcomingAppointment.requestId}` : '/student/history')}
+                    >
+                      {t('ดูรายละเอียด', 'View Details')}
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (

@@ -7,7 +7,7 @@ import { useStore } from '@/data/mock-store'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/ToastContext'
-import { PageHeader, Card, StatusBadge, Timeline, EmptyState, Button, Modal } from '@/components/ui'
+import { PageHeader, Card, StatusBadge, Timeline, EmptyState, Button, Modal, GoogleCalendarButton } from '@/components/ui'
 import { ArrowLeft, Calendar, Paperclip, FileText, CheckCircle, X } from 'lucide-react'
 import { useState } from 'react'
 
@@ -172,13 +172,27 @@ export default function AdvisingDetail() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-end gap-2.5">
-              <Button variant="secondary" onClick={() => setShowDeclineModal(true)}>
-                <X className="h-4 w-4 mr-1.5" /> {t('ไม่สะดวก', 'Decline')}
-              </Button>
-              <Button onClick={handleConfirmAppointment}>
-                <CheckCircle className="h-4 w-4 mr-1.5" /> {t('ยืนยันการนัดหมาย', 'Confirm Appointment')}
-              </Button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+              <GoogleCalendarButton
+                event={{
+                  title: `Advising Meeting: ${currentUser?.name || 'Student'} & ${advisor?.name || 'Advisor'}`,
+                  description: `Advising Topic: ${catLabel}\nLocation: ${appointment.location}\nDetails: ${request.details}`,
+                  location: appointment.location,
+                  date: appointment.scheduledDate,
+                  time: appointment.scheduledTime,
+                  attendeeEmails: [currentUser?.email || '', advisor?.email || ''],
+                }}
+                size="sm"
+                variant="secondary"
+              />
+              <div className="flex items-center gap-2">
+                <Button variant="secondary" onClick={() => setShowDeclineModal(true)}>
+                  <X className="h-4 w-4 mr-1.5" /> {t('ไม่สะดวก', 'Decline')}
+                </Button>
+                <Button onClick={handleConfirmAppointment}>
+                  <CheckCircle className="h-4 w-4 mr-1.5" /> {t('ยืนยันการนัดหมาย', 'Confirm Appointment')}
+                </Button>
+              </div>
             </div>
           </Card>
         )}
