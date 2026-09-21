@@ -912,8 +912,20 @@ export default function QualitativeExitAnalysis() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={comparativeChartData}
-                margin={{ left: 0, right: 24, top: 10, bottom: 4 }}
+                margin={{ left: 0, right: 24, top: 14, bottom: 4 }}
+                barGap={6}
+                barCategoryGap="22%"
               >
+                <defs>
+                  <linearGradient id="compWithdrawalGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#fb7185" />
+                    <stop offset="100%" stopColor="#e11d48" />
+                  </linearGradient>
+                  <linearGradient id="compLeaveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#fcd34d" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
                 <XAxis
                   dataKey="reason"
@@ -930,29 +942,61 @@ export default function QualitativeExitAnalysis() {
                   axisLine={false}
                 />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: chartTheme.tooltipBg,
-                    borderColor: chartTheme.tooltipBorder,
-                    color: chartTheme.tooltipText,
-                    borderRadius: '10px',
-                    fontSize: '12px',
+                  cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)', radius: 8 }}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload || !payload.length) return null
+                    return (
+                      <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-slate-900/95 p-3 shadow-xl backdrop-blur-md min-w-[210px] text-xs">
+                        <div className="font-bold text-slate-900 dark:text-slate-100 mb-2 border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                          {label}
+                        </div>
+                        <div className="space-y-1.5">
+                          {payload.map((entry: any, i: number) => {
+                            const c = entry.dataKey === 'withdrawal' ? '#e11d48' : '#d97706'
+                            return (
+                              <div key={i} className="flex items-center justify-between gap-3 text-[11px]">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c }} />
+                                  <span className="text-slate-600 dark:text-slate-300 font-medium">{entry.name}</span>
+                                </div>
+                                <span className="font-bold font-mono text-slate-900 dark:text-slate-100">
+                                  {entry.value} {t('เคส', 'cases')}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
                   }}
-                  itemStyle={{ color: chartTheme.tooltipText }}
                 />
-                <Legend wrapperStyle={{ fontSize: 11, color: chartTheme.axis }} />
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  wrapperStyle={{ paddingBottom: '16px', fontSize: '11px' }}
+                  formatter={(val, entry: any) => {
+                    const c = entry.dataKey === 'withdrawal' ? '#e11d48' : '#d97706'
+                    return (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 mr-2">
+                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c }} />
+                        {val}
+                      </span>
+                    )
+                  }}
+                />
                 <Bar
                   dataKey="withdrawal"
                   name={t('ขอลาออกถาวร (Withdrawal)', 'Permanent Withdrawal')}
-                  fill="#e11d48"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={46}
+                  fill="url(#compWithdrawalGrad)"
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={32}
                 />
                 <Bar
                   dataKey="leave"
                   name={t('ขอพักการศึกษา (Leave of Absence)', 'Leave of Absence')}
-                  fill="#d97706"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={46}
+                  fill="url(#compLeaveGrad)"
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={32}
                 />
               </BarChart>
             </ResponsiveContainer>

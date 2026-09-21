@@ -263,23 +263,63 @@ export default function QADashboard() {
               {categoryData.length > 0 ? (
                 <div className="h-[28rem] sm:h-[30rem]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={categoryData} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 16 }} barCategoryGap={12}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+                    <BarChart
+                      data={categoryData}
+                      layout="vertical"
+                      margin={{ top: 6, right: 24, bottom: 6, left: 16 }}
+                      barCategoryGap={12}
+                    >
+                      <defs>
+                        <linearGradient id="qaCategoryBarGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#0284c7" />
+                          <stop offset="60%" stopColor="#0ea5e9" />
+                          <stop offset="100%" stopColor="#38bdf8" />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} horizontal={false} />
                       <XAxis type="number" hide />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: chartTheme.axis }} tickLine={false} axisLine={false} width={210} interval={0} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: chartTheme.tooltipBg,
-                          borderColor: chartTheme.tooltipBorder,
-                          color: chartTheme.tooltipText,
-                          borderRadius: '8px',
-                          fontSize: '11px',
-                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                        }}
-                        itemStyle={{ color: chartTheme.tooltipText }}
-                        formatter={(value, _name, item) => [`${value} ${t('คำร้อง', 'requests')} (${item.payload.percentage}%)`, t('จำนวน', 'Count')]}
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        tick={{ fontSize: 11, fill: chartTheme.axis }}
+                        tickLine={false}
+                        axisLine={false}
+                        width={210}
+                        interval={0}
                       />
-                      <Bar dataKey="count" fill="#0284c7" radius={[0, 6, 6, 0]} barSize={24} />
+                      <Tooltip
+                        cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)', radius: 6 }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload || !payload.length) return null
+                          const d = payload[0].payload
+                          return (
+                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-slate-900/95 p-3 shadow-xl backdrop-blur-md min-w-[190px] text-xs">
+                              <p className="font-bold text-slate-900 dark:text-slate-100 mb-1.5 border-b border-slate-100 dark:border-slate-800 pb-1">
+                                {d.name}
+                              </p>
+                              <div className="flex items-center justify-between gap-3 text-[11px]">
+                                <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                  <span className="h-2 w-2 rounded-full bg-sky-500" />
+                                  {t('จำนวนคำร้อง', 'Requests')}
+                                </span>
+                                <span className="font-bold font-mono text-sky-600 dark:text-sky-400">
+                                  {d.count} {t('คำร้อง', 'requests')} ({d.percentage}%)
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill="url(#qaCategoryBarGrad)"
+                        radius={[0, 8, 8, 0]}
+                        barSize={18}
+                        background={{
+                          fill: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.03)',
+                          radius: 8,
+                        }}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -408,27 +448,111 @@ export default function QADashboard() {
               <CalendarClock className="h-4 w-4 text-sky-600 dark:text-sky-400" /> {t('ภาระงานอาจารย์ที่ปรึกษาและการมีส่วนร่วม', 'Faculty Advisor Workload & Engagement')}
             </h3>
             {advisorWorkload.length > 0 ? (
-              <div className="h-52 sm:h-60">
+              <div className="h-56 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={advisorWorkload}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: chartTheme.axis }} />
-                    <YAxis tick={{ fontSize: 10, fill: chartTheme.axis }} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: chartTheme.tooltipBg,
-                        borderColor: chartTheme.tooltipBorder,
-                        color: chartTheme.tooltipText,
-                        borderRadius: '8px',
-                        fontSize: '11px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                      }}
-                      itemStyle={{ color: chartTheme.tooltipText }}
+                  <BarChart
+                    data={advisorWorkload}
+                    margin={{ top: 12, right: 16, bottom: 8, left: -10 }}
+                    barGap={4}
+                    barCategoryGap="22%"
+                  >
+                    <defs>
+                      <linearGradient id="advisorGradStudents" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#38bdf8" />
+                        <stop offset="100%" stopColor="#0284c7" />
+                      </linearGradient>
+                      <linearGradient id="advisorGradRequests" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#c084fc" />
+                        <stop offset="100%" stopColor="#7c3aed" />
+                      </linearGradient>
+                      <linearGradient id="advisorGradSessions" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#34d399" />
+                        <stop offset="100%" stopColor="#059669" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: chartTheme.axis }}
+                      tickLine={false}
+                      axisLine={{ stroke: chartTheme.grid }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 10, color: chartTheme.axis }} />
-                    <Bar dataKey="students" fill="#0284c7" name={t('นักศึกษาในความดูแล', 'Assigned Advisees')} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="requests" fill="#38bdf8" name={t('คำร้องที่ได้รับ', 'Student Requests')} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="sessions" fill="#64748b" name={t('ครั้งที่ให้คำปรึกษาสำเร็จ', 'Completed Sessions')} radius={[4, 4, 0, 0]} />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: chartTheme.axis }}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)', radius: 8 }}
+                      content={({ active, payload, label }) => {
+                        if (!active || !payload || !payload.length) return null
+                        return (
+                          <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-slate-900/95 p-3 shadow-xl backdrop-blur-md min-w-[200px] text-xs">
+                            <div className="font-bold text-slate-900 dark:text-slate-100 mb-2 border-b border-slate-100 dark:border-slate-800 pb-1.5 flex items-center justify-between">
+                              <span>{label}</span>
+                              <span className="text-[10px] text-slate-400 font-normal">{t('ภาระงานที่ปรึกษา', 'Workload & Sessions')}</span>
+                            </div>
+                            <div className="space-y-1.5">
+                              {payload.map((entry: any, i: number) => {
+                                const dotColors = ['#0284c7', '#7c3aed', '#059669']
+                                return (
+                                  <div key={i} className="flex items-center justify-between gap-3 text-[11px]">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: dotColors[i] || entry.color }} />
+                                      <span className="text-slate-600 dark:text-slate-300 font-medium">{entry.name}</span>
+                                    </div>
+                                    <span className="font-bold font-mono text-slate-900 dark:text-slate-100">
+                                      {entry.value}
+                                    </span>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="top"
+                      align="right"
+                      wrapperStyle={{ paddingBottom: '16px', fontSize: '11px' }}
+                      formatter={(val, entry: any) => {
+                        const dotColors: Record<string, string> = {
+                          students: '#0284c7',
+                          requests: '#7c3aed',
+                          sessions: '#059669',
+                        }
+                        const c = dotColors[entry.dataKey] || '#0284c7'
+                        return (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 mr-2">
+                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c }} />
+                            {val}
+                          </span>
+                        )
+                      }}
+                    />
+                    <Bar
+                      dataKey="students"
+                      fill="url(#advisorGradStudents)"
+                      name={t('นักศึกษาในความดูแล', 'Assigned Advisees')}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={28}
+                    />
+                    <Bar
+                      dataKey="requests"
+                      fill="url(#advisorGradRequests)"
+                      name={t('คำร้องที่ได้รับ', 'Student Requests')}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={28}
+                    />
+                    <Bar
+                      dataKey="sessions"
+                      fill="url(#advisorGradSessions)"
+                      name={t('ครั้งที่ให้คำปรึกษาสำเร็จ', 'Completed Sessions')}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={28}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -564,9 +688,16 @@ export default function QADashboard() {
                   <BarChart
                     data={voiceFactorData}
                     layout="vertical"
-                    margin={{ top: 4, right: 28, bottom: 6, left: 12 }}
-                    barCategoryGap={10}
+                    margin={{ top: 8, right: 28, bottom: 8, left: 12 }}
+                    barCategoryGap={12}
                   >
+                    <defs>
+                      <linearGradient id="qaVoiceFactorGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#0369a1" />
+                        <stop offset="50%" stopColor="#0284c7" />
+                        <stop offset="100%" stopColor="#38bdf8" />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       stroke={chartTheme.grid}
@@ -589,25 +720,37 @@ export default function QADashboard() {
                       axisLine={false}
                     />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: chartTheme.tooltipBg,
-                        borderColor: chartTheme.tooltipBorder,
-                        color: chartTheme.tooltipText,
-                        borderRadius: '10px',
-                        fontSize: '12px',
-                        boxShadow: '0 8px 24px rgb(15 23 42 / 0.08)',
+                      cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)', radius: 6 }}
+                      content={({ active, payload }) => {
+                        if (!active || !payload || !payload.length) return null
+                        const d = payload[0].payload
+                        return (
+                          <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/95 dark:bg-slate-900/95 p-3 shadow-xl backdrop-blur-md min-w-[210px] text-xs">
+                            <p className="font-bold text-slate-900 dark:text-slate-100 mb-1.5 border-b border-slate-100 dark:border-slate-800 pb-1">
+                              {d.fullName || d.name}
+                            </p>
+                            <div className="flex items-center justify-between gap-3 text-[11px]">
+                              <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                <span className="h-2 w-2 rounded-full bg-sky-500" />
+                                {t('จำนวนครั้งที่ระบุ', 'Frequency')}
+                              </span>
+                              <span className="font-bold font-mono text-sky-600 dark:text-sky-400">
+                                {d.count} {t('ครั้ง', 'mentions')}
+                              </span>
+                            </div>
+                          </div>
+                        )
                       }}
-                      itemStyle={{ color: chartTheme.tooltipText }}
-                      formatter={(val, _name, item) => [
-                        `${val} ${t('ครั้ง', 'mentions')}`,
-                        (item.payload as any).fullName,
-                      ]}
                     />
                     <Bar
                       dataKey="count"
-                      fill="#0f78b8"
-                      radius={[0, 6, 6, 0]}
-                      maxBarSize={40}
+                      fill="url(#qaVoiceFactorGrad)"
+                      radius={[0, 8, 8, 0]}
+                      barSize={20}
+                      background={{
+                        fill: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.03)',
+                        radius: 8,
+                      }}
                       name={t('จำนวนครั้งที่ถูกระบุ', 'Mentions')}
                     />
                   </BarChart>
