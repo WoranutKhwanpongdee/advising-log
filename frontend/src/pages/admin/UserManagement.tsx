@@ -26,6 +26,21 @@ export default function UserManagement() {
   const [bulkText, setBulkText] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Helper to derive readable name directly from email
+  function deriveNameFromEmail(email: string): string {
+    const prefix = email.trim().split('@')[0] || ''
+    if (!prefix) return ''
+    if (/^\d/.test(prefix)) {
+      const digitMatch = prefix.match(/^\d+/)
+      return digitMatch ? `Student ${digitMatch[0]}` : `Student ${prefix}`
+    }
+    const words = prefix
+      .split(/[._\-\s]+/)
+      .filter(Boolean)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    return words.length > 0 ? words.join(' ') : prefix
+  }
+
   // Helper to derive code automatically without manual user input
   function deriveCode(role: UserRole, email: string): string {
     const emailPrefix = email.trim().split('@')[0]
@@ -74,6 +89,7 @@ export default function UserManagement() {
     newEmail.includes('@lamduan.')
 
   const effectiveRole: UserRole = isStudentDetected ? 'student' : newRole
+  const derivedSingleName = deriveNameFromEmail(newEmail)
 
   // Parse bulk text into valid user objects with live preview
   const parsedBulkUsers = (() => {
@@ -89,7 +105,7 @@ export default function UserManagement() {
       const isStu = /^\d/.test(prefix) || email.includes('@student.') || email.includes('@lamduan.')
 
       let role: UserRole = isStu ? 'student' : 'advisor'
-      let name = parts[1] || (isStu ? `Student ${prefix}` : prefix)
+      let name = parts[1] || deriveNameFromEmail(email) || (isStu ? `Student ${prefix}` : prefix)
       let department = parts[3] || parts[2] || 'School of Applied Digital Technology (ADT)'
 
       if (!isStu && parts[2]) {
@@ -130,8 +146,8 @@ export default function UserManagement() {
 
   async function handleAddSingleUser(e: React.FormEvent) {
     e.preventDefault()
-    if (!newEmail.trim() || !newName.trim()) {
-      addToast('error', t('กรุณากรอกอีเมลและชื่อ-นามสกุล', 'Please enter email and full name'))
+    if (!newEmail.trim()) {
+      addToast('error', t('กรุณากรอกอีเมลมหาวิทยาลัย', 'Please enter institutional email'))
       return
     }
 
@@ -143,12 +159,13 @@ export default function UserManagement() {
     }
 
     const autoCode = deriveCode(effectiveRole, email)
+    const finalName = newName.trim() || derivedSingleName || emailPrefix
     const generatedId = `${effectiveRole.toUpperCase().slice(0, 3)}_${Date.now().toString().slice(-6)}`
 
     const newUser: User = {
       id: generatedId,
       code: autoCode,
-      name: newName.trim(),
+      name: finalName,
       email,
       role: effectiveRole,
       department: newDept || 'School of Applied Digital Technology (ADT)',
@@ -479,17 +496,29 @@ export default function UserManagement() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-                  {t('ชื่อ-นามสกุล *', 'Full Name *')}
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                    {t('ชื่อ-นามสกุล (ไม่บังคับ - สร้างจากอีเมลอัตโนมัติ)', 'Full Name (Optional - Auto-derived from email)')}
+                  </label>
+                  {derivedSingleName && (
+                    <span className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold">
+                      {t('สร้างอัตโนมัติ:', 'Auto-derived:')} {derivedSingleName}
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Somchai Jaidee or Dr. Prasit Kumar"
+                  placeholder={derivedSingleName ? `e.g. ${derivedSingleName}` : 'e.g. Somchai Jaidee or Dr. Prasit Kumar'}
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  {t(
+                    'หากเว้นว่าง ระบบจะสร้างชื่อจากอีเมลให้อัตโนมัติ และจะอัปเดตเป็นชื่อจริงจาก Google Account เมื่อผู้ใช้เข้าสู่ระบบครั้งแรก',
+                    'If left blank, name is derived from email and will auto-sync with verified Google Profile upon first login.'
+                  )}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -532,8 +561,8 @@ export default function UserManagement() {
                 <Info className="h-4 w-4 text-sky-600 dark:text-sky-400 flex-shrink-0" />
                 <span>
                   {t(
-                    'รหัสประจำตัว (Code) จะถูกสร้างและเชื่อมโยงกับโปรไฟล์โดยอัตโนมัติ ไม่จำเป็นต้องกรอกแยก',
-                    'User / Student Code is derived automatically from the email address.'
+                    'รหัสประจำตัว (Code) และชื่อจะถูกสร้างให้อัตโนมัติจากอีเมล ไม่จำเป็นต้องกรอกแยก',
+                    'User Code and Display Name are derived automatically from the email address.'
                   )}
                 </span>
               </div>
@@ -565,17 +594,17 @@ export default function UserManagement() {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {t('วางรายชื่อหรืออีเมล (1 บรรทัดต่อ 1 คน หรือรูปแบบ CSV) *', 'Paste Emails or CSV (1 per line) *')}
+                    {t('วางรายชื่ออีเมล (เพียงแค่วางอีเมล 1 บรรทัดต่อ 1 คน หรือรูปแบบ CSV) *', 'Paste Emails (1 email per line or CSV) *')}
                   </label>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    {t('รูปแบบ: อีเมล, ชื่อ-นามสกุล, [บทบาท]', 'Format: email, full name, [role]')}
+                    {t('ชื่อ, รหัส, บทบาท, สำนักวิชา ADT สร้างให้อัตโนมัติ', 'Name, Code, Role, ADT Dept auto-derived')}
                   </span>
                 </div>
                 <textarea
-                  rows={5}
+                  rows={6}
                   value={bulkText}
                   onChange={e => setBulkText(e.target.value)}
-                  placeholder={`6631501001@lamduan.mfu.ac.th, Somchai Jaidee\n6631501002@lamduan.mfu.ac.th, Suda Rakdee\nprasit.k@mfu.ac.th, Dr. Prasit Kumar, advisor\nchair.qa@mfu.ac.th, Dr. Siriporn QA, qa_chair`}
+                  placeholder={`6631501001@lamduan.mfu.ac.th\n6631501002@lamduan.mfu.ac.th\nprasit.k@mfu.ac.th\nsomchai.jaidee@mfu.ac.th\nchair.qa@mfu.ac.th, qa_chair`}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>

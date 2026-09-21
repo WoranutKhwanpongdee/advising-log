@@ -21,6 +21,7 @@ import type {
   StudentVoiceResponse,
   StudentDocument,
   User,
+  UserRole,
   StudentAdvisorAssignment,
   AdvisingCategoryConfig,
   DocumentType,
@@ -148,7 +149,7 @@ interface StoreActions {
 
   // Users
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => User
-  bulkAddUsers: (users: Omit<User, 'id' | 'createdAt'>[]) => Promise<User[]>
+  bulkAddUsers: (users: Partial<User>[]) => Promise<User[]>
   updateUser: (id: string, updates: Partial<User>) => void
 
   // Roster
@@ -449,13 +450,40 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return newUser
   }, [])
 
-  const bulkAddUsers = useCallback(async (newUsersData: Omit<User, 'id' | 'createdAt'>[]): Promise<User[]> => {
+  const bulkAddUsers = useCallback(async (newUsersData: Partial<User>[]): Promise<User[]> => {
     const timestamp = now()
-    const createdUsers: User[] = newUsersData.map((u, idx) => ({
-      ...u,
-      id: nextId(`USR_${Date.now()}_${idx}`),
-      createdAt: timestamp,
-    }))
+    const createdUsers: User[] = newUsersData.map((u, idx) => {
+      const email = (u.email || '').trim()
+      const prefix = email.split('@')[0] || `user_${idx + 1}`
+      const isStu = /^\d/.test(prefix) || email.includes('@student.') || email.includes('@lamduan.')
+      const assignedRole: UserRole = u.role || (isStu ? 'student' : 'advisor')
+
+      let autoName = u.name?.trim()
+      if (!autoName) {
+        if (isStu) {
+          const digitMatch = prefix.match(/^\d+/)
+          autoName = digitMatch ? `Student ${digitMatch[0]}` : `Student ${prefix}`
+        } else {
+          const words = prefix.split(/[._\-\s]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          autoName = words.length > 0 ? words.join(' ') : prefix
+        }
+      }
+
+      const autoCode = u.code || (isStu ? prefix.match(/^\d+/)?.[0] || prefix : `ADV${String(idx + 1).padStart(3, '0')}`)
+
+      return {
+        id: u.id || nextId(`USR_${Date.now()}_${idx}`),
+        code: autoCode,
+        name: autoName,
+        email,
+        role: assignedRole,
+        department: u.department || 'School of Applied Digital Technology (ADT)',
+        phone: u.phone,
+        isActive: u.isActive !== undefined ? u.isActive : true,
+        hasAiAccess: u.hasAiAccess !== undefined ? u.hasAiAccess : assignedRole !== 'student',
+        createdAt: u.createdAt || timestamp,
+      }
+    })
 
     setUsers(prev => {
       const existingEmails = new Set(createdUsers.map(u => u.email.toLowerCase()))

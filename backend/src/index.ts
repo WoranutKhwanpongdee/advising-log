@@ -279,6 +279,20 @@ app.get('/api/users/:id', async (c) => {
   return c.json({ user })
 })
 
+function deriveNameFromEmail(email: string): string {
+  const prefix = (email || '').trim().split('@')[0] || ''
+  if (!prefix) return 'User'
+  if (/^\d/.test(prefix)) {
+    const digitMatch = prefix.match(/^\d+/)
+    return digitMatch ? `Student ${digitMatch[0]}` : `Student ${prefix}`
+  }
+  const words = prefix
+    .split(/[._\-\s]+/)
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+  return words.length > 0 ? words.join(' ') : prefix
+}
+
 app.post('/api/users', async (c) => {
   const database = db(c)
   if (!database) return c.json({ error: 'Database unavailable' }, 503)
@@ -291,11 +305,12 @@ app.post('/api/users', async (c) => {
     ? 'student'
     : (body.role === 'admin' && body.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : body.role || 'advisor')
   const autoCode = body.code || (isStudent ? emailPrefix : `STAFF_${Date.now().toString().slice(-4)}`)
+  const derivedName = body.name?.trim() || deriveNameFromEmail(body.email)
 
   const newUser = {
     id: body.id || `USER_${Date.now()}`,
     code: autoCode,
-    name: body.name || emailPrefix,
+    name: derivedName,
     email: (body.email || '').trim(),
     role: assignedRole,
     department: body.department || 'School of Applied Digital Technology (ADT)',
@@ -330,11 +345,12 @@ app.post('/api/users/bulk', async (c) => {
       : (item.role === 'admin' && item.email?.toLowerCase().trim() !== superAdminEmail ? 'advisor' : item.role || 'advisor')
 
     const autoCode = item.code || (isStudent ? emailPrefix : `STAFF_${Date.now().toString().slice(-4)}`)
+    const derivedName = item.name?.trim() || deriveNameFromEmail(item.email)
 
     const userObj = {
       id: item.id || `USER_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       code: autoCode,
-      name: item.name || emailPrefix,
+      name: derivedName,
       email: item.email.trim(),
       role: assignedRole,
       department: item.department || 'School of Applied Digital Technology (ADT)',

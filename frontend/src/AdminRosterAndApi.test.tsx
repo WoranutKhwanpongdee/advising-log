@@ -365,4 +365,36 @@ describe('Admin API Control & CSV Roster Import', () => {
     expect(addedAdvisor.department).toBe('School of Applied Digital Technology (ADT)')
   })
 
+  it('correctly auto-derives full names from student and faculty email addresses', async () => {
+    let storeRef: any
+    function TestComponent() {
+      storeRef = useStore()
+      return <div data-testid="users-count">{storeRef.users.length}</div>
+    }
+
+    renderWithProviders(<TestComponent />)
+
+    await act(async () => {
+      await storeRef.bulkAddUsers([
+        {
+          email: '6631508888@lamduan.mfu.ac.th',
+          role: 'student',
+        },
+        {
+          email: 'somchai.jaidee@mfu.ac.th',
+          role: 'advisor',
+        },
+      ])
+    })
+
+    const student = storeRef.users.find((u: any) => u.email === '6631508888@lamduan.mfu.ac.th')
+    expect(student).toBeDefined()
+    expect(student.code).toBe('6631508888')
+    expect(student.name).toBe('Student 6631508888')
+
+    const advisor = storeRef.users.find((u: any) => u.email === 'somchai.jaidee@mfu.ac.th')
+    expect(advisor).toBeDefined()
+    expect(advisor.name).toBe('Somchai Jaidee')
+  })
+
 })
