@@ -24,7 +24,7 @@ export default function ExitCaseReview() {
   // State
   const [selectedCase, setSelectedCase] = useState<ExitCase | null>(null)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'under_review' | 'closed'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'under_review' | 'closed'>('all')
 
   // Finalize & Close Modal State
   const [showFinalizeModal, setShowFinalizeModal] = useState(false)
@@ -36,8 +36,8 @@ export default function ExitCaseReview() {
 
   if (!currentUser) return null
 
-  // QA can see cases under review or closed
-  const allReviewCases = store.exitCases.filter(e => e.status !== 'open')
+  // QA can see all cases in the curriculum
+  const allReviewCases = store.exitCases
 
   // Filtered cases by search and status
   const filteredCases = allReviewCases.filter(e => {
@@ -57,6 +57,7 @@ export default function ExitCaseReview() {
     )
   })
 
+  const openCount = allReviewCases.filter(e => e.status === 'open').length
   const underReviewCount = allReviewCases.filter(e => e.status === 'under_review').length
   const closedCount = allReviewCases.filter(e => e.status === 'closed').length
 
@@ -249,6 +250,17 @@ export default function ExitCaseReview() {
             }`}
           >
             {t('ทั้งหมด', 'All')} ({allReviewCases.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('open')}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              statusFilter === 'open'
+                ? 'bg-white dark:bg-slate-700 text-sky-700 dark:text-sky-300 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            {t('รออาจารย์ประเมิน', 'Awaiting Advisor')} ({openCount})
           </button>
           <button
             type="button"
@@ -520,11 +532,21 @@ export default function ExitCaseReview() {
                 </div>
               </div>
             ) : (
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-4 text-xs text-slate-400 italic">
-                {t(
-                  'ยังไม่มีบันทึกผลการประเมินจากอาจารย์ที่ปรึกษา',
-                  'No formal advisor assessment filed yet.'
-                )}
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+                <div className="p-3.5 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-xl flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-200">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block mb-0.5">
+                      {t('รอดำเนินการประเมินจากอาจารย์ที่ปรึกษา', 'Awaiting Faculty Advisor Assessment')}
+                    </span>
+                    <p className="leading-relaxed text-slate-600 dark:text-slate-300">
+                      {t(
+                        'นักศึกษายื่นคำร้องแล้ว แต่อาจารย์ที่ปรึกษายังไม่ได้บันทึกผลการประเมินความเห็น (สามารถประสานอาจารย์ หรือพิจารณาสรุปมติในระดับหลักสูตรได้)',
+                        'The student has filed the exit request, but the faculty advisor has not recorded their assessment yet.'
+                      )}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -570,6 +592,18 @@ export default function ExitCaseReview() {
                 </p>
               </div>
             </div>
+
+            {!assessment && (
+              <div className="p-3 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-xl flex items-center gap-2 text-xs text-amber-900 dark:text-amber-200 font-medium">
+                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>
+                  {t(
+                    'เคสนี้ยังไม่มีบันทึกผลการประเมินจากอาจารย์ที่ปรึกษา (มตินี้จะเป็นการพิจารณาโดยตรงจากคณะกรรมการ)',
+                    'Advisor assessment has not been submitted. This resolution will be recorded directly by the committee.'
+                  )}
+                </span>
+              </div>
+            )}
 
             {/* Case Summary Pill */}
             <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs">
