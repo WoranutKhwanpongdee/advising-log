@@ -591,16 +591,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       seenStudentCodes.add(sCode)
 
-      const student = users.find(u => u.code === sCode && u.role === 'student')
+      const student = users.find(
+        u =>
+          u.role === 'student' &&
+          (u.code.toLowerCase() === sCode.toLowerCase() ||
+            u.email.toLowerCase() === sCode.toLowerCase() ||
+            u.email.toLowerCase().startsWith(sCode.toLowerCase()))
+      )
       if (!student) {
         skippedCount++
-        errors.push(`ไม่พบรหัสนักศึกษา "${sCode}" ในฐานข้อมูล`)
+        errors.push(`ไม่พบนักศึกษา "${sCode}" ในฐานข้อมูล (สามารถใช้รหัสนักศึกษาหรืออีเมล)`)
         preview.push({
           studentCode: sCode,
           studentName: 'ไม่พบในระบบ',
           newAdvisorName: aTarget,
           action: 'error',
-          errorReason: `ไม่พบนักศึกษารหัส ${sCode}`,
+          errorReason: `ไม่พบนักศึกษา "${sCode}"`,
         })
         continue
       }
