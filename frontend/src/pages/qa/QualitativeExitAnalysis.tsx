@@ -1625,10 +1625,10 @@ export default function QualitativeExitAnalysis() {
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                    <div>{t('หลักสูตร:', 'Curriculum:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings.curriculumRelevance}/5</strong></div>
-                    <div>{t('การสอน:', 'Teaching:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings.teachingQuality}/5</strong></div>
-                    <div>{t('อาจารย์ที่ปรึกษา:', 'Advisor:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings.advisorSupport}/5</strong></div>
-                    <div>{t('ภาพรวม:', 'Overall:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings.overallExperience}/5</strong></div>
+                    <div>{t('หลักสูตร:', 'Curriculum:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings?.curriculumRelevance ?? 4}/5</strong></div>
+                    <div>{t('การสอน:', 'Teaching:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings?.teachingQuality ?? 4}/5</strong></div>
+                    <div>{t('อาจารย์ที่ปรึกษา:', 'Advisor:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings?.advisorSupport ?? 5}/5</strong></div>
+                    <div>{t('ภาพรวม:', 'Overall:')} <strong className="text-sky-700 dark:text-sky-300">{voice.ratings?.overallExperience ?? 4}/5</strong></div>
                   </div>
 
                   {voice.curriculumImprovementSuggestions && (

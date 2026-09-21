@@ -253,7 +253,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (fRes && Array.isArray(fRes.followUps)) setFollowUps(fRes.followUps)
         if (sRes && Array.isArray(sRes.sessions)) setSessions(sRes.sessions)
         if (eRes && Array.isArray(eRes.exitCases)) setExitCases(eRes.exitCases)
-        if (vRes && Array.isArray(vRes.surveys)) setStudentVoiceResponses(vRes.surveys)
+        if (vRes && Array.isArray(vRes.surveys)) {
+          const normalized = vRes.surveys.map((s: any) => ({
+            ...s,
+            primaryFactors: Array.isArray(s.primaryFactors)
+              ? s.primaryFactors
+              : typeof s.primaryFactors === 'string'
+                ? (() => { try { return JSON.parse(s.primaryFactors) } catch { return [] } })()
+                : [],
+            ratings: s.ratings || {
+              curriculumRelevance: s.curriculumRating ?? 3,
+              teachingQuality: s.teachingRating ?? 3,
+              advisorSupport: s.advisorRating ?? 3,
+              universityServices: s.servicesRating ?? 3,
+              overallExperience: s.overallRating ?? 3,
+            },
+          }))
+          setStudentVoiceResponses(normalized)
+        }
         if (aRes && Array.isArray(aRes.logs)) setAuditLogs(aRes.logs)
         if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
         if (ewRes && Array.isArray(ewRes.earlyWarnings)) setEarlyWarnings(ewRes.earlyWarnings)
@@ -264,7 +281,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (fRes && Array.isArray(fRes.followUps) && fRes.followUps.length > 0) setFollowUps(fRes.followUps)
         if (sRes && Array.isArray(sRes.sessions) && sRes.sessions.length > 0) setSessions(sRes.sessions)
         if (eRes && Array.isArray(eRes.exitCases) && eRes.exitCases.length > 0) setExitCases(eRes.exitCases)
-        if (vRes && Array.isArray(vRes.surveys) && vRes.surveys.length > 0) setStudentVoiceResponses(vRes.surveys)
+        if (vRes && Array.isArray(vRes.surveys) && vRes.surveys.length > 0) {
+          const normalized = vRes.surveys.map((s: any) => ({
+            ...s,
+            primaryFactors: Array.isArray(s.primaryFactors)
+              ? s.primaryFactors
+              : typeof s.primaryFactors === 'string'
+                ? (() => { try { return JSON.parse(s.primaryFactors) } catch { return [] } })()
+                : [],
+            ratings: s.ratings || {
+              curriculumRelevance: s.curriculumRating ?? 3,
+              teachingQuality: s.teachingRating ?? 3,
+              advisorSupport: s.advisorRating ?? 3,
+              universityServices: s.servicesRating ?? 3,
+              overallExperience: s.overallRating ?? 3,
+            },
+          }))
+          setStudentVoiceResponses(normalized)
+        }
         if (aRes && Array.isArray(aRes.logs) && aRes.logs.length > 0) setAuditLogs(aRes.logs)
         if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
         if (ewRes && Array.isArray(ewRes.earlyWarnings) && ewRes.earlyWarnings.length > 0) setEarlyWarnings(ewRes.earlyWarnings)

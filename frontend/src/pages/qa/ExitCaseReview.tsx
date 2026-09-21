@@ -166,14 +166,14 @@ export default function ExitCaseReview() {
 
                 <div className="space-y-2 p-3.5 bg-sky-50/60 dark:bg-sky-950/40 rounded-xl border border-sky-100 dark:border-sky-900/40 text-xs">
                   <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border-b border-sky-100/80 dark:border-sky-800/60 pb-2">
-                    <span>{t('คะแนนหลักสูตร:', 'Curriculum:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings.curriculumRelevance}/5</strong></span>
-                    <span>{t('คุณภาพการสอน:', 'Teaching:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings.teachingQuality}/5</strong></span>
-                    <span>{t('การดูแลของอาจารย์:', 'Advisor:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings.advisorSupport}/5</strong></span>
-                    <span>{t('ภาพรวม:', 'Overall:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings.overallExperience}/5</strong></span>
+                    <span>{t('คะแนนหลักสูตร:', 'Curriculum:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings?.curriculumRelevance ?? 4}/5</strong></span>
+                    <span>{t('คุณภาพการสอน:', 'Teaching:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings?.teachingQuality ?? 4}/5</strong></span>
+                    <span>{t('การดูแลของอาจารย์:', 'Advisor:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings?.advisorSupport ?? 5}/5</strong></span>
+                    <span>{t('ภาพรวม:', 'Overall:')} <strong className="text-sky-700 dark:text-sky-300">{voiceResponse.ratings?.overallExperience ?? 4}/5</strong></span>
                   </div>
 
                   <div className="flex flex-wrap gap-1 pt-1">
-                    {voiceResponse.primaryFactors.map((fac, idx) => (
+                    {(voiceResponse.primaryFactors || []).map((fac, idx) => (
                       <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium">
                         {fac}
                       </span>

@@ -720,7 +720,37 @@ app.get('/api/student-voice', async (c) => {
   const database = db(c)
   if (!database) return c.json({ surveys: [] })
   const list = await database.select().from(schema.studentVoiceResponses).orderBy(desc(schema.studentVoiceResponses.createdAt))
-  return c.json({ surveys: list })
+  const formatted = list.map(item => {
+    let factors: string[] = []
+    try {
+      factors = typeof item.primaryFactors === 'string' ? JSON.parse(item.primaryFactors) : (item.primaryFactors || [])
+      if (!Array.isArray(factors)) factors = []
+    } catch {
+      factors = []
+    }
+    return {
+      id: item.id,
+      exitCaseId: item.exitCaseId || undefined,
+      studentId: item.studentId || undefined,
+      isAnonymous: Boolean(item.isAnonymous),
+      exitType: item.exitType as any,
+      academicYear: item.academicYear,
+      primaryFactors: factors,
+      ratings: {
+        curriculumRelevance: item.curriculumRating ?? 3,
+        teachingQuality: item.teachingRating ?? 3,
+        advisorSupport: item.advisorRating ?? 3,
+        universityServices: item.servicesRating ?? 3,
+        overallExperience: item.overallRating ?? 3,
+      },
+      whatCouldUniversityDoBetter: item.whatCouldUniversityDoBetter || '',
+      curriculumImprovementSuggestions: item.curriculumImprovementSuggestions || '',
+      adviceForFutureStudents: item.adviceForFutureStudents || '',
+      shareWithAdvisor: Boolean(item.shareWithAdvisor),
+      createdAt: item.createdAt,
+    }
+  })
+  return c.json({ surveys: formatted })
 })
 
 app.post('/api/student-voice', async (c) => {
@@ -736,11 +766,11 @@ app.post('/api/student-voice', async (c) => {
     exitType: body.exitType,
     academicYear: body.academicYear || '2026',
     primaryFactors: typeof body.primaryFactors === 'string' ? body.primaryFactors : JSON.stringify(body.primaryFactors || []),
-    curriculumRating: body.curriculumRating || 3,
-    teachingRating: body.teachingRating || 3,
-    advisorRating: body.advisorRating || 3,
-    servicesRating: body.servicesRating || 3,
-    overallRating: body.overallRating || 3,
+    curriculumRating: body.ratings?.curriculumRelevance ?? body.curriculumRating ?? 3,
+    teachingRating: body.ratings?.teachingQuality ?? body.teachingRating ?? 3,
+    advisorRating: body.ratings?.advisorSupport ?? body.advisorRating ?? 3,
+    servicesRating: body.ratings?.universityServices ?? body.servicesRating ?? 3,
+    overallRating: body.ratings?.overallExperience ?? body.overallRating ?? 3,
     whatCouldUniversityDoBetter: body.whatCouldUniversityDoBetter || null,
     curriculumImprovementSuggestions: body.curriculumImprovementSuggestions || null,
     adviceForFutureStudents: body.adviceForFutureStudents || null,
@@ -841,6 +871,8 @@ app.post('/api/audit-logs', async (c) => {
   await database.insert(schema.auditLogs).values(log)
   return c.json({ success: true, log }, 201)
 })
+
+
 
 // ============================================================
 // 7. Multi-Key AI Governance (Cloudflare D1)

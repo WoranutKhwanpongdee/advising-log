@@ -143,22 +143,23 @@ export default function QADashboard() {
 
   // Student Voice Statistics
   const avgCurriculum = totalVoiceResponses > 0
-    ? (store.studentVoiceResponses.reduce((acc, r) => acc + r.ratings.curriculumRelevance, 0) / totalVoiceResponses).toFixed(1)
+    ? (store.studentVoiceResponses.reduce((acc, r) => acc + (r.ratings?.curriculumRelevance ?? (r as any).curriculumRating ?? 0), 0) / totalVoiceResponses).toFixed(1)
     : '0'
   const avgTeaching = totalVoiceResponses > 0
-    ? (store.studentVoiceResponses.reduce((acc, r) => acc + r.ratings.teachingQuality, 0) / totalVoiceResponses).toFixed(1)
+    ? (store.studentVoiceResponses.reduce((acc, r) => acc + (r.ratings?.teachingQuality ?? (r as any).teachingRating ?? 0), 0) / totalVoiceResponses).toFixed(1)
     : '0'
   const avgAdvisor = totalVoiceResponses > 0
-    ? (store.studentVoiceResponses.reduce((acc, r) => acc + r.ratings.advisorSupport, 0) / totalVoiceResponses).toFixed(1)
+    ? (store.studentVoiceResponses.reduce((acc, r) => acc + (r.ratings?.advisorSupport ?? (r as any).advisorRating ?? 0), 0) / totalVoiceResponses).toFixed(1)
     : '0'
   const avgOverall = totalVoiceResponses > 0
-    ? (store.studentVoiceResponses.reduce((acc, r) => acc + r.ratings.overallExperience, 0) / totalVoiceResponses).toFixed(1)
+    ? (store.studentVoiceResponses.reduce((acc, r) => acc + (r.ratings?.overallExperience ?? (r as any).overallRating ?? 0), 0) / totalVoiceResponses).toFixed(1)
     : '0'
 
   // Student Voice factor frequency
   const factorCounts: Record<string, number> = {}
   store.studentVoiceResponses.forEach(r => {
-    r.primaryFactors.forEach(f => {
+    const factors = Array.isArray(r.primaryFactors) ? r.primaryFactors : []
+    factors.forEach(f => {
       factorCounts[f] = (factorCounts[f] || 0) + 1
     })
   })
@@ -681,7 +682,7 @@ export default function QADashboard() {
                       </div>
 
                       {/* Factor tags */}
-                      {res.primaryFactors.length > 0 && (
+                      {Array.isArray(res.primaryFactors) && res.primaryFactors.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                           {res.primaryFactors.map((fac, idx) => (
                             <span
@@ -727,9 +728,9 @@ export default function QADashboard() {
                     <footer className="border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between gap-3 text-xs text-slate-400 dark:text-slate-500">
                       <div className="inline-flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
                         <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                        <span>{res.ratings.overallExperience}/5</span>
+                        <span>{res.ratings?.overallExperience ?? (res as any).overallRating ?? 4}/5</span>
                       </div>
-                      <span>{new Date(res.createdAt).toLocaleDateString()}</span>
+                      <span>{res.createdAt ? new Date(res.createdAt).toLocaleDateString() : '2026-09-20'}</span>
                     </footer>
                   </article>
                 )
