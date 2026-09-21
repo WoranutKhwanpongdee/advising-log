@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   ArrowRight,
   Sparkles,
+  GitMerge,
 } from 'lucide-react'
 import type { StudentAdvisorAssignment, RosterImportEntry, RosterImportResult } from '@/types'
 
@@ -484,7 +485,8 @@ export default function Roster() {
                 />
                 <div>
                   <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
-                    <span>🟢 {t('อัปเดตและเพิ่มใหม่ (Upsert / Merge)', 'Upsert / Merge')}</span>
+                    <GitMerge className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>{t('อัปเดตและเพิ่มใหม่ (Upsert / Merge)', 'Upsert / Merge')}</span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200 font-extrabold">
                       {t('แนะนำ', 'Recommended')}
                     </span>
@@ -515,8 +517,9 @@ export default function Roster() {
                   className="mt-0.5 text-rose-600 focus:ring-rose-500"
                 />
                 <div>
-                  <div className="font-bold text-slate-900 dark:text-slate-100">
-                    <span>🔴 {t('แทนที่ข้อมูลทั้งหมด (Full Replace / Overwrite)', 'Full Replace / Overwrite')}</span>
+                  <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100">
+                    <Layers className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                    <span>{t('แทนที่ข้อมูลทั้งหมด (Full Replace / Overwrite)', 'Full Replace / Overwrite')}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                     {t(

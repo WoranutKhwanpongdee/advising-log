@@ -5,7 +5,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, Modal, ConfirmDialog } from '@/components/ui'
 import type { StudentDocument } from '@/types'
-import { FileText, Upload, AlertCircle, FileUp, X, ShieldCheck, Trash2 } from 'lucide-react'
+import { FileText, Upload, AlertCircle, FileUp, X, ShieldCheck, Trash2, PenTool, Fingerprint, FileCheck } from 'lucide-react'
 
 export default function Documents() {
   const { currentUser } = useAuth()
@@ -204,12 +204,14 @@ export default function Documents() {
       render: (d: StudentDocument) => (
         <div className="inline-flex items-center gap-1.5">
           {d.signatureMethod === 'wet_signature' ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60">
-              ✍️ {t('ลายมือจริง (Wet Signature)', 'Wet Signature')}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60">
+              <PenTool className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+              <span>{t('ลายมือจริง (Wet Signature)', 'Wet Signature')}</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60">
-              🔏 {t('ลายเซ็นดิจิทัล (E-Signature)', 'E-Signature')}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60">
+              <Fingerprint className="h-3 w-3 text-sky-600 dark:text-sky-400" />
+              <span>{t('ลายเซ็นดิจิทัล (E-Signature)', 'E-Signature')}</span>
             </span>
           )}
         </div>
@@ -336,12 +338,14 @@ export default function Documents() {
                   {t('รูปแบบการลงนาม (กำหนดโดยระบบ/ผู้ดูแล):', 'Validation Method (Configured by Admin):')}
                 </span>
                 {selectedDocType.signatureMethod === 'wet_signature' ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white shadow-2xs">
-                    ✍️ {t('ลายมือจริง (Wet Signature)', 'Wet Signature')}
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white shadow-2xs">
+                    <PenTool className="h-3 w-3" />
+                    <span>{t('ลายมือจริง (Wet Signature)', 'Wet Signature')}</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white shadow-2xs">
-                    🔏 {t('ลายเซ็นดิจิทัล (E-Signature)', 'E-Signature')}
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-600 text-white shadow-2xs">
+                    <Fingerprint className="h-3 w-3" />
+                    <span>{t('ลายเซ็นดิจิทัล (E-Signature)', 'E-Signature')}</span>
                   </span>
                 )}
               </div>
@@ -414,9 +418,10 @@ export default function Documents() {
                       e.stopPropagation()
                       handleSimulateSample('scholarship_form_scanned.pdf')
                     }}
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/60 dark:hover:text-sky-300 transition-colors"
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/60 dark:hover:text-sky-300 transition-colors flex items-center gap-1"
                   >
-                    📄 scholarship_form_scanned.pdf
+                    <FileCheck className="h-3 w-3 text-sky-500" />
+                    <span>scholarship_form_scanned.pdf</span>
                   </button>
                   <button
                     type="button"
@@ -424,9 +429,10 @@ export default function Documents() {
                       e.stopPropagation()
                       handleSimulateSample('petition_document_signed.pdf')
                     }}
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/60 dark:hover:text-sky-300 transition-colors"
+                    className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sky-50 hover:text-sky-600 dark:hover:bg-sky-950/60 dark:hover:text-sky-300 transition-colors flex items-center gap-1"
                   >
-                    📄 petition_document_signed.pdf
+                    <FileCheck className="h-3 w-3 text-sky-500" />
+                    <span>petition_document_signed.pdf</span>
                   </button>
                 </div>
               </div>
@@ -488,7 +494,7 @@ export default function Documents() {
               ) : (
                 /* Wet-signature: no tick box needed (advisor checks for approval) */
                 <div className="p-3.5 rounded-xl border border-amber-200/90 dark:border-amber-800/70 bg-amber-50/70 dark:bg-amber-950/30 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2.5">
-                  <span className="text-base leading-none mt-0.5">✍️</span>
+                  <PenTool className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                   <div className="leading-relaxed">
                     <span className="font-bold block text-amber-900 dark:text-amber-200 mb-0.5">
                       {t('ไม่ต้องยืนยันลายเซ็นดิจิทัล (ไม่ต้องติ๊กกล่อง)', 'No digital checkbox required')}

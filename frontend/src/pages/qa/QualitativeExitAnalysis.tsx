@@ -1477,8 +1477,9 @@ export default function QualitativeExitAnalysis() {
                         "{c.details}"
                       </p>
                       {voice?.whatCouldUniversityDoBetter && (
-                        <p className="text-[11px] text-sky-700 dark:text-sky-300 pt-1 border-t border-slate-200/60 dark:border-slate-700/60 mt-1.5">
-                          💡 {t('สิ่งที่อยากให้ ม. ปรับปรุง:', 'University Feedback:')} "{voice.whatCouldUniversityDoBetter}"
+                        <p className="text-[11px] text-sky-700 dark:text-sky-300 pt-1 border-t border-slate-200/60 dark:border-slate-700/60 mt-1.5 flex items-center gap-1.5">
+                          <Lightbulb className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                          <span>{t('สิ่งที่อยากให้ ม. ปรับปรุง:', 'University Feedback:')} "{voice.whatCouldUniversityDoBetter}"</span>
                         </p>
                       )}
                     </div>
@@ -1495,8 +1496,9 @@ export default function QualitativeExitAnalysis() {
                             {assessment.assessment}
                           </p>
                           {assessment.recommendation && (
-                            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 pt-1 border-t border-sky-100/80 dark:border-sky-900/40 mt-1.5 font-semibold">
-                              ✓ {t('ข้อเสนอแนะ:', 'Recommendation:')} {assessment.recommendation}
+                            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 pt-1 border-t border-sky-100/80 dark:border-sky-900/40 mt-1.5 font-semibold flex items-center gap-1.5">
+                              <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                              <span>{t('ข้อเสนอแนะ:', 'Recommendation:')} {assessment.recommendation}</span>
                             </p>
                           )}
                         </>

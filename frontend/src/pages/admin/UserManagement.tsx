@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useToast } from '@/contexts/ToastContext'
 import { PageHeader, DataTable, StatusBadge, Button, SearchInput, Modal, UserAvatar } from '@/components/ui'
 import type { User, UserRole } from '@/types'
-import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck } from 'lucide-react'
+import { ChevronDown, Bot, ExternalLink, UserPlus, ShieldCheck, User as UserIcon, Users, GraduationCap, Info } from 'lucide-react'
 
 export default function UserManagement() {
   const store = useStore()
@@ -431,24 +431,26 @@ export default function UserManagement() {
             <button
               type="button"
               onClick={() => setAddMode('single')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 addMode === 'single'
                   ? 'bg-white dark:bg-slate-900 text-sky-700 dark:text-sky-300 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              👤 {t('ลงทะเบียนทีละคน (Single User)', 'Single User Registration')}
+              <UserIcon className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+              <span>{t('ลงทะเบียนทีละคน (Single User)', 'Single User Registration')}</span>
             </button>
             <button
               type="button"
               onClick={() => setAddMode('bulk')}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 addMode === 'bulk'
                   ? 'bg-white dark:bg-slate-900 text-sky-700 dark:text-sky-300 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              ⚡ {t('นำเข้าหลายคนพร้อมกัน (Bulk Import)', 'Bulk Import / Paste Roster')}
+              <Users className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+              <span>{t('นำเข้าหลายคนพร้อมกัน (Bulk Import)', 'Bulk Import / Paste Roster')}</span>
             </button>
           </div>
 
@@ -496,9 +498,9 @@ export default function UserManagement() {
                     {t('บทบาทในระบบ *', 'System Role *')}
                   </label>
                   {isStudentDetected ? (
-                    <div className="px-3.5 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-xs font-bold text-sky-800 dark:text-sky-300 flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-                      <span>🎓 {t('นักศึกษา (ตรวจพบรหัสนักศึกษาอัตโนมัติ)', 'Student (Auto-detected from ID)')}</span>
+                    <div className="px-3.5 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-xs font-bold text-sky-800 dark:text-sky-300 flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+                      <span>{t('นักศึกษา (ตรวจพบรหัสนักศึกษาอัตโนมัติ)', 'Student (Auto-detected from ID)')}</span>
                     </div>
                   ) : (
                     <select
@@ -526,11 +528,14 @@ export default function UserManagement() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400">
-                ⚡ {t(
-                  'รหัสประจำตัว (Code) จะถูกสร้างและเชื่อมโยงกับโปรไฟล์โดยอัตโนมัติ ไม่จำเป็นต้องกรอกแยก',
-                  'User / Student Code is derived automatically from the email address.'
-                )}
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                <Info className="h-4 w-4 text-sky-600 dark:text-sky-400 flex-shrink-0" />
+                <span>
+                  {t(
+                    'รหัสประจำตัว (Code) จะถูกสร้างและเชื่อมโยงกับโปรไฟล์โดยอัตโนมัติ ไม่จำเป็นต้องกรอกแยก',
+                    'User / Student Code is derived automatically from the email address.'
+                  )}
+                </span>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
