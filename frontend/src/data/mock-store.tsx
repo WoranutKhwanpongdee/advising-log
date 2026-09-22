@@ -232,7 +232,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true
     async function syncFromBackend() {
-      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes, kRes, ewRes] = await Promise.all([
+      const [uRes, rosRes, rRes, aptRes, fRes, sRes, eRes, vRes, aRes, kRes, ewRes, docRes] = await Promise.all([
         api.getUsers(),
         api.getRoster(),
         api.getRequests(),
@@ -244,6 +244,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         api.getAuditLogs(),
         api.getAiKeys(),
         api.getEarlyWarnings(),
+        api.getDocuments(),
       ])
       if (!isMounted) return
       if (uRes && Array.isArray(uRes.users) && uRes.users.length > 0) {
@@ -275,6 +276,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (aRes && Array.isArray(aRes.logs)) setAuditLogs(aRes.logs)
         if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
         if (ewRes && Array.isArray(ewRes.earlyWarnings)) setEarlyWarnings(ewRes.earlyWarnings)
+        if (docRes && Array.isArray(docRes.documents)) setDocuments(docRes.documents)
       } else {
         if (rosRes && Array.isArray(rosRes.roster) && rosRes.roster.length > 0) setRoster(rosRes.roster)
         if (rRes && Array.isArray(rRes.requests) && rRes.requests.length > 0) setRequests(rRes.requests)
@@ -303,6 +305,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (aRes && Array.isArray(aRes.logs) && aRes.logs.length > 0) setAuditLogs(aRes.logs)
         if (kRes && Array.isArray(kRes.keys)) setAiKeys(kRes.keys)
         if (ewRes && Array.isArray(ewRes.earlyWarnings) && ewRes.earlyWarnings.length > 0) setEarlyWarnings(ewRes.earlyWarnings)
+        if (docRes && Array.isArray(docRes.documents) && docRes.documents.length > 0) setDocuments(docRes.documents)
       }
     }
     syncFromBackend()
@@ -492,19 +495,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addDocument = useCallback((doc: Omit<StudentDocument, 'id'>): StudentDocument => {
     const newDoc: StudentDocument = { ...doc, id: nextId('DOC') }
     setDocuments(prev => [newDoc, ...prev])
+    api.saveDocument(newDoc).catch(() => {})
     return newDoc
   }, [])
 
   const updateDocument = useCallback((id: string, updates: Partial<StudentDocument>) => {
-    setDocuments(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d))
+    setDocuments(prev => prev.map(d => {
+      if (d.id === id) {
+        const updated = { ...d, ...updates }
+        api.saveDocument(updated).catch(() => {})
+        return updated
+      }
+      return d
+    }))
   }, [])
 
   const updateDocumentStatus = useCallback((id: string, status: StudentDocument['status']) => {
-    setDocuments(prev => prev.map(d => d.id === id ? { ...d, status } : d))
+    setDocuments(prev => prev.map(d => {
+      if (d.id === id) {
+        const updated = { ...d, status }
+        api.saveDocument(updated).catch(() => {})
+        return updated
+      }
+      return d
+    }))
   }, [])
 
   const deleteDocument = useCallback((id: string) => {
     setDocuments(prev => prev.filter(d => d.id !== id))
+    api.deleteDocument(id).catch(() => {})
   }, [])
 
   const addUser = useCallback((user: Omit<User, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): User => {

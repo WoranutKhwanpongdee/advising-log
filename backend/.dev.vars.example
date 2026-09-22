@@ -1,3 +1,8 @@
 # Backend Local Environment Variables Template (.dev.vars)
 SUPER_ADMIN_EMAIL=your-super-admin@example.com
 GEMINI_API_KEY=your-optional-gemini-api-key
+
+# Cloudinary Credentials (Optional for server-side management)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret

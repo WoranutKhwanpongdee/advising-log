@@ -258,6 +258,24 @@ class ApiClient {
       method: 'POST',
     })
   }
+
+  async getDocuments(studentId?: string) {
+    const url = studentId ? `/api/documents?studentId=${studentId}` : '/api/documents'
+    return this.request<{ documents: StudentDocument[] }>(url)
+  }
+
+  async saveDocument(doc: Partial<StudentDocument>) {
+    return this.request<{ success: boolean; document: StudentDocument }>('/api/documents', {
+      method: 'POST',
+      body: JSON.stringify(doc),
+    })
+  }
+
+  async deleteDocument(id: string) {
+    return this.request<{ success: boolean; message: string }>(`/api/documents/${id}`, {
+      method: 'DELETE',
+    })
+  }
 }
 
 export const api = new ApiClient(API_BASE)

@@ -242,7 +242,7 @@ app.post('/api/auth/google', async (c) => {
     // Update real profile name and picture from Google OAuth
     if (name && (user.name.startsWith('Student ') || user.name.includes('@') || user.name === codePrefix)) {
       try {
-        await database.update(schema.users).set({ name, avatar: picture || null }).where(eq(schema.users.id, user.id))
+        await database.update(schema.users).set({ name }).where(eq(schema.users.id, user.id))
         user = { ...user, name }
       } catch (_e) {}
     }
@@ -870,6 +870,52 @@ app.post('/api/audit-logs', async (c) => {
 
   await database.insert(schema.auditLogs).values(log)
   return c.json({ success: true, log }, 201)
+})
+
+// ============================================================
+// 6.2 Cloudinary Documents & Media (D1 Registry)
+// ============================================================
+app.get('/api/documents', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ documents: [] })
+
+  const studentId = c.req.query('studentId')
+  let query = database.select().from(schema.documents).orderBy(desc(schema.documents.createdAt))
+  if (studentId) {
+    const list = await database.select().from(schema.documents).where(eq(schema.documents.studentId, studentId)).orderBy(desc(schema.documents.createdAt))
+    return c.json({ documents: list })
+  }
+  const list = await query
+  return c.json({ documents: list })
+})
+
+app.post('/api/documents', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const body = await c.req.json()
+  const doc = {
+    id: body.id || `DOC${Date.now()}`,
+    studentId: body.studentId,
+    title: body.title || body.documentName || 'Document',
+    type: body.type || body.documentTypeId || 'general',
+    status: (body.status === 'approved' || body.status === 'rejected' ? body.status : 'pending') as any,
+    publicId: body.publicId || body.cloudinaryPublicId || 'local_pending',
+    url: body.url || body.fileUrl || '',
+    createdAt: body.createdAt || new Date().toISOString().replace('T', ' ').substring(0, 19),
+  }
+
+  await database.insert(schema.documents).values(doc)
+  return c.json({ success: true, document: doc }, 201)
+})
+
+app.delete('/api/documents/:id', async (c) => {
+  const database = db(c)
+  if (!database) return c.json({ error: 'Database unavailable' }, 503)
+
+  const id = c.req.param('id')
+  await database.delete(schema.documents).where(eq(schema.documents.id, id))
+  return c.json({ success: true, message: `Document ${id} deleted` })
 })
 
 

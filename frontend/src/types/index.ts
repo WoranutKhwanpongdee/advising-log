@@ -299,6 +299,8 @@ export interface StudentDocument {
   uploadedAt?: string
   signedAt?: string
   description?: string
+  cloudinaryPublicId?: string
+  fileUrl?: string
 }
 
 export interface Notification {

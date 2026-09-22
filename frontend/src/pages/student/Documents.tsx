@@ -5,7 +5,8 @@ import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { PageHeader, DataTable, StatusBadge, Button, Modal, ConfirmDialog } from '@/components/ui'
 import type { StudentDocument } from '@/types'
-import { FileText, Upload, AlertCircle, FileUp, X, ShieldCheck, Trash2, PenTool, Fingerprint, FileCheck } from 'lucide-react'
+import { FileText, Upload, AlertCircle, FileUp, X, ShieldCheck, Trash2, PenTool, Fingerprint, FileCheck, ExternalLink, Loader2, Cloud } from 'lucide-react'
+import { uploadFileToCloudinary, getCloudinaryViewUrl } from '@/services/cloudinaryService'
 
 export default function Documents() {
   const { currentUser } = useAuth()
@@ -23,6 +24,7 @@ export default function Documents() {
   const [formError, setFormError] = useState('')
   const [targetRequiredDocId, setTargetRequiredDocId] = useState<string | null>(null)
   const [docToDelete, setDocToDelete] = useState<StudentDocument | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!currentUser) return null
@@ -41,6 +43,7 @@ export default function Documents() {
     setHasConsentedEsign(false)
     setFormError('')
     setTargetRequiredDocId(null)
+    setIsUploading(false)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -80,7 +83,7 @@ export default function Documents() {
     }
   }
 
-  function handleUploadSubmit() {
+  async function handleUploadSubmit() {
     if (!currentUser) return
     setFormError('')
 
@@ -99,55 +102,81 @@ export default function Documents() {
       return
     }
 
-    const today = new Date().toISOString().split('T')[0]
-    const status: StudentDocument['status'] = selectedDocType.signatureMethod === 'e_signature' ? 'signed' : 'uploaded'
+    setIsUploading(true)
+    try {
+      let cloudPublicId: string | undefined
+      let cloudUrl: string | undefined
 
-    let resultDocId = ''
+      // Real Cloudinary Upload if a real file is attached
+      if (selectedFile) {
+        const uploadRes = await uploadFileToCloudinary(selectedFile, {
+          studentCode: currentUser.code || currentUser.id,
+        })
+        cloudPublicId = uploadRes.publicId
+        cloudUrl = uploadRes.secureUrl
+      } else {
+        // Mock fallback for simulated demo files
+        cloudPublicId = `advising_docs/${currentUser.code || 'std'}_${Date.now()}_${simulatedFileName}`
+      }
 
-    // If uploading for a specific existing required document, update it
-    if (targetRequiredDocId) {
-      store.updateDocument(targetRequiredDocId, {
-        fileName: currentFileName,
-        status: status,
-        signatureMethod: selectedDocType.signatureMethod,
-        uploadedAt: today,
-        signedAt: selectedDocType.signatureMethod === 'e_signature' ? today : undefined,
-        description: descriptionText.trim() || undefined,
+      const today = new Date().toISOString().split('T')[0]
+      const status: StudentDocument['status'] = selectedDocType.signatureMethod === 'e_signature' ? 'signed' : 'uploaded'
+
+      let resultDocId = ''
+
+      // If uploading for a specific existing required document, update it
+      if (targetRequiredDocId) {
+        store.updateDocument(targetRequiredDocId, {
+          fileName: currentFileName,
+          status: status,
+          signatureMethod: selectedDocType.signatureMethod,
+          uploadedAt: today,
+          signedAt: selectedDocType.signatureMethod === 'e_signature' ? today : undefined,
+          description: descriptionText.trim() || undefined,
+          cloudinaryPublicId: cloudPublicId,
+          fileUrl: cloudUrl,
+        })
+        resultDocId = targetRequiredDocId
+      } else {
+        // Otherwise, add a new row to the table
+        const newDoc = store.addDocument({
+          studentId: currentUser.id,
+          documentTypeId: selectedDocType.id,
+          documentName: selectedDocType.name,
+          fileName: currentFileName,
+          status: status,
+          signatureMethod: selectedDocType.signatureMethod,
+          uploadedAt: today,
+          signedAt: selectedDocType.signatureMethod === 'e_signature' ? today : undefined,
+          description: descriptionText.trim() || undefined,
+          cloudinaryPublicId: cloudPublicId,
+          fileUrl: cloudUrl,
+        })
+        resultDocId = newDoc.id
+      }
+
+      store.addAuditLog({
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userRole: currentUser.role,
+        action: 'document_uploaded',
+        description: `Uploaded ${selectedDocType.name} (${selectedDocType.signatureMethod === 'e_signature' ? 'E-Signature verified' : 'Wet Signature pending advisor review'}) to Cloudinary [${cloudPublicId}]`,
+        targetId: resultDocId,
       })
-      resultDocId = targetRequiredDocId
-    } else {
-      // Otherwise, add a new row to the table
-      const newDoc = store.addDocument({
-        studentId: currentUser.id,
-        documentTypeId: selectedDocType.id,
-        documentName: selectedDocType.name,
-        fileName: currentFileName,
-        status: status,
-        signatureMethod: selectedDocType.signatureMethod,
-        uploadedAt: today,
-        signedAt: selectedDocType.signatureMethod === 'e_signature' ? today : undefined,
-        description: descriptionText.trim() || undefined,
-      })
-      resultDocId = newDoc.id
+
+      addToast(
+        'success',
+        t('อัปโหลดเอกสารสำเร็จ', 'Document Uploaded'),
+        `${selectedDocType.name} ${t('ถูกอัปโหลดขึ้นระบบ Cloudinary และบันทึกเรียบร้อยแล้ว', 'has been successfully uploaded to Cloudinary.')}`
+      )
+
+      setIsModalOpen(false)
+      resetForm()
+    } catch (err: any) {
+      setFormError(err.message || 'Failed to upload document')
+    } finally {
+      setIsUploading(false)
     }
-
-    store.addAuditLog({
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userRole: currentUser.role,
-      action: 'document_uploaded',
-      description: `Uploaded ${selectedDocType.name} (${selectedDocType.signatureMethod === 'e_signature' ? 'E-Signature verified' : 'Wet Signature pending advisor review'})`,
-      targetId: resultDocId,
-    })
-
-    addToast(
-      'success',
-      t('อัปโหลดเอกสารสำเร็จ', 'Document Uploaded'),
-      `${selectedDocType.name} ${t('ถูกเพิ่มในรายการเรียบร้อยแล้ว', 'has been successfully added to your documents.')}`
-    )
-
-    setIsModalOpen(false)
-    resetForm()
   }
 
   function handleConfirmDelete() {
@@ -221,16 +250,30 @@ export default function Documents() {
       key: 'file',
       header: t('ชื่อไฟล์', 'File Name'),
       render: (d: StudentDocument) => (
-        <span className="text-xs text-slate-600 dark:text-slate-300 font-mono">
-          {d.fileName ? (
-            <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 font-medium">
-              <FileUp className="h-3 w-3" />
-              {d.fileName}
-            </span>
-          ) : (
-            '—'
+        <div className="flex flex-col gap-0.5">
+          <span className="text-xs text-slate-600 dark:text-slate-300 font-mono">
+            {d.fileName ? (
+              <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 font-medium">
+                <FileUp className="h-3 w-3" />
+                {d.fileName}
+              </span>
+            ) : (
+              '—'
+            )}
+          </span>
+          {d.fileUrl && (
+            <a
+              href={getCloudinaryViewUrl(d.fileUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 hover:underline"
+            >
+              <Cloud className="h-3 w-3" />
+              <span>{t('ดูไฟล์ใน Cloudinary', 'View in Cloudinary')}</span>
+              <ExternalLink className="h-2.5 w-2.5" />
+            </a>
           )}
-        </span>
+        </div>
       ),
     },
     {
@@ -243,6 +286,17 @@ export default function Documents() {
       header: t('การจัดการ', 'Actions'),
       render: (d: StudentDocument) => (
         <div className="flex items-center gap-1.5 justify-end">
+          {d.fileUrl && (
+            <a
+              href={getCloudinaryViewUrl(d.fileUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors"
+              title={t('เปิดไฟล์', 'Open File')}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
           {d.status === 'required' && (
             <Button
               size="sm"
@@ -519,6 +573,7 @@ export default function Documents() {
                 setIsModalOpen(false)
                 resetForm()
               }}
+              disabled={isUploading}
             >
               {t('ยกเลิก', 'Cancel')}
             </Button>
@@ -526,14 +581,24 @@ export default function Documents() {
               variant="primary"
               onClick={handleUploadSubmit}
               disabled={
+                isUploading ||
                 !selectedTypeId ||
                 !currentFileName ||
                 (selectedDocType?.signatureMethod === 'e_signature' && !hasConsentedEsign)
               }
               className="flex items-center gap-1.5"
             >
-              <Upload className="h-4 w-4" />
-              <span>{t('อัปโหลดเอกสาร', 'Upload Document')}</span>
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  <span>{t('กำลังอัปโหลดไปยัง Cloudinary...', 'Uploading to Cloudinary...')}</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" />
+                  <span>{t('อัปโหลดเอกสาร', 'Upload Document')}</span>
+                </>
+              )}
             </Button>
           </div>
         </div>
