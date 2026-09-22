@@ -1,0 +1,44 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  # Deploy Backend (Cloudflare Workers & D1 Database)
+  deploy-backend:
+    name: Test & Deploy Backend Worker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci || npm install
+
+      - name: TypeScript Type Check
+        working-directory: ./backend
+        run: npx tsc --noEmit
+
+      - name: Run Backend Unit Tests
+        working-directory: ./backend
+        run: npm test
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: 'backend'
+          command: deploy
