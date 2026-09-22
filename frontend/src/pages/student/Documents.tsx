@@ -3,9 +3,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, DataTable, StatusBadge, Button, Modal, ConfirmDialog } from '@/components/ui'
+import { PageHeader, DataTable, StatusBadge, Button, Modal, ConfirmDialog, DocumentViewerModal, type DocumentViewerTarget } from '@/components/ui'
 import type { StudentDocument } from '@/types'
-import { FileText, Upload, AlertCircle, FileUp, X, ShieldCheck, Trash2, PenTool, Fingerprint, FileCheck, ExternalLink, Loader2, Cloud } from 'lucide-react'
+import { FileText, Upload, AlertCircle, FileUp, X, ShieldCheck, Trash2, PenTool, Fingerprint, FileCheck, Eye, Download, Loader2 } from 'lucide-react'
 import { uploadFileToCloudinary, getCloudinaryViewUrl } from '@/services/cloudinaryService'
 
 export default function Documents() {
@@ -24,7 +24,9 @@ export default function Documents() {
   const [formError, setFormError] = useState('')
   const [targetRequiredDocId, setTargetRequiredDocId] = useState<string | null>(null)
   const [docToDelete, setDocToDelete] = useState<StudentDocument | null>(null)
+  const [previewDoc, setPreviewDoc] = useState<DocumentViewerTarget | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [downloadingDocId, setDownloadingDocId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (!currentUser) return null
@@ -204,6 +206,41 @@ export default function Documents() {
     setDocToDelete(null)
   }
 
+  async function handleTriggerDownload(doc: StudentDocument) {
+    let url = doc.fileUrl || ''
+    if (!url && doc.cloudinaryPublicId) {
+      url = getCloudinaryViewUrl(doc.cloudinaryPublicId)
+    }
+    if (!url) return
+
+    setDownloadingDocId(doc.id)
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Fetch failed')
+      const blob = await response.blob()
+      const blobUrl = window.URL.createObjectURL(blob)
+      const link = window.document.createElement('a')
+      link.href = blobUrl
+      link.download = doc.fileName || `${doc.documentName}.pdf`
+      window.document.body.appendChild(link)
+      link.click()
+      window.document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+      addToast('success', t('ดาวน์โหลดสำเร็จ', 'Download Complete'), `${doc.fileName || doc.documentName}`)
+    } catch (_err) {
+      // Fallback direct link
+      const link = window.document.createElement('a')
+      link.href = url
+      link.target = '_blank'
+      link.download = doc.fileName || doc.documentName
+      window.document.body.appendChild(link)
+      link.click()
+      window.document.body.removeChild(link)
+    } finally {
+      setDownloadingDocId(null)
+    }
+  }
+
   const columns = [
     {
       key: 'name',
@@ -249,32 +286,37 @@ export default function Documents() {
     {
       key: 'file',
       header: t('ชื่อไฟล์', 'File Name'),
-      render: (d: StudentDocument) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs text-slate-600 dark:text-slate-300 font-mono">
-            {d.fileName ? (
-              <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 font-medium">
-                <FileUp className="h-3 w-3" />
-                {d.fileName}
-              </span>
-            ) : (
-              '—'
-            )}
-          </span>
-          {d.fileUrl && (
-            <a
-              href={getCloudinaryViewUrl(d.fileUrl)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 hover:underline"
-            >
-              <Cloud className="h-3 w-3" />
-              <span>{t('ดูไฟล์ใน Cloudinary', 'View in Cloudinary')}</span>
-              <ExternalLink className="h-2.5 w-2.5" />
-            </a>
-          )}
-        </div>
-      ),
+      render: (d: StudentDocument) => {
+        const hasFile = !!(d.fileUrl || d.cloudinaryPublicId || d.fileName)
+        if (!hasFile || !d.fileName) {
+          return <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+        }
+
+        return (
+          <button
+            type="button"
+            onClick={() =>
+              setPreviewDoc({
+                id: d.id,
+                title: d.documentName,
+                fileName: d.fileName,
+                fileUrl: d.fileUrl,
+                cloudinaryPublicId: d.cloudinaryPublicId,
+                uploadedAt: d.uploadedAt,
+                studentName: currentUser.name,
+                studentCode: currentUser.code,
+                signatureMethod: d.signatureMethod,
+                description: d.description,
+              })
+            }
+            className="flex items-center gap-1.5 text-xs font-medium text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 hover:underline cursor-pointer group text-left"
+            title={t('คลิกเพื่อเปิดดูตัวอย่างเอกสาร', 'Click to preview document in-app')}
+          >
+            <FileUp className="h-3.5 w-3.5 group-hover:scale-110 transition-transform flex-shrink-0" />
+            <span className="truncate max-w-[170px] font-mono">{d.fileName}</span>
+          </button>
+        )
+      },
     },
     {
       key: 'status',
@@ -284,38 +326,68 @@ export default function Documents() {
     {
       key: 'actions',
       header: t('การจัดการ', 'Actions'),
-      render: (d: StudentDocument) => (
-        <div className="flex items-center gap-1.5 justify-end">
-          {d.fileUrl && (
-            <a
-              href={getCloudinaryViewUrl(d.fileUrl)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors"
-              title={t('เปิดไฟล์', 'Open File')}
+      render: (d: StudentDocument) => {
+        const hasFile = !!(d.fileUrl || d.cloudinaryPublicId || d.fileName)
+        return (
+          <div className="flex items-center gap-1 justify-end">
+            {hasFile && (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPreviewDoc({
+                      id: d.id,
+                      title: d.documentName,
+                      fileName: d.fileName,
+                      fileUrl: d.fileUrl,
+                      cloudinaryPublicId: d.cloudinaryPublicId,
+                      uploadedAt: d.uploadedAt,
+                      studentName: currentUser.name,
+                      studentCode: currentUser.code,
+                      signatureMethod: d.signatureMethod,
+                      description: d.description,
+                    })
+                  }
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors cursor-pointer"
+                  title={t('ดูเอกสารในระบบ', 'Preview Document In-App')}
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleTriggerDownload(d)}
+                  disabled={downloadingDocId === d.id}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 dark:hover:bg-sky-950/40 transition-colors cursor-pointer disabled:opacity-50"
+                  title={t('ดาวน์โหลดเอกสาร', 'Download File')}
+                >
+                  {downloadingDocId === d.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-sky-600" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                </button>
+              </>
+            )}
+            {d.status === 'required' && (
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={() => handleOpenModal(d)}
+              >
+                <Upload className="h-3 w-3 mr-1" /> {t('อัปโหลด', 'Upload')}
+              </Button>
+            )}
+            <button
+              type="button"
+              onClick={() => setDocToDelete(d)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+              title={t('ลบเอกสาร', 'Delete document')}
             >
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          )}
-          {d.status === 'required' && (
-            <Button
-              size="sm"
-              variant="primary"
-              onClick={() => handleOpenModal(d)}
-            >
-              <Upload className="h-3 w-3 mr-1" /> {t('อัปโหลด', 'Upload')}
-            </Button>
-          )}
-          <button
-            type="button"
-            onClick={() => setDocToDelete(d)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-            title={t('ลบเอกสาร', 'Delete document')}
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      ),
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )
+      },
     },
   ]
 
@@ -616,6 +688,13 @@ export default function Documents() {
         )}
         confirmLabel={t('ลบเอกสาร', 'Delete')}
         variant="danger"
+      />
+
+      {/* In-App Document Viewer & Downloader Modal */}
+      <DocumentViewerModal
+        isOpen={previewDoc !== null}
+        onClose={() => setPreviewDoc(null)}
+        document={previewDoc}
       />
     </div>
   )

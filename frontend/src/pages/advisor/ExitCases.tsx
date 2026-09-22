@@ -7,9 +7,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useStore } from '@/data/mock-store'
 import { useToast } from '@/contexts/ToastContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { PageHeader, DataTable, StatusBadge, Button, Modal, Timeline } from '@/components/ui'
+import { PageHeader, DataTable, StatusBadge, Button, Modal, Timeline, DocumentViewerModal, type DocumentViewerTarget } from '@/components/ui'
 import type { ExitCase } from '@/types'
-import { Eye, MessageSquareHeart } from 'lucide-react'
+import { Eye, MessageSquareHeart, FileText, Download, FileUp } from 'lucide-react'
 
 export default function ExitCases() {
   const { currentUser } = useAuth()
@@ -22,6 +22,7 @@ export default function ExitCases() {
   const [factors, setFactors] = useState('')
   const [actions, setActions] = useState('')
   const [recommendation, setRecommendation] = useState('')
+  const [previewDoc, setPreviewDoc] = useState<DocumentViewerTarget | null>(null)
 
   if (!currentUser) return null
   const myCases = store.exitCases.filter(e => e.advisorId === currentUser.id)
@@ -196,6 +197,55 @@ export default function ExitCases() {
               )
             })()}
 
+            {/* Supporting Student Documents */}
+            {(() => {
+              const studentDocs = store.documents.filter(d => d.studentId === selectedCase.studentId)
+              if (studentDocs.length === 0) return null
+              return (
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-3.5">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <FileText className="h-4 w-4 text-sky-600" />
+                    {t('เอกสารประกอบคำร้องของนักศึกษา', 'Student Supporting Documents')}
+                  </h4>
+                  <div className="space-y-1.5">
+                    {studentDocs.map(doc => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 text-xs"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileUp className="h-3.5 w-3.5 text-sky-600 flex-shrink-0" />
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{doc.documentName}</span>
+                          {doc.fileName && <span className="text-[11px] font-mono text-slate-400 truncate">({doc.fileName})</span>}
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() =>
+                              setPreviewDoc({
+                                id: doc.id,
+                                title: doc.documentName,
+                                fileName: doc.fileName,
+                                fileUrl: doc.fileUrl,
+                                cloudinaryPublicId: doc.cloudinaryPublicId,
+                                studentName: store.users.find(u => u.id === selectedCase.studentId)?.name,
+                                uploadedAt: doc.uploadedAt,
+                                signatureMethod: doc.signatureMethod,
+                              })
+                            }
+                            className="text-[11px] h-7 px-2"
+                          >
+                            <Eye className="h-3 w-3 mr-1" /> {t('ดูเอกสาร', 'View')}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
             <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
               <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3">{t('ประวัติการรับคำปรึกษาที่ผ่านมา', 'Student Advising History & Timeline')}</h4>
               <Timeline items={caseTimeline} />
@@ -253,6 +303,13 @@ export default function ExitCases() {
           </div>
         </div>
       </Modal>
+
+      {/* In-App Document Viewer & Downloader Modal */}
+      <DocumentViewerModal
+        isOpen={previewDoc !== null}
+        onClose={() => setPreviewDoc(null)}
+        document={previewDoc}
+      />
     </div>
   )
 }
