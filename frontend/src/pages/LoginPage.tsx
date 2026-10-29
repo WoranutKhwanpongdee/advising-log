@@ -20,6 +20,10 @@ import {
   Compass,
   Award,
   Lock,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Info,
 } from 'lucide-react'
 
 // Map each role to its default route
@@ -30,13 +34,20 @@ const ROLE_REDIRECT: Record<string, string> = {
   admin: '/admin',
 }
 
+// Check if a real Google Client ID is configured in environment
+const isGoogleConfigured = Boolean(
+  import.meta.env.VITE_GOOGLE_CLIENT_ID &&
+  !import.meta.env.VITE_GOOGLE_CLIENT_ID.includes('demo-advising-log')
+)
+
 export default function LoginPage() {
-  const { loginWithGoogle } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
   const { language, setLanguage, t } = useLanguage()
   const navigate = useNavigate()
 
   const [authError, setAuthError] = useState<{ code?: string; message?: string; email?: string } | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showDemoSection, setShowDemoSection] = useState(!isGoogleConfigured)
 
   function redirectForRole(role: string) {
     if (role === 'student') navigate(ROLE_REDIRECT.student)
@@ -46,22 +57,43 @@ export default function LoginPage() {
     else navigate('/')
   }
 
+  function handleDemoQuickLogin(id: string) {
+    setAuthError(null)
+    setLoading(true)
+    const success = login(id)
+    setLoading(false)
+    if (success) {
+      if (id.startsWith('STU')) navigate(ROLE_REDIRECT.student)
+      else if (id.startsWith('ADV')) navigate(ROLE_REDIRECT.advisor)
+      else if (id.startsWith('QA')) navigate(ROLE_REDIRECT.qa_chair)
+      else if (id.startsWith('ADM')) navigate(ROLE_REDIRECT.admin)
+      else navigate('/')
+    }
+  }
+
   function getErrorMessage(): string {
     if (!authError) return ''
     const { code, message, email } = authError
     const userEmail = email ? ` (${email})` : ''
 
+    if (code === 'OAUTH_CLIENT_NOT_CONFIGURED') {
+      return message || t(
+        'ระบบยังไม่ได้เชื่อมต่อ Google Client ID บน Vercel: กรุณาใช้ปุ่มเข้าใช้งานแบบทดสอบ (Quick Demo) ด้านล่าง',
+        'Google Client ID is not configured on Vercel. Please use the Quick Demo login below.'
+      )
+    }
+
     if (code === 'USER_NOT_REGISTERED' || (message && message.includes('ยังไม่ได้รับการเพิ่มหรือลงทะเบียน'))) {
       return t(
-        `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ${userEmail} ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชาหรือผู้ดูแลระบบเพื่อลงทะเบียนเข้าสู่ระบบก่อน`,
-        `Sign in failed: Your account${userEmail} has not been added or registered by an Administrator (Admin). Please contact your School office or Administrator to register before signing in.`
+        `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ${userEmail} ยังไม่ได้รับการเพิ่มหรือลงทะเบียนโดยผู้ดูแลระบบ (Admin) กรุณาติดต่อสำนักวิชา หรือใช้ปุ่มเข้าใช้งานแบบทดสอบ (Quick Demo) ด้านล่าง`,
+        `Sign in failed: Your account${userEmail} has not been added or registered by an Administrator (Admin). Please use the Quick Demo login below.`
       )
     }
 
     if (code === 'DOMAIN_RESTRICTED' || (message && message.includes('ไม่อนุญาตให้เข้าใช้งาน'))) {
       return t(
-        'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือให้อาจารย์/ผู้ดูแลระบบลงทะเบียนอีเมลภายนอกของคุณเข้าสู่ระบบก่อน',
-        'Access restricted: Please use an authorized Mae Fah Luang University email (@mfu.ac.th or @lamduan.mfu.ac.th), or contact an Administrator to whitelist your external email.'
+        'ไม่อนุญาตให้เข้าใช้งาน: กรุณาใช้อีเมลมหาวิทยาลัยแม่ฟ้าหลวง (@mfu.ac.th หรือ @lamduan.mfu.ac.th) หรือใช้ปุ่มเข้าใช้งานแบบทดสอบ (Quick Demo) ด้านล่าง',
+        'Access restricted: Please use an authorized Mae Fah Luang University email (@mfu.ac.th or @lamduan.mfu.ac.th), or use the Quick Demo login below.'
       )
     }
 
@@ -74,17 +106,23 @@ export default function LoginPage() {
 
     if (code === 'STUDENT_NOT_ASSIGNED' || (message && message.includes('ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา'))) {
       return t(
-        `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ${userEmail} ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา กรุณาติดต่ออาจารย์ที่ปรึกษาหรือสำนักวิชาเพื่อเพิ่มรายชื่อเข้าสู่ระบบ`,
-        `Sign in failed: Your account${userEmail} has not been assigned to a faculty advisor. Please contact your advisor or School office.`
+        `ไม่สามารถเข้าสู่ระบบได้: บัญชีของคุณ${userEmail} ยังไม่ได้รับการจัดสรรอาจารย์ที่ปรึกษา กรุณาติดต่ออาจารย์ที่ปรึกษา หรือใช้ปุ่มเข้าใช้งานแบบทดสอบ (Quick Demo) ด้านล่าง`,
+        `Sign in failed: Your account${userEmail} has not been assigned to a faculty advisor. Please use the Quick Demo login below.`
       )
     }
 
     if (code === 'GOOGLE_CONNECT_ERROR') {
-      return t('เกิดข้อผิดพลาดในการเชื่อมต่อ Google', 'Error connecting to Google OAuth service.')
+      return t(
+        'เกิดข้อผิดพลาดในการเชื่อมต่อ Google OAuth — กรุณาลองใช้ปุ่มเข้าใช้งานแบบทดสอบ (Quick Demo) ด้านล่าง',
+        'Error connecting to Google OAuth service — Please use the Quick Demo login below.'
+      )
     }
 
     if (code === 'GOOGLE_AUTH_FAILED') {
-      return t('การยืนยันตัวตนกับ Google ล้มเหลว', 'Google Authentication Failed')
+      return t(
+        'การยืนยันตัวตนกับ Google ล้มเหลว (อาจเกิดจาก Client ID ไม่ถูกต้อง หรือยังไม่ได้เพิ่ม Authorized JavaScript Origin ใน Google Cloud Console) — กรุณาลองใช้ปุ่มเข้าใช้งานแบบทดสอบ (Quick Demo) ด้านล่าง',
+        'Google Authentication Failed (invalid Client ID or unauthorized origin in Google Cloud) — Please use the Quick Demo login below.'
+      )
     }
 
     return message || t('ไม่สามารถเข้าสู่ระบบด้วย Google ได้', 'Failed to sign in with Google account.')
@@ -119,6 +157,7 @@ export default function LoginPage() {
         if (result.success && result.user) {
           redirectForRole(result.user.role)
         } else {
+          setShowDemoSection(true)
           setAuthError({
             code: result.error || 'AUTH_FAILED',
             message: result.message,
@@ -127,15 +166,32 @@ export default function LoginPage() {
         }
       } catch {
         setLoading(false)
+        setShowDemoSection(true)
         setAuthError({ code: 'GOOGLE_CONNECT_ERROR' })
       }
     },
     onError: () => {
       setLoading(false)
+      setShowDemoSection(true)
       setAuthError({ code: 'GOOGLE_AUTH_FAILED' })
     },
     prompt: 'select_account',
   })
+
+  function handleGoogleButtonClick() {
+    if (!isGoogleConfigured) {
+      setAuthError({
+        code: 'OAUTH_CLIENT_NOT_CONFIGURED',
+        message: t(
+          'ระบบตรวจพบว่ายังไม่ได้ตั้งค่า VITE_GOOGLE_CLIENT_ID ใน Vercel: กรุณาคลิกเลือกบทบาทใน "โหมดทดสอบระบบด่วน (Quick Demo)" ด้านล่าง เพื่อเข้าใช้งานตามบทบาทได้ทันที',
+          'VITE_GOOGLE_CLIENT_ID is not configured in Vercel: Please select a role in the "1-Click Quick Demo" section below to test each role instantly.'
+        ),
+      })
+      setShowDemoSection(true)
+      return
+    }
+    handleGoogleSelectAccount()
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 selection:bg-sky-500/20 selection:text-sky-900 dark:selection:text-sky-200">
@@ -345,7 +401,7 @@ export default function LoginPage() {
             <div className="space-y-3 pt-1">
               <button
                 type="button"
-                onClick={() => handleGoogleSelectAccount()}
+                onClick={handleGoogleButtonClick}
                 disabled={loading}
                 className="w-full py-2.5 px-4 rounded-xl bg-white dark:bg-slate-800/90 hover:bg-sky-50/40 dark:hover:bg-slate-800 active:bg-slate-100 dark:active:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-medium text-sm border border-slate-300 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
               >
@@ -376,13 +432,163 @@ export default function LoginPage() {
                 </span>
               </button>
 
+              {/* Demo Environment Notice (when Google Client ID is not configured) */}
+              {!isGoogleConfigured && (
+                <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-300">
+                  <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">
+                    {t(
+                      'สภาพแวดล้อม Vercel ยังไม่ได้กำหนด VITE_GOOGLE_CLIENT_ID: ท่านสามารถคลิกเลือกบทบาทในส่วน "โหมดทดสอบระบบด่วน" ด้านล่างเพื่อเข้าสู่ระบบได้ทันที',
+                      'VITE_GOOGLE_CLIENT_ID is not set in Vercel: Please use the Quick Demo section below to sign in instantly.'
+                    )}
+                  </span>
+                </div>
+              )}
+
               {/* Error Alert Box */}
               {authError && (
-                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2.5">
-                  <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
-                  <div className="space-y-0.5">
-                    <p className="font-semibold">{t('ไม่สามารถเข้าสู่ระบบได้', 'Authentication Failed')}</p>
-                    <p className="text-[11px] text-rose-700 dark:text-rose-300/90 leading-relaxed">{getErrorMessage()}</p>
+                <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 text-xs space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 mt-0.5 flex-shrink-0" />
+                    <div className="space-y-0.5 flex-1">
+                      <p className="font-semibold">{t('ไม่สามารถเข้าสู่ระบบได้', 'Authentication Failed')}</p>
+                      <p className="text-[11px] text-rose-700 dark:text-rose-300/90 leading-relaxed">{getErrorMessage()}</p>
+                    </div>
+                  </div>
+                  <div className="pt-0.5 flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowDemoSection(true)
+                        const demoEl = document.getElementById('quick-demo-section')
+                        if (demoEl) demoEl.scrollIntoView({ behavior: 'smooth' })
+                      }}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/50 dark:hover:bg-rose-900/80 text-rose-900 dark:text-rose-200 font-bold text-[11px] transition-colors cursor-pointer"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                      <span>{t('เข้าใช้งานโหมดทดสอบด่วนแทน', 'Use Quick Demo instead')}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Demo Role Switcher */}
+            <div id="quick-demo-section" className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setShowDemoSection(v => !v)}
+                className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-sky-50/70 hover:bg-sky-100/70 dark:bg-sky-950/30 dark:hover:bg-sky-950/50 border border-sky-100 dark:border-sky-800/60 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all cursor-pointer group"
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
+                  <span className="font-bold text-sky-900 dark:text-sky-200">
+                    {t('เข้าใช้งานโหมดทดสอบด่วน (1-Click Demo Login)', '1-Click Quick Demo Role Switcher')}
+                  </span>
+                  <span className="text-[10px] bg-sky-600 text-white font-bold px-2 py-0.5 rounded-full shadow-2xs">
+                    {t('พร้อมใช้งาน', 'Ready')}
+                  </span>
+                </span>
+                {showDemoSection ? (
+                  <ChevronUp className="h-4 w-4 text-sky-600 dark:text-sky-400 group-hover:scale-110 transition-transform" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-sky-600 dark:text-sky-400 group-hover:scale-110 transition-transform" />
+                )}
+              </button>
+
+              {/* 1-Click Demo Cards */}
+              {showDemoSection && (
+                <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/90 dark:border-slate-800 transition-all">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                      {t('เลือกบทบาทเพื่อเข้าใช้งานทันที', 'Select Role to Sign In Instantly')}
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                      <ShieldCheck className="h-3 w-3" />
+                      {t('ไม่ต้องใช้รหัสผ่าน', 'No Password Required')}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {/* Student */}
+                    <button
+                      type="button"
+                      onClick={() => handleDemoQuickLogin('STU001')}
+                      className="p-3 text-left rounded-xl bg-white dark:bg-slate-800/90 hover:bg-sky-50/70 dark:hover:bg-sky-950/40 border border-slate-200 dark:border-slate-700 hover:border-sky-400 dark:hover:border-sky-500 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 font-mono">
+                          Student
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">STU001</span>
+                      </div>
+                      <span className="block font-bold text-xs text-slate-800 dark:text-slate-100 mt-1 truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                        Somchai Jaidee
+                      </span>
+                      <span className="block text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                        {t('นักศึกษา · ADT', 'Student · ADT')}
+                      </span>
+                    </button>
+
+                    {/* Advisor */}
+                    <button
+                      type="button"
+                      onClick={() => handleDemoQuickLogin('ADV001')}
+                      className="p-3 text-left rounded-xl bg-white dark:bg-slate-800/90 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/40 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-mono">
+                          Advisor
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">ADV001</span>
+                      </div>
+                      <span className="block font-bold text-xs text-slate-800 dark:text-slate-100 mt-1 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        Dr. Prasit K.
+                      </span>
+                      <span className="block text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                        {t('อาจารย์ที่ปรึกษา', 'Faculty Advisor')}
+                      </span>
+                    </button>
+
+                    {/* QA Chair */}
+                    <button
+                      type="button"
+                      onClick={() => handleDemoQuickLogin('QA001')}
+                      className="p-3 text-left rounded-xl bg-white dark:bg-slate-800/90 hover:bg-violet-50/70 dark:hover:bg-violet-950/40 border border-slate-200 dark:border-slate-700 hover:border-violet-400 dark:hover:border-violet-500 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-violet-600 dark:text-violet-400 font-mono">
+                          QA Chair
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">QA001</span>
+                      </div>
+                      <span className="block font-bold text-xs text-slate-800 dark:text-slate-100 mt-1 truncate group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                        Assoc. Rattana P.
+                      </span>
+                      <span className="block text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                        {t('ประธานประกันคุณภาพ', 'QA Program Chair')}
+                      </span>
+                    </button>
+
+                    {/* Admin */}
+                    <button
+                      type="button"
+                      onClick={() => handleDemoQuickLogin('ADM001')}
+                      className="p-3 text-left rounded-xl bg-white dark:bg-slate-800/90 hover:bg-rose-50/70 dark:hover:bg-rose-950/40 border border-slate-200 dark:border-slate-700 hover:border-rose-400 dark:hover:border-rose-500 transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400 font-mono">
+                          Admin
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">ADM001</span>
+                      </div>
+                      <span className="block font-bold text-xs text-slate-800 dark:text-slate-100 mt-1 truncate group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                        Supattra K.
+                      </span>
+                      <span className="block text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                        {t('ผู้ดูแลระบบส่วนกลาง', 'System Administrator')}
+                      </span>
+                    </button>
                   </div>
                 </div>
               )}
