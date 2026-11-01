@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import type { RequestStatus, FollowUpStatus, ReferralStatus, ExitCaseStatus, AppointmentStatus, EarlyWarningSeverity, DocumentStatus } from '@/types'
 
 export { ThemeToggle } from './ThemeToggle'
+export { ErrorBoundary } from './ErrorBoundary'
 
 // --- Status Badge ---
 

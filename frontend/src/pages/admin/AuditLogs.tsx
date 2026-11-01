@@ -26,7 +26,7 @@ export default function AuditLogs() {
       header: t('วัน-เวลา', 'Timestamp'),
       render: (l: AuditLog) => (
         <span className="text-xs font-mono text-slate-500 dark:text-slate-400 font-medium">
-          {l.createdAt.replace('T', ' ').substring(0, 19)}
+          {(l.createdAt || '').replace('T', ' ').substring(0, 19)}
         </span>
       ),
     },

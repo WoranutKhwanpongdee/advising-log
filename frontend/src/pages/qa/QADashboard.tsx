@@ -97,7 +97,7 @@ export default function QADashboard() {
   // Student Voice factor frequency
   const factorCounts: Record<string, number> = {}
   store.studentVoiceResponses.forEach(r => {
-    r.primaryFactors.forEach(f => {
+    ;(r.primaryFactors || []).forEach(f => {
       factorCounts[f] = (factorCounts[f] || 0) + 1
     })
   })
@@ -199,7 +199,10 @@ export default function QADashboard() {
                         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                       }}
                       itemStyle={{ color: chartTheme.tooltipText }}
-                      formatter={(value, _name, item) => [`${value} ${t('คำร้อง', 'requests')} (${item.payload.percentage}%)`, t('จำนวน', 'Count')]}
+                      formatter={(value, _name, item) => [
+                        `${value} ${t('คำร้อง', 'requests')} (${(item as any)?.payload?.percentage ?? ''}%)`,
+                        t('จำนวน', 'Count'),
+                      ]}
                     />
                     <Bar dataKey="count" fill="#0284c7" radius={[0, 4, 4, 0]}>
                       <LabelList dataKey="count" position="right" fill={chartTheme.axis} fontSize={11} />
@@ -350,7 +353,7 @@ export default function QADashboard() {
                         borderRadius: '8px',
                         fontSize: '12px',
                       }}
-                      formatter={(val, _name, item) => [val, (item.payload as any).fullName]}
+                      formatter={(val, _name, item) => [val, (item as any)?.payload?.fullName || String(val ?? '')]}
                     />
                     <Bar dataKey="count" fill="#0284c7" radius={[0, 4, 4, 0]} name={t('จำนวนนักศึกษา', 'Student Count')} />
                   </BarChart>
@@ -392,7 +395,7 @@ export default function QADashboard() {
 
                     {/* Factors Tags */}
                     <div className="flex flex-wrap gap-1">
-                      {res.primaryFactors.map((fac, idx) => (
+                      {(res.primaryFactors || []).map((fac, idx) => (
                         <span
                           key={idx}
                           className="px-2 py-0.5 rounded-full text-[10px] bg-sky-50 dark:bg-sky-500/12 text-sky-800 dark:text-sky-300 border border-sky-100 dark:border-sky-500/25"

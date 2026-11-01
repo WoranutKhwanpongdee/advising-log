@@ -83,7 +83,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
     advisor: { title: t('ระบบอาจารย์ที่ปรึกษา', 'Advisor Portal'), subtitle: t('อาจารย์ที่ปรึกษา', 'Faculty Advisor') },
     qa_chair: { title: t('ระบบประกันคุณภาพ', 'QA & Chair Portal'), subtitle: t('ฝ่ายประกันคุณภาพ', 'Quality Assurance') },
     admin: { title: t('ระบบผู้ดูแล', 'Admin Console'), subtitle: t('ผู้ดูแลระบบ', 'System Operator') },
-  }[currentUser.role]
+  }[currentUser.role] || { title: t('ระบบบริการการศึกษา', 'Advisory Portal'), subtitle: currentUser.role }
 
   const navItems = getNavItems(currentUser.role)
 

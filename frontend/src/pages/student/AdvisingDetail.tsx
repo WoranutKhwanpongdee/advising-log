@@ -97,11 +97,11 @@ export default function AdvisingDetail() {
             </p>
           </div>
 
-          {request.attachments.length > 0 && (
+          {(request.attachments || []).length > 0 && (
             <div className="mt-4">
               <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">{t('เอกสารแนบ', 'Attached Files')}</span>
               <div className="flex flex-wrap gap-2">
-                {request.attachments.map((f, i) => (
+                {(request.attachments || []).map((f, i) => (
                   <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 rounded-lg text-xs font-medium text-sky-800 dark:text-sky-300">
                     <Paperclip className="h-3 w-3" /> {f}
                   </span>

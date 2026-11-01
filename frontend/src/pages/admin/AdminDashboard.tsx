@@ -469,7 +469,7 @@ export default function AdminDashboard() {
                             </p>
                             <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 flex-shrink-0 flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {log.createdAt.replace('T', ' ').substring(11, 16)}
+                              {(log.createdAt || '').replace('T', ' ').substring(11, 16)}
                             </span>
                           </div>
 
@@ -481,7 +481,7 @@ export default function AdminDashboard() {
                               {t(role.labelTh, role.labelEn)}
                             </span>
                             <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase">
-                              · {log.action.replace(/_/g, ' ')}
+                              · {(log.action || '').replace(/_/g, ' ')}
                             </span>
                           </div>
                         </div>
